@@ -8,6 +8,7 @@ class Core extends Module {
     val dmem = new RamIO
   })
 
+  
   val fetch = Module(new InstFetch)
   fetch.io.imem <> io.imem
 
