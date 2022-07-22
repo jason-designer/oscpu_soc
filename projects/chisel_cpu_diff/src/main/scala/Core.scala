@@ -214,6 +214,8 @@ class Core extends Module {
 
   /* ----- Difftest ------------------------------ */
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
+  val inst = wbreg.io.inst_out
+  val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
   
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
@@ -223,7 +225,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.pc_out)
   dt_ic.io.instr    := RegNext(wbreg.io.inst_out)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || wbreg.io.inst_out === "hb0002973".U)
+  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || read_mcycle)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.rd_en_out)
