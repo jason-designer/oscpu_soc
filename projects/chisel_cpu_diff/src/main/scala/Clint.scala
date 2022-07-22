@@ -6,50 +6,50 @@ class Clint extends Module {
         val dmem = new DCacheIO
         val mem0 = Flipped(new DCacheIO)
         val mem1 = Flipped(new DCacheIO)
+        val mem2 = Flipped(new DCacheIO)
     })
     
-    val sel = WireInit(0.U(1.W))
+    val sel = WireInit(0.U)
     val out_ok = WireInit(false.B)
     val out_rdata = WireInit(0.U(64.W))
 
-    when(!io.mem0.ok){sel := 0.U(1.W)}
-    .elsewhen(!io.mem1.ok){sel := 1.U(1.W)}
-    .otherwise{sel := Mux(io.dmem.addr === "h0200bff8".U, 1.U(1.W), 0.U(1.W))}
-
-    val sel_r = RegEnable(sel, 0.U(1.W), out_ok)
-
-    when(sel === 0.U(1.W)){
-        io.mem0.en := io.dmem.en
-        io.mem0.op := io.dmem.op
-        io.mem0.addr := io.dmem.addr
-        io.mem0.wdata := io.dmem.wdata
-        io.mem0.wmask := io.dmem.wmask
-        io.mem1.en := false.B
-        io.mem1.op := false.B
-        io.mem1.addr := 0.U
-        io.mem1.wdata := 0.U
-        io.mem1.wmask := 0.U
-    }
+    when(!io.mem0.ok){sel := 0.U}
+    .elsewhen(!io.mem1.ok){sel := 1.U}
+    .elsewhen(!io.mem1.ok){sel := 2.U}
     .otherwise{
-        io.mem1.en := io.dmem.en
-        io.mem1.op := io.dmem.op
-        io.mem1.addr := io.dmem.addr
-        io.mem1.wdata := io.dmem.wdata
-        io.mem1.wmask := io.dmem.wmask
-        io.mem0.en := false.B
-        io.mem0.op := false.B
-        io.mem0.addr := 0.U
-        io.mem0.wdata := 0.U
-        io.mem0.wmask := 0.U
+        when(io.dmem.addr === "h0200bff8".U){sel := 1.U}
+        .elsewhen(io.dmem.addr === "h02004000".U){sel := 2.U}
+        .otherwise{sel := 0.U}
     }
+
+    val sel_r = RegEnable(sel, 0.U, out_ok)
+
+    io.mem0.en      := Mux(sel === 0.U, io.dmem.en, false.B)
+    io.mem0.op      := Mux(sel === 0.U, io.dmem.op, false.B)
+    io.mem0.addr    := Mux(sel === 0.U, io.dmem.addr, 0.U)
+    io.mem0.wdata   := Mux(sel === 0.U, io.dmem.wdata, 0.U)
+    io.mem0.wmask   := Mux(sel === 0.U, io.dmem.wmask, 0.U)
+    io.mem1.en      := Mux(sel === 1.U, io.dmem.en, false.B)
+    io.mem1.op      := Mux(sel === 1.U, io.dmem.op, false.B)
+    io.mem1.addr    := Mux(sel === 1.U, io.dmem.addr, 0.U)
+    io.mem1.wdata   := Mux(sel === 1.U, io.dmem.wdata, 0.U)
+    io.mem1.wmask   := Mux(sel === 1.U, io.dmem.wmask, 0.U)
+    io.mem2.en      := Mux(sel === 2.U, io.dmem.en, false.B)
+    io.mem2.op      := Mux(sel === 2.U, io.dmem.op, false.B)
+    io.mem2.addr    := Mux(sel === 2.U, io.dmem.addr, 0.U)
+    io.mem2.wdata   := Mux(sel === 2.U, io.dmem.wdata, 0.U)
+    io.mem2.wmask   := Mux(sel === 2.U, io.dmem.wmask, 0.U)
+
 
     out_ok := MuxLookup(sel_r, 0.U, Array(
-        "b0".U -> io.mem0.ok,
-        "b1".U -> io.mem1.ok,
+        0.U -> io.mem0.ok,
+        1.U -> io.mem1.ok,
+        2.U -> io.mem2.ok,
     ))
     out_rdata := MuxLookup(sel_r, 0.U, Array(
-        "b0".U -> io.mem0.rdata,
-        "b1".U -> io.mem1.rdata,
+        0.U -> io.mem0.rdata,
+        1.U -> io.mem1.rdata,
+        2.U -> io.mem2.rdata,
     ))
 
     io.dmem.ok := out_ok
@@ -60,9 +60,26 @@ class Mtime extends Module {
     val io = IO(new Bundle {
         val mem = new DCacheIO
     })
-    val time = RegInit(0.U(64.W))
-    time := time + 1.U
+    val mtime = RegInit(0.U(64.W))
+    mtime := mtime + 1.U
 
     io.mem.ok := true.B
-    io.mem.rdata := time
+    io.mem.rdata := mtime
+}
+
+class Mtimecmp extends Module{
+    val io = IO(new Bundle {
+        val mem = new DCacheIO
+    })
+    val mtimecmp = RegInit(0.U(64.W))
+
+    val wm = io.mem.wmask
+    val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
+    val mtimecmp_update = (mtimecmp & (~mask64)) | (mask64 & mtimecmp)
+
+    when(io.mem.en && io.mem.op){mtimecmp := mtimecmp_update}
+    .otherwise{mtimecmp := mtimecmp}
+
+    io.mem.rdata := mtimecmp
+    io.mem.ok := true.B
 }

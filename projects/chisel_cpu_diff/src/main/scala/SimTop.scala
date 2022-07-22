@@ -19,6 +19,7 @@ class SimTop extends Module {
 
   val clint = Module(new Clint)
   val mtime = Module(new Mtime)
+  val mtimecmp = Module(new Mtimecmp)
 
   // val mem = Module(new RamSyn)
 
@@ -26,6 +27,7 @@ class SimTop extends Module {
   core.io.dmem  <> clint.io.dmem
   clint.io.mem0 <> dcache.io.dmem
   clint.io.mem1 <> mtime.io.mem
+  clint.io.mem2 <> mtimecmp.io.mem
 
   // dcache.io.dmem.en := true.B
   // dcache.io.dmem.op := false.B

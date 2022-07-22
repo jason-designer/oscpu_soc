@@ -12255,30 +12255,44 @@ module Clint(
   output [7:0]  io_mem0_wmask,
   input         io_mem0_ok,
   input  [63:0] io_mem0_rdata,
-  input  [63:0] io_mem1_rdata
+  input  [63:0] io_mem1_rdata,
+  output        io_mem2_en,
+  output        io_mem2_op,
+  output [7:0]  io_mem2_wmask,
+  input  [63:0] io_mem2_rdata
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
 `endif // RANDOMIZE_REG_INIT
-  wire  _sel_T = io_dmem_addr == 64'h200bff8; // @[Clint.scala 17:40]
-  wire  sel = ~io_mem0_ok ? 1'h0 : _sel_T; // @[Clint.scala 15:22 Clint.scala 15:27]
-  reg  sel_r; // @[Reg.scala 27:20]
-  wire  out_ok = sel_r | io_mem0_ok; // @[Mux.scala 80:57]
-  assign io_dmem_ok = sel_r | io_mem0_ok; // @[Mux.scala 80:57]
-  assign io_dmem_rdata = sel_r ? io_mem1_rdata : io_mem0_rdata; // @[Mux.scala 80:57]
-  assign io_mem0_en = ~sel & io_dmem_en; // @[Clint.scala 21:27 Clint.scala 22:20 Clint.scala 39:20]
-  assign io_mem0_op = ~sel & io_dmem_op; // @[Clint.scala 21:27 Clint.scala 23:20 Clint.scala 40:20]
-  assign io_mem0_addr = ~sel ? io_dmem_addr : 64'h0; // @[Clint.scala 21:27 Clint.scala 24:22 Clint.scala 41:22]
-  assign io_mem0_wdata = ~sel ? io_dmem_wdata : 64'h0; // @[Clint.scala 21:27 Clint.scala 25:23 Clint.scala 42:23]
-  assign io_mem0_wmask = ~sel ? io_dmem_wmask : 8'h0; // @[Clint.scala 21:27 Clint.scala 26:23 Clint.scala 43:23]
+  wire [1:0] _GEN_0 = io_dmem_addr == 64'h2004000 ? 2'h2 : 2'h0; // @[Clint.scala 21:50 Clint.scala 21:55 Clint.scala 22:24]
+  wire [1:0] _GEN_1 = io_dmem_addr == 64'h200bff8 ? 2'h1 : _GEN_0; // @[Clint.scala 20:45 Clint.scala 20:50]
+  wire [1:0] sel = ~io_mem0_ok ? 2'h0 : _GEN_1; // @[Clint.scala 16:22 Clint.scala 16:27]
+  reg [1:0] sel_r; // @[Reg.scala 27:20]
+  wire  out_ok = 2'h2 == sel_r | (2'h1 == sel_r | 2'h0 == sel_r & io_mem0_ok); // @[Mux.scala 80:57]
+  wire  _io_mem0_en_T = sel == 2'h0; // @[Clint.scala 27:32]
+  wire  _io_mem2_en_T = sel == 2'h2; // @[Clint.scala 37:32]
+  wire [63:0] _out_rdata_T_1 = 2'h0 == sel_r ? io_mem0_rdata : 64'h0; // @[Mux.scala 80:57]
+  wire [63:0] _out_rdata_T_3 = 2'h1 == sel_r ? io_mem1_rdata : _out_rdata_T_1; // @[Mux.scala 80:57]
+  assign io_dmem_ok = 2'h2 == sel_r | (2'h1 == sel_r | 2'h0 == sel_r & io_mem0_ok); // @[Mux.scala 80:57]
+  assign io_dmem_rdata = 2'h2 == sel_r ? io_mem2_rdata : _out_rdata_T_3; // @[Mux.scala 80:57]
+  assign io_mem0_en = sel == 2'h0 & io_dmem_en; // @[Clint.scala 27:27]
+  assign io_mem0_op = _io_mem0_en_T & io_dmem_op; // @[Clint.scala 28:27]
+  assign io_mem0_addr = _io_mem0_en_T ? io_dmem_addr : 64'h0; // @[Clint.scala 29:27]
+  assign io_mem0_wdata = _io_mem0_en_T ? io_dmem_wdata : 64'h0; // @[Clint.scala 30:27]
+  assign io_mem0_wmask = _io_mem0_en_T ? io_dmem_wmask : 8'h0; // @[Clint.scala 31:27]
+  assign io_mem2_en = sel == 2'h2 & io_dmem_en; // @[Clint.scala 37:27]
+  assign io_mem2_op = _io_mem2_en_T & io_dmem_op; // @[Clint.scala 38:27]
+  assign io_mem2_wmask = _io_mem2_en_T ? io_dmem_wmask : 8'h0; // @[Clint.scala 41:27]
   always @(posedge clock) begin
     if (reset) begin // @[Reg.scala 27:20]
-      sel_r <= 1'h0; // @[Reg.scala 27:20]
+      sel_r <= 2'h0; // @[Reg.scala 27:20]
     end else if (out_ok) begin // @[Reg.scala 28:19]
-      if (~io_mem0_ok) begin // @[Clint.scala 15:22]
-        sel_r <= 1'h0; // @[Clint.scala 15:27]
+      if (~io_mem0_ok) begin // @[Clint.scala 16:22]
+        sel_r <= 2'h0; // @[Clint.scala 16:27]
+      end else if (io_dmem_addr == 64'h200bff8) begin // @[Clint.scala 20:45]
+        sel_r <= 2'h1; // @[Clint.scala 20:50]
       end else begin
-        sel_r <= _sel_T;
+        sel_r <= _GEN_0;
       end
     end
   end
@@ -12319,7 +12333,7 @@ initial begin
     `endif
 `ifdef RANDOMIZE_REG_INIT
   _RAND_0 = {1{`RANDOM}};
-  sel_r = _RAND_0[0:0];
+  sel_r = _RAND_0[1:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -12336,14 +12350,14 @@ module Mtime(
 `ifdef RANDOMIZE_REG_INIT
   reg [63:0] _RAND_0;
 `endif // RANDOMIZE_REG_INIT
-  reg [63:0] time_; // @[Clint.scala 63:23]
-  wire [63:0] _time_T_1 = time_ + 64'h1; // @[Clint.scala 64:18]
-  assign io_mem_rdata = time_; // @[Clint.scala 67:18]
+  reg [63:0] mtime; // @[Clint.scala 63:24]
+  wire [63:0] _mtime_T_1 = mtime + 64'h1; // @[Clint.scala 64:20]
+  assign io_mem_rdata = mtime; // @[Clint.scala 67:18]
   always @(posedge clock) begin
-    if (reset) begin // @[Clint.scala 63:23]
-      time_ <= 64'h0; // @[Clint.scala 63:23]
+    if (reset) begin // @[Clint.scala 63:24]
+      mtime <= 64'h0; // @[Clint.scala 63:24]
     end else begin
-      time_ <= _time_T_1; // @[Clint.scala 64:10]
+      mtime <= _mtime_T_1; // @[Clint.scala 64:11]
     end
   end
 // Register and memory initialization
@@ -12383,7 +12397,87 @@ initial begin
     `endif
 `ifdef RANDOMIZE_REG_INIT
   _RAND_0 = {2{`RANDOM}};
-  time_ = _RAND_0[63:0];
+  mtime = _RAND_0[63:0];
+`endif // RANDOMIZE_REG_INIT
+  `endif // RANDOMIZE
+end // initial
+`ifdef FIRRTL_AFTER_INITIAL
+`FIRRTL_AFTER_INITIAL
+`endif
+`endif // SYNTHESIS
+endmodule
+module Mtimecmp(
+  input         clock,
+  input         reset,
+  input         io_mem_en,
+  input         io_mem_op,
+  input  [7:0]  io_mem_wmask,
+  output [63:0] io_mem_rdata
+);
+`ifdef RANDOMIZE_REG_INIT
+  reg [63:0] _RAND_0;
+`endif // RANDOMIZE_REG_INIT
+  reg [63:0] mtimecmp; // @[Clint.scala 74:27]
+  wire [7:0] mask64_hi_hi_hi = io_mem_wmask[7] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_hi_hi_lo = io_mem_wmask[6] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_hi_lo_hi = io_mem_wmask[5] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_hi_lo_lo = io_mem_wmask[4] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_lo_hi_hi = io_mem_wmask[3] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_lo_hi_lo = io_mem_wmask[2] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_lo_lo_hi = io_mem_wmask[1] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [7:0] mask64_lo_lo_lo = io_mem_wmask[0] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
+  wire [63:0] mask64 = {mask64_hi_hi_hi,mask64_hi_hi_lo,mask64_hi_lo_hi,mask64_hi_lo_lo,mask64_lo_hi_hi,mask64_lo_hi_lo,
+    mask64_lo_lo_hi,mask64_lo_lo_lo}; // @[Cat.scala 30:58]
+  wire [63:0] _mtimecmp_update_T = ~mask64; // @[Clint.scala 78:40]
+  wire [63:0] _mtimecmp_update_T_1 = mtimecmp & _mtimecmp_update_T; // @[Clint.scala 78:37]
+  wire [63:0] _mtimecmp_update_T_2 = mask64 & mtimecmp; // @[Clint.scala 78:60]
+  wire [63:0] mtimecmp_update = _mtimecmp_update_T_1 | _mtimecmp_update_T_2; // @[Clint.scala 78:50]
+  assign io_mem_rdata = mtimecmp; // @[Clint.scala 83:18]
+  always @(posedge clock) begin
+    if (reset) begin // @[Clint.scala 74:27]
+      mtimecmp <= 64'h0; // @[Clint.scala 74:27]
+    end else if (io_mem_en & io_mem_op) begin // @[Clint.scala 80:33]
+      mtimecmp <= mtimecmp_update; // @[Clint.scala 80:43]
+    end
+  end
+// Register and memory initialization
+`ifdef RANDOMIZE_GARBAGE_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_INVALID_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_REG_INIT
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+`define RANDOMIZE
+`endif
+`ifndef RANDOM
+`define RANDOM $random
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+  integer initvar;
+`endif
+`ifndef SYNTHESIS
+`ifdef FIRRTL_BEFORE_INITIAL
+`FIRRTL_BEFORE_INITIAL
+`endif
+initial begin
+  `ifdef RANDOMIZE
+    `ifdef INIT_RANDOM
+      `INIT_RANDOM
+    `endif
+    `ifndef VERILATOR
+      `ifdef RANDOMIZE_DELAY
+        #`RANDOMIZE_DELAY begin end
+      `else
+        #0.002 begin end
+      `endif
+    `endif
+`ifdef RANDOMIZE_REG_INIT
+  _RAND_0 = {2{`RANDOM}};
+  mtimecmp = _RAND_0[63:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -12531,9 +12625,19 @@ module SimTop(
   wire  clint_io_mem0_ok; // @[SimTop.scala 20:21]
   wire [63:0] clint_io_mem0_rdata; // @[SimTop.scala 20:21]
   wire [63:0] clint_io_mem1_rdata; // @[SimTop.scala 20:21]
+  wire  clint_io_mem2_en; // @[SimTop.scala 20:21]
+  wire  clint_io_mem2_op; // @[SimTop.scala 20:21]
+  wire [7:0] clint_io_mem2_wmask; // @[SimTop.scala 20:21]
+  wire [63:0] clint_io_mem2_rdata; // @[SimTop.scala 20:21]
   wire  mtime_clock; // @[SimTop.scala 21:21]
   wire  mtime_reset; // @[SimTop.scala 21:21]
   wire [63:0] mtime_io_mem_rdata; // @[SimTop.scala 21:21]
+  wire  mtimecmp_clock; // @[SimTop.scala 22:24]
+  wire  mtimecmp_reset; // @[SimTop.scala 22:24]
+  wire  mtimecmp_io_mem_en; // @[SimTop.scala 22:24]
+  wire  mtimecmp_io_mem_op; // @[SimTop.scala 22:24]
+  wire [7:0] mtimecmp_io_mem_wmask; // @[SimTop.scala 22:24]
+  wire [63:0] mtimecmp_io_mem_rdata; // @[SimTop.scala 22:24]
   Core core ( // @[SimTop.scala 15:20]
     .clock(core_clock),
     .reset(core_reset),
@@ -12627,91 +12731,109 @@ module SimTop(
     .io_mem0_wmask(clint_io_mem0_wmask),
     .io_mem0_ok(clint_io_mem0_ok),
     .io_mem0_rdata(clint_io_mem0_rdata),
-    .io_mem1_rdata(clint_io_mem1_rdata)
+    .io_mem1_rdata(clint_io_mem1_rdata),
+    .io_mem2_en(clint_io_mem2_en),
+    .io_mem2_op(clint_io_mem2_op),
+    .io_mem2_wmask(clint_io_mem2_wmask),
+    .io_mem2_rdata(clint_io_mem2_rdata)
   );
   Mtime mtime ( // @[SimTop.scala 21:21]
     .clock(mtime_clock),
     .reset(mtime_reset),
     .io_mem_rdata(mtime_io_mem_rdata)
   );
-  assign io_uart_out_valid = 1'h0; // @[SimTop.scala 58:21]
-  assign io_uart_out_ch = 8'h0; // @[SimTop.scala 59:18]
-  assign io_uart_in_valid = 1'h0; // @[SimTop.scala 60:20]
-  assign io_memAXI_0_aw_valid = axi_io_out_aw_valid; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_len = 8'h7; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_size = 3'h3; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_burst = 2'h1; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_lock = 1'h0; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_cache = 4'h2; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_qos = 4'h0; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_addr = axi_io_out_aw_bits_addr; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_prot = 3'h0; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_id = 4'h0; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_aw_bits_user = 4'h0; // @[SimTop.scala 42:17]
-  assign io_memAXI_0_w_valid = axi_io_out_w_valid; // @[SimTop.scala 43:17]
-  assign io_memAXI_0_w_bits_data = axi_io_out_w_bits_data; // @[SimTop.scala 43:17]
-  assign io_memAXI_0_w_bits_strb = 8'hff; // @[SimTop.scala 43:17]
-  assign io_memAXI_0_w_bits_last = axi_io_out_w_bits_last; // @[SimTop.scala 43:17]
-  assign io_memAXI_0_b_ready = axi_io_out_b_ready; // @[SimTop.scala 44:17]
-  assign io_memAXI_0_ar_valid = axi_io_out_ar_valid; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_len = 8'h7; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_size = 3'h3; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_burst = 2'h1; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_lock = 1'h0; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_cache = 4'h2; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_qos = 4'h0; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_addr = axi_io_out_ar_bits_addr; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_prot = 3'h0; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_id = 4'h0; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_ar_bits_user = 4'h0; // @[SimTop.scala 40:17]
-  assign io_memAXI_0_r_ready = axi_io_out_r_ready; // @[SimTop.scala 41:17]
+  Mtimecmp mtimecmp ( // @[SimTop.scala 22:24]
+    .clock(mtimecmp_clock),
+    .reset(mtimecmp_reset),
+    .io_mem_en(mtimecmp_io_mem_en),
+    .io_mem_op(mtimecmp_io_mem_op),
+    .io_mem_wmask(mtimecmp_io_mem_wmask),
+    .io_mem_rdata(mtimecmp_io_mem_rdata)
+  );
+  assign io_uart_out_valid = 1'h0; // @[SimTop.scala 60:21]
+  assign io_uart_out_ch = 8'h0; // @[SimTop.scala 61:18]
+  assign io_uart_in_valid = 1'h0; // @[SimTop.scala 62:20]
+  assign io_memAXI_0_aw_valid = axi_io_out_aw_valid; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_len = 8'h7; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_size = 3'h3; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_burst = 2'h1; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_lock = 1'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_cache = 4'h2; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_qos = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_addr = axi_io_out_aw_bits_addr; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_prot = 3'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_id = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_aw_bits_user = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_w_valid = axi_io_out_w_valid; // @[SimTop.scala 45:17]
+  assign io_memAXI_0_w_bits_data = axi_io_out_w_bits_data; // @[SimTop.scala 45:17]
+  assign io_memAXI_0_w_bits_strb = 8'hff; // @[SimTop.scala 45:17]
+  assign io_memAXI_0_w_bits_last = axi_io_out_w_bits_last; // @[SimTop.scala 45:17]
+  assign io_memAXI_0_b_ready = axi_io_out_b_ready; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_ar_valid = axi_io_out_ar_valid; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_len = 8'h7; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_size = 3'h3; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_burst = 2'h1; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_lock = 1'h0; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_cache = 4'h2; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_qos = 4'h0; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_addr = axi_io_out_ar_bits_addr; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_prot = 3'h0; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_id = 4'h0; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_ar_bits_user = 4'h0; // @[SimTop.scala 42:17]
+  assign io_memAXI_0_r_ready = axi_io_out_r_ready; // @[SimTop.scala 43:17]
   assign core_clock = clock;
   assign core_reset = reset;
-  assign core_io_imem_data = icache_io_imem_data; // @[SimTop.scala 25:17]
-  assign core_io_imem_data_ok = icache_io_imem_data_ok; // @[SimTop.scala 25:17]
-  assign core_io_dmem_ok = clint_io_dmem_ok; // @[SimTop.scala 26:17]
-  assign core_io_dmem_rdata = clint_io_dmem_rdata; // @[SimTop.scala 26:17]
+  assign core_io_imem_data = icache_io_imem_data; // @[SimTop.scala 26:17]
+  assign core_io_imem_data_ok = icache_io_imem_data_ok; // @[SimTop.scala 26:17]
+  assign core_io_dmem_ok = clint_io_dmem_ok; // @[SimTop.scala 27:17]
+  assign core_io_dmem_rdata = clint_io_dmem_rdata; // @[SimTop.scala 27:17]
   assign icache_clock = clock;
   assign icache_reset = reset;
-  assign icache_io_imem_addr = core_io_imem_addr; // @[SimTop.scala 25:17]
-  assign icache_io_axi_valid = axi_io_icacheio_valid; // @[SimTop.scala 37:17]
-  assign icache_io_axi_data = axi_io_icacheio_data; // @[SimTop.scala 37:17]
+  assign icache_io_imem_addr = core_io_imem_addr; // @[SimTop.scala 26:17]
+  assign icache_io_axi_valid = axi_io_icacheio_valid; // @[SimTop.scala 39:17]
+  assign icache_io_axi_data = axi_io_icacheio_data; // @[SimTop.scala 39:17]
   assign dcache_clock = clock;
   assign dcache_reset = reset;
-  assign dcache_io_dmem_en = clint_io_mem0_en; // @[SimTop.scala 27:17]
-  assign dcache_io_dmem_op = clint_io_mem0_op; // @[SimTop.scala 27:17]
-  assign dcache_io_dmem_addr = clint_io_mem0_addr; // @[SimTop.scala 27:17]
-  assign dcache_io_dmem_wdata = clint_io_mem0_wdata; // @[SimTop.scala 27:17]
-  assign dcache_io_dmem_wmask = clint_io_mem0_wmask; // @[SimTop.scala 27:17]
-  assign dcache_io_axi_rvalid = axi_io_dcacheio_rvalid; // @[SimTop.scala 38:17]
-  assign dcache_io_axi_rdata = axi_io_dcacheio_rdata; // @[SimTop.scala 38:17]
-  assign dcache_io_axi_wdone = axi_io_dcacheio_wdone; // @[SimTop.scala 38:17]
+  assign dcache_io_dmem_en = clint_io_mem0_en; // @[SimTop.scala 28:17]
+  assign dcache_io_dmem_op = clint_io_mem0_op; // @[SimTop.scala 28:17]
+  assign dcache_io_dmem_addr = clint_io_mem0_addr; // @[SimTop.scala 28:17]
+  assign dcache_io_dmem_wdata = clint_io_mem0_wdata; // @[SimTop.scala 28:17]
+  assign dcache_io_dmem_wmask = clint_io_mem0_wmask; // @[SimTop.scala 28:17]
+  assign dcache_io_axi_rvalid = axi_io_dcacheio_rvalid; // @[SimTop.scala 40:17]
+  assign dcache_io_axi_rdata = axi_io_dcacheio_rdata; // @[SimTop.scala 40:17]
+  assign dcache_io_axi_wdone = axi_io_dcacheio_wdone; // @[SimTop.scala 40:17]
   assign axi_clock = clock;
   assign axi_reset = reset;
-  assign axi_io_out_aw_ready = io_memAXI_0_aw_ready; // @[SimTop.scala 42:17]
-  assign axi_io_out_w_ready = io_memAXI_0_w_ready; // @[SimTop.scala 43:17]
-  assign axi_io_out_b_valid = io_memAXI_0_b_valid; // @[SimTop.scala 44:17]
-  assign axi_io_out_ar_ready = io_memAXI_0_ar_ready; // @[SimTop.scala 40:17]
-  assign axi_io_out_r_valid = io_memAXI_0_r_valid; // @[SimTop.scala 41:17]
-  assign axi_io_out_r_bits_data = io_memAXI_0_r_bits_data; // @[SimTop.scala 41:17]
-  assign axi_io_out_r_bits_last = io_memAXI_0_r_bits_last; // @[SimTop.scala 41:17]
-  assign axi_io_icacheio_req = icache_io_axi_req; // @[SimTop.scala 37:17]
-  assign axi_io_icacheio_addr = icache_io_axi_addr; // @[SimTop.scala 37:17]
-  assign axi_io_dcacheio_req = dcache_io_axi_req; // @[SimTop.scala 38:17]
-  assign axi_io_dcacheio_raddr = dcache_io_axi_raddr; // @[SimTop.scala 38:17]
-  assign axi_io_dcacheio_weq = dcache_io_axi_weq; // @[SimTop.scala 38:17]
-  assign axi_io_dcacheio_waddr = dcache_io_axi_waddr; // @[SimTop.scala 38:17]
-  assign axi_io_dcacheio_wdata = dcache_io_axi_wdata; // @[SimTop.scala 38:17]
+  assign axi_io_out_aw_ready = io_memAXI_0_aw_ready; // @[SimTop.scala 44:17]
+  assign axi_io_out_w_ready = io_memAXI_0_w_ready; // @[SimTop.scala 45:17]
+  assign axi_io_out_b_valid = io_memAXI_0_b_valid; // @[SimTop.scala 46:17]
+  assign axi_io_out_ar_ready = io_memAXI_0_ar_ready; // @[SimTop.scala 42:17]
+  assign axi_io_out_r_valid = io_memAXI_0_r_valid; // @[SimTop.scala 43:17]
+  assign axi_io_out_r_bits_data = io_memAXI_0_r_bits_data; // @[SimTop.scala 43:17]
+  assign axi_io_out_r_bits_last = io_memAXI_0_r_bits_last; // @[SimTop.scala 43:17]
+  assign axi_io_icacheio_req = icache_io_axi_req; // @[SimTop.scala 39:17]
+  assign axi_io_icacheio_addr = icache_io_axi_addr; // @[SimTop.scala 39:17]
+  assign axi_io_dcacheio_req = dcache_io_axi_req; // @[SimTop.scala 40:17]
+  assign axi_io_dcacheio_raddr = dcache_io_axi_raddr; // @[SimTop.scala 40:17]
+  assign axi_io_dcacheio_weq = dcache_io_axi_weq; // @[SimTop.scala 40:17]
+  assign axi_io_dcacheio_waddr = dcache_io_axi_waddr; // @[SimTop.scala 40:17]
+  assign axi_io_dcacheio_wdata = dcache_io_axi_wdata; // @[SimTop.scala 40:17]
   assign clint_clock = clock;
   assign clint_reset = reset;
-  assign clint_io_dmem_en = core_io_dmem_en; // @[SimTop.scala 26:17]
-  assign clint_io_dmem_op = core_io_dmem_op; // @[SimTop.scala 26:17]
-  assign clint_io_dmem_addr = core_io_dmem_addr; // @[SimTop.scala 26:17]
-  assign clint_io_dmem_wdata = core_io_dmem_wdata; // @[SimTop.scala 26:17]
-  assign clint_io_dmem_wmask = core_io_dmem_wmask; // @[SimTop.scala 26:17]
-  assign clint_io_mem0_ok = dcache_io_dmem_ok; // @[SimTop.scala 27:17]
-  assign clint_io_mem0_rdata = dcache_io_dmem_rdata; // @[SimTop.scala 27:17]
-  assign clint_io_mem1_rdata = mtime_io_mem_rdata; // @[SimTop.scala 28:17]
+  assign clint_io_dmem_en = core_io_dmem_en; // @[SimTop.scala 27:17]
+  assign clint_io_dmem_op = core_io_dmem_op; // @[SimTop.scala 27:17]
+  assign clint_io_dmem_addr = core_io_dmem_addr; // @[SimTop.scala 27:17]
+  assign clint_io_dmem_wdata = core_io_dmem_wdata; // @[SimTop.scala 27:17]
+  assign clint_io_dmem_wmask = core_io_dmem_wmask; // @[SimTop.scala 27:17]
+  assign clint_io_mem0_ok = dcache_io_dmem_ok; // @[SimTop.scala 28:17]
+  assign clint_io_mem0_rdata = dcache_io_dmem_rdata; // @[SimTop.scala 28:17]
+  assign clint_io_mem1_rdata = mtime_io_mem_rdata; // @[SimTop.scala 29:17]
+  assign clint_io_mem2_rdata = mtimecmp_io_mem_rdata; // @[SimTop.scala 30:17]
   assign mtime_clock = clock;
   assign mtime_reset = reset;
+  assign mtimecmp_clock = clock;
+  assign mtimecmp_reset = reset;
+  assign mtimecmp_io_mem_en = clint_io_mem2_en; // @[SimTop.scala 30:17]
+  assign mtimecmp_io_mem_op = clint_io_mem2_op; // @[SimTop.scala 30:17]
+  assign mtimecmp_io_mem_wmask = clint_io_mem2_wmask; // @[SimTop.scala 30:17]
 endmodule
