@@ -8,9 +8,14 @@ class Clint extends Module {
         val mem1 = Flipped(new DCacheIO)
     })
     
-    when(!io.mem0.ok){val sel = 0.U(1.W)}
-    .elsewhen(!io.mem1.ok){val sel = 1.U(1.W)}
-    .otherwise{val sel = Mux(io.dmem.addr === "h0200bfff".U, 1.U(1.W), 0.U(1.W))}
+    val sel = WireInit(0.U(1.W))
+    val out_ok = WireInit(false.B)
+    val out_rdata = WireInit(0.U(64.W))
+
+    when(!io.mem0.ok){sel := 0.U(1.W)}
+    .elsewhen(!io.mem1.ok){sel := 1.U(1.W)}
+    .otherwise{sel := Mux(io.dmem.addr === "h0200bfff".U, 1.U(1.W), 0.U(1.W))}
+
     val sel_r = RegEnable(sel, 0.U(1.W), out_ok)
 
     when(sel === 0.U(1.W)){
@@ -38,11 +43,11 @@ class Clint extends Module {
         io.mem0.wmask := 0.U
     }
 
-    val out_ok = MuxLookup(sel_r, 0.U, Array(
+    out_ok := MuxLookup(sel_r, 0.U, Array(
         "b0".U -> io.mem0.ok,
         "b1".U -> io.mem1.ok,
     ))
-    val out_rdata = MuxLookup(sel_r, 0.U, Array(
+    out_rdata := MuxLookup(sel_r, 0.U, Array(
         "b0".U -> io.mem0.rdata,
         "b1".U -> io.mem1.rdata,
     ))
@@ -53,7 +58,7 @@ class Clint extends Module {
 
 class Mtime extends Module {
     val io = IO(new Bundle {
-        val mem = Flipped(new DCacheIO)
+        val mem = new DCacheIO
     })
     val time = RegInit(0.U(64.W))
     time := time + 1.U
