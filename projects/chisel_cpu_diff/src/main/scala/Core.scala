@@ -21,8 +21,6 @@ class DmemIO extends Bundle{
 
 class Core extends Module {
   val io = IO(new Bundle {
-    // val imem = new ImemIO
-    // val dmem = new DmemIO
     val imem = Flipped(new ICacheIO)
     val dmem = Flipped(new DCacheIO)
   })
@@ -113,12 +111,6 @@ class Core extends Module {
   io.dmem.addr  := dmem_addr
   io.dmem.wdata := preamu.io.wdata
   io.dmem.wmask := preamu.io.wmask
-  // io.dmem.ren   := preamu.io.ren & memreg.io.pr.valid_out //必须是有效的流水线指令才读取
-  // io.dmem.raddr := preamu.io.raddr
-  // io.dmem.wen   := preamu.io.wen & memreg.io.pr.valid_out //必须是有效的流水线指令才写入
-  // io.dmem.waddr := preamu.io.waddr
-  // io.dmem.wdata := preamu.io.wdata
-  // io.dmem.wmask := preamu.io.wmask
   //wbreg
   wbreg.io.pc_in        := memreg.io.pc_out
   wbreg.io.inst_in      := memreg.io.inst_out
@@ -151,14 +143,12 @@ class Core extends Module {
   wbu.io.lu_out   := amu.io.lu_out
 
   //rfu
-  // rfu.io.rs1_en   := idu.io.rs1_en
-  // rfu.io.rs2_en   := idu.io.rs2_en
   rfu.io.rs1_addr := idu.io.rs1_addr
   rfu.io.rs2_addr := idu.io.rs2_addr
 
   rfu.io.rd_addr  := wbreg.io.rd_addr_out
   // rfu.io.rd_data  := Mux(wbreg.io.inst_out === "hff86b683".U, csru.io.mcycle, wbu.io.out)
-  rfu.io.rd_data  := Mux(wbreg.io.inst_out === "hff86b683".U, 0.U, wbu.io.out)
+  rfu.io.rd_data  := wbu.io.out
 
   //csru
   csru.io.raddr     := ieu.io.csr_raddr
@@ -216,14 +206,6 @@ class Core extends Module {
   csru.io.wen   := wbreg.io.csr_wen_out && commit_valid
   csru.io.csru_code_valid := commit_valid
 
-
-  // debug
-  val c = RegInit(0.U(64.W))
-  c := c + 1.U
-  //printf("pc=%x inst=%x valid=%d wen=%d waddr=%d wdata=%x stall=%d icache_ok=%d\n", wbreg.io.pc_out, wbreg.io.inst_out, wbreg.io.pr.valid_out, wbreg.io.rd_en_out, wbreg.io.rd_addr_out, wbu.io.out, stall, io.imem.data_ok)
-  // when(io.dmem.en && io.dmem.op && io.dmem.addr === "h80019a30".U){
-  //   printf("clock=%d pc=%x inst=%x waddr=%x wdata=%x wmask=%x \n", c, memreg.io.pc_out, memreg.io.inst_out, io.dmem.addr, io.dmem.wdata, io.dmem.wmask)
-  // }
   
   // putch
   val regfile_a0 = WireInit(0.U(64.W))
@@ -241,7 +223,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.pc_out)
   dt_ic.io.instr    := RegNext(wbreg.io.inst_out)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || wbreg.io.inst_out === CSRRS || wbreg.io.inst_out === "hff86b683".U || wbreg.io.inst_out === "h00d7b023".U || wbreg.io.inst_out === "h0007b703".U)
+  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.rd_en_out)
