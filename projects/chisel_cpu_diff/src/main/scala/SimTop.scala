@@ -38,6 +38,7 @@ class SimTop extends Module {
   axi.io.out.w  <> io.memAXI_0.w
   axi.io.out.b  <> io.memAXI_0.b 
 
+
   // mem.io.imem <> core.io.imem
   // mem.io.dmem <> core.io.dmem
   // mem.io.imem.en    := false.B
