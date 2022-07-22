@@ -223,7 +223,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.pc_out)
   dt_ic.io.instr    := RegNext(wbreg.io.inst_out)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH)
+  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || wbreg.io.inst_out === "hb0002973".U)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.rd_en_out)

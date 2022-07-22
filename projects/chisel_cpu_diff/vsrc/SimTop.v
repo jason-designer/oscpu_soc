@@ -3104,7 +3104,7 @@ module Core(
     dt_ic_io_valid_REG <= wbreg_io_pr_valid_out & ~dmem_not_ok; // @[Core.scala 196:44]
     dt_ic_io_pc_REG <= wbreg_io_pc_out; // @[Core.scala 223:31]
     dt_ic_io_instr_REG <= wbreg_io_inst_out; // @[Core.scala 224:31]
-    dt_ic_io_skip_REG <= wbreg_io_inst_out == 32'h7b; // @[Core.scala 226:50]
+    dt_ic_io_skip_REG <= wbreg_io_inst_out == 32'h7b | wbreg_io_inst_out == 32'hb0002973; // @[Core.scala 226:60]
     dt_ic_io_wen_REG <= wbreg_io_rd_en_out; // @[Core.scala 229:31]
     dt_ic_io_wdata_REG <= wbu_io_out; // @[Core.scala 230:31]
     dt_ic_io_wdest_REG <= wbreg_io_rd_addr_out; // @[Core.scala 231:31]
