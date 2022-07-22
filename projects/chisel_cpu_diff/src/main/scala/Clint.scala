@@ -14,7 +14,7 @@ class Clint extends Module {
 
     when(!io.mem0.ok){sel := 0.U(1.W)}
     .elsewhen(!io.mem1.ok){sel := 1.U(1.W)}
-    .otherwise{sel := Mux(io.dmem.addr === "h0200bfff".U, 1.U(1.W), 0.U(1.W))}
+    .otherwise{sel := Mux(io.dmem.addr === "h0200bff8".U, 1.U(1.W), 0.U(1.W))}
 
     val sel_r = RegEnable(sel, 0.U(1.W), out_ok)
 
