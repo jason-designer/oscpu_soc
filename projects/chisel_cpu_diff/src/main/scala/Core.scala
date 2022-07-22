@@ -218,6 +218,7 @@ class Core extends Module {
   val inst = wbreg.io.inst_out
   val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
   val read_mtime = inst === "hff86b683".U
+  val write_mtimecmp = inst === "h00d7b023".U
   
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
@@ -227,7 +228,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.pc_out)
   dt_ic.io.instr    := RegNext(wbreg.io.inst_out)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || read_mcycle || read_mtime)
+  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || read_mcycle || read_mtime || write_mtimecmp)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.rd_en_out)
