@@ -75,7 +75,7 @@ class Mtimecmp extends Module{
 
     val wm = io.mem.wmask
     val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
-    val mtimecmp_update = (mtimecmp & (~mask64)) | (mask64 & mtimecmp)
+    val mtimecmp_update = (mtimecmp & (~mask64)) | (mask64 & io.mem.wdata)
 
     when(io.mem.en && io.mem.op){mtimecmp := mtimecmp_update}
     .otherwise{mtimecmp := mtimecmp}

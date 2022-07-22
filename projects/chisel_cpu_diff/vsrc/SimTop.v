@@ -12258,6 +12258,7 @@ module Clint(
   input  [63:0] io_mem1_rdata,
   output        io_mem2_en,
   output        io_mem2_op,
+  output [63:0] io_mem2_wdata,
   output [7:0]  io_mem2_wmask,
   input  [63:0] io_mem2_rdata
 );
@@ -12282,6 +12283,7 @@ module Clint(
   assign io_mem0_wmask = _io_mem0_en_T ? io_dmem_wmask : 8'h0; // @[Clint.scala 31:27]
   assign io_mem2_en = sel == 2'h2 & io_dmem_en; // @[Clint.scala 37:27]
   assign io_mem2_op = _io_mem2_en_T & io_dmem_op; // @[Clint.scala 38:27]
+  assign io_mem2_wdata = _io_mem2_en_T ? io_dmem_wdata : 64'h0; // @[Clint.scala 40:27]
   assign io_mem2_wmask = _io_mem2_en_T ? io_dmem_wmask : 8'h0; // @[Clint.scala 41:27]
   always @(posedge clock) begin
     if (reset) begin // @[Reg.scala 27:20]
@@ -12411,6 +12413,7 @@ module Mtimecmp(
   input         reset,
   input         io_mem_en,
   input         io_mem_op,
+  input  [63:0] io_mem_wdata,
   input  [7:0]  io_mem_wmask,
   output [63:0] io_mem_rdata
 );
@@ -12430,7 +12433,7 @@ module Mtimecmp(
     mask64_lo_lo_hi,mask64_lo_lo_lo}; // @[Cat.scala 30:58]
   wire [63:0] _mtimecmp_update_T = ~mask64; // @[Clint.scala 78:40]
   wire [63:0] _mtimecmp_update_T_1 = mtimecmp & _mtimecmp_update_T; // @[Clint.scala 78:37]
-  wire [63:0] _mtimecmp_update_T_2 = mask64 & mtimecmp; // @[Clint.scala 78:60]
+  wire [63:0] _mtimecmp_update_T_2 = mask64 & io_mem_wdata; // @[Clint.scala 78:60]
   wire [63:0] mtimecmp_update = _mtimecmp_update_T_1 | _mtimecmp_update_T_2; // @[Clint.scala 78:50]
   assign io_mem_rdata = mtimecmp; // @[Clint.scala 83:18]
   always @(posedge clock) begin
@@ -12627,6 +12630,7 @@ module SimTop(
   wire [63:0] clint_io_mem1_rdata; // @[SimTop.scala 20:21]
   wire  clint_io_mem2_en; // @[SimTop.scala 20:21]
   wire  clint_io_mem2_op; // @[SimTop.scala 20:21]
+  wire [63:0] clint_io_mem2_wdata; // @[SimTop.scala 20:21]
   wire [7:0] clint_io_mem2_wmask; // @[SimTop.scala 20:21]
   wire [63:0] clint_io_mem2_rdata; // @[SimTop.scala 20:21]
   wire  mtime_clock; // @[SimTop.scala 21:21]
@@ -12636,6 +12640,7 @@ module SimTop(
   wire  mtimecmp_reset; // @[SimTop.scala 22:24]
   wire  mtimecmp_io_mem_en; // @[SimTop.scala 22:24]
   wire  mtimecmp_io_mem_op; // @[SimTop.scala 22:24]
+  wire [63:0] mtimecmp_io_mem_wdata; // @[SimTop.scala 22:24]
   wire [7:0] mtimecmp_io_mem_wmask; // @[SimTop.scala 22:24]
   wire [63:0] mtimecmp_io_mem_rdata; // @[SimTop.scala 22:24]
   Core core ( // @[SimTop.scala 15:20]
@@ -12734,6 +12739,7 @@ module SimTop(
     .io_mem1_rdata(clint_io_mem1_rdata),
     .io_mem2_en(clint_io_mem2_en),
     .io_mem2_op(clint_io_mem2_op),
+    .io_mem2_wdata(clint_io_mem2_wdata),
     .io_mem2_wmask(clint_io_mem2_wmask),
     .io_mem2_rdata(clint_io_mem2_rdata)
   );
@@ -12747,6 +12753,7 @@ module SimTop(
     .reset(mtimecmp_reset),
     .io_mem_en(mtimecmp_io_mem_en),
     .io_mem_op(mtimecmp_io_mem_op),
+    .io_mem_wdata(mtimecmp_io_mem_wdata),
     .io_mem_wmask(mtimecmp_io_mem_wmask),
     .io_mem_rdata(mtimecmp_io_mem_rdata)
   );
@@ -12835,5 +12842,6 @@ module SimTop(
   assign mtimecmp_reset = reset;
   assign mtimecmp_io_mem_en = clint_io_mem2_en; // @[SimTop.scala 30:17]
   assign mtimecmp_io_mem_op = clint_io_mem2_op; // @[SimTop.scala 30:17]
+  assign mtimecmp_io_mem_wdata = clint_io_mem2_wdata; // @[SimTop.scala 30:17]
   assign mtimecmp_io_mem_wmask = clint_io_mem2_wmask; // @[SimTop.scala 30:17]
 endmodule
