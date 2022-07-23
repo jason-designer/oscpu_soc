@@ -221,7 +221,6 @@ class Core extends Module {
   val write_mtimecmp = inst === "h00d7b023".U
 
  
- 
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
   dt_ic.io.coreid   := 0.U
