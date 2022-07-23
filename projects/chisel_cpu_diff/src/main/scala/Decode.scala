@@ -9,7 +9,7 @@ object Decode_constant{
     val lu_code_length  = 7
     val su_code_length  = 4
     val mdu_code_length = 10
-    val csru_code_length = 7
+    val csru_code_length = 8
 }
 class DecodeInfo extends Bundle{
     val fu_code   = Output(UInt())
@@ -124,6 +124,7 @@ class Decode extends Module{
     val csrrs   = inst === CSRRS
     val csrrw   = inst === CSRRW
     val csrrc   = inst === CSRRC
+    val csrrsi  = inst === CSRRSI
     val csrrwi  = inst === CSRRWI
     val csrrci  = inst === CSRRCI
 
@@ -168,7 +169,7 @@ class Decode extends Module{
     val mdu_code = Cat(remuw, remu, remw, rem, divuw, divu, divw, div, mulw, mul)
     val mdu_en   = mdu_code =/= 0.U
     //csrrs
-    val csru_code = Cat(csrrci, csrrwi, csrrc, csrrw, csrrs, mret, ecall)
+    val csru_code = Cat(csrrci, csrrwi, csrrsi, csrrc, csrrw, csrrs, mret, ecall)
     val csr_en    = csru_code =/= 0.U
     //fu_code
     val fu_code = Cat(csr_en, mdu_en, su_en, lu_en, bu_en, alu_en)
@@ -188,7 +189,7 @@ class Decode extends Module{
                     slti  || sltiu ||
                     jalr  ||
                     lb    || lh    || lw    || ld    || lbu    || lhu    || lwu ||
-                    ecall || csrrs || csrrw || csrrc || csrrwi || csrrci 
+                    ecall || csrrs || csrrw || csrrc || csrrwi || csrrci || csrrsi
     val type_s =    sb    || sh    || sw    || sd
     val type_b =    beq   || bne   || blt   || bge   || bltu   || bgeu
     val type_u =    lui   || auipc 

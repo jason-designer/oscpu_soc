@@ -86,32 +86,36 @@ class Execution extends Module{
     //csru
     io.csr_raddr := op2
     val csru_out = MuxLookup(csru_code, 0.U, Array(
-        "b0000100".U -> io.csr_rdata,
-        "b0001000".U -> io.csr_rdata,
-        "b0010000".U -> io.csr_rdata,
-        "b0100000".U -> io.csr_rdata,
-        "b1000000".U -> io.csr_rdata,
+        "b00000100".U -> io.csr_rdata,
+        "b00001000".U -> io.csr_rdata,
+        "b00010000".U -> io.csr_rdata,
+        "b00100000".U -> io.csr_rdata,
+        "b01000000".U -> io.csr_rdata,
+        "b10000000".U -> io.csr_rdata,
     ))
     val csr_wen = MuxLookup(csru_code, false.B, Array(
-        "b0000100".U -> true.B,
-        "b0001000".U -> true.B,
-        "b0010000".U -> true.B,
-        "b0100000".U -> true.B,
-        "b1000000".U -> true.B,
+        "b00000100".U -> true.B,
+        "b00001000".U -> true.B,
+        "b00010000".U -> true.B,
+        "b00100000".U -> true.B,
+        "b01000000".U -> true.B,
+        "b10000000".U -> true.B,
     ))
     val csr_waddr = MuxLookup(csru_code, 0.U, Array(
-        "b0000100".U -> op2,
-        "b0001000".U -> op2,
-        "b0010000".U -> op2,
-        "b0100000".U -> op2,
-        "b1000000".U -> op2,
+        "b00000100".U -> op2,
+        "b00001000".U -> op2,
+        "b00010000".U -> op2,
+        "b00100000".U -> op2,
+        "b01000000".U -> op2,
+        "b10000000".U -> op2,
     ))
     val csr_wdata = MuxLookup(csru_code, 0.U, Array(
-        "b0000100".U -> (io.csr_rdata | op1),
-        "b0001000".U -> op1,
-        "b0010000".U -> (io.csr_rdata & (~op1)),
-        "b0100000".U -> Cat(0.U(59.W), io.rs1_addr),
-        "b1000000".U -> (io.csr_rdata & (~Cat(0.U(59.W), io.rs1_addr))),
+        "b00000100".U -> (io.csr_rdata | op1),
+        "b00001000".U -> op1,
+        "b00010000".U -> (io.csr_rdata & (~op1)),
+        "b00100000".U -> (io.csr_rdata | (Cat(0.U(59.W), io.rs1_addr))),
+        "b01000000".U -> Cat(0.U(59.W), io.rs1_addr),
+        "b10000000".U -> (io.csr_rdata & (~Cat(0.U(59.W), io.rs1_addr))),
     ))
 
     // out
