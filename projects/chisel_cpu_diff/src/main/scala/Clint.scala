@@ -61,10 +61,16 @@ class Mtime extends Module {
         val mem = new DCacheIO
     })
     val mtime = RegInit(0.U(64.W))
-    mtime := mtime + 1.U
 
-    io.mem.ok := true.B
+    val wm = io.mem.wmask
+    val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
+    val mtime_update = (mtime & (~mask64)) | (mask64 & io.mem.wdata)
+
+    when(io.mem.en && io.mem.op){mtime := mtime_update}
+    .otherwise{mtime := mtime}
+
     io.mem.rdata := mtime
+    io.mem.ok := true.B
 }
 
 class Mtimecmp extends Module{
