@@ -236,6 +236,17 @@ class Core extends Module {
   BoringUtils.addSink(regfile_a0, "rf_a0")
   when(wbreg.io.out.putch && commit_valid) {printf("%c",regfile_a0)}
 
+
+  /* ----- Debug ------------------------------ */
+  // io.dmem.en 
+  // io.dmem.op   
+  // io.dmem.addr
+  // io.dmem.wdata
+  // io.dmem.wmask 
+  // when(io.dmem.en && io.dmem.addr >= "h02000000".U && io.dmem.addr < "h0200c000".U){
+  //   printf("pc=%x addr=%x op=%d \n", memreg.io.out.pc, io.dmem.addr, io.dmem.op)
+  // }
+
   /* ----- Difftest ------------------------------ */
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
   // skip inst

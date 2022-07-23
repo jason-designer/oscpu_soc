@@ -17,16 +17,17 @@ class SimTop extends Module {
   val dcache = Module(new DCache)
   val axi = Module(new AXI)
   
-  val clint = Module(new Clint)
-  val mtime = Module(new Mtime)
-  val mtimecmp = Module(new Mtimecmp)
+  val mmio = Module(new MMIO)
+  val clintreg = Module(new ClintReg)
 
   // val mem = Module(new RamSyn)
   core.io.imem  <> icache.io.imem
-  core.io.dmem  <> clint.io.dmem
-  clint.io.mem0 <> dcache.io.dmem
-  clint.io.mem1 <> mtime.io.mem
-  clint.io.mem2 <> mtimecmp.io.mem
+  core.io.dmem  <> mmio.io.dmem
+  mmio.io.mem0 <> dcache.io.dmem
+  mmio.io.mem1 <> clintreg.io.mem
+
+  mmio.io.mem2.ok := true.B
+  mmio.io.mem2.rdata := 0.U
 
   // dcache.io.dmem.en := true.B
   // dcache.io.dmem.op := false.B
