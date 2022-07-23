@@ -21,6 +21,8 @@ class DmemIO extends Bundle{
 
 class Core extends Module {
   val io = IO(new Bundle {
+    // val imem = new ImemIO
+    // val dmem = new DmemIO
     val imem = Flipped(new ICacheIO)
     val dmem = Flipped(new DCacheIO)
   })
@@ -43,139 +45,161 @@ class Core extends Module {
   //ifu
   ifu.io.jump_en  := idu.io.jump_en
   ifu.io.jump_pc  := idu.io.jump_pc
-  ifu.io.pc       := idreg.io.pc_out
+  ifu.io.pc       := idreg.io.out.pc
   //idreg
-  io.imem.en          := idreg.io.imem.en
-  io.imem.addr        := idreg.io.imem.addr
-  idreg.io.imem.data  := io.imem.data
-
-  idreg.io.pc_in  := ifu.io.next_pc
+  idreg.io.imem <> io.imem
+  idreg.io.in.pc  := ifu.io.next_pc
   //idu
-  idu.io.pc       := idreg.io.pc_out
-  idu.io.inst     := idreg.io.inst_out
+  idu.io.pc       := idreg.io.out.pc
+  idu.io.inst     := idreg.io.inst
   idu.io.rs1_data := rfu.io.rs1_data
   idu.io.rs2_data := rfu.io.rs2_data
   idu.io.mtvec    := csru.io.mtvec
   idu.io.mepc     := csru.io.mepc
   //exereg
-  exereg.io.pc_in       := idreg.io.pc_out
-  exereg.io.inst_in     := idreg.io.inst_out
-  exereg.io.rd_en_in    := idu.io.rd_en
-  exereg.io.rd_addr_in  := idu.io.rd_addr
-  exereg.io.imm_in      := idu.io.imm
-  exereg.io.op1_in      := idu.io.op1
-  exereg.io.op2_in      := idu.io.op2
-  exereg.io.rs1_addr_in := idu.io.rs1_addr
-  exereg.io.decode_info_in <> idu.io.decode_info
-  exereg.io.putch_in    := idu.io.putch
+  exereg.io.in.pc       := idreg.io.out.pc
+  exereg.io.in.inst     := idreg.io.inst
+  exereg.io.in.rd_en    := idu.io.rd_en
+  exereg.io.in.rd_addr  := idu.io.rd_addr
+  exereg.io.in.imm      := idu.io.imm
+  exereg.io.in.op1      := idu.io.op1
+  exereg.io.in.op2      := idu.io.op2
+  exereg.io.in.rs1_addr := idu.io.rs1_addr
+  exereg.io.in.fu_code  := idu.io.decode_info.fu_code
+  exereg.io.in.alu_code := idu.io.decode_info.alu_code
+  exereg.io.in.bu_code  := idu.io.decode_info.bu_code
+  exereg.io.in.mdu_code := idu.io.decode_info.mdu_code
+  exereg.io.in.lu_code  := idu.io.decode_info.lu_code
+  exereg.io.in.su_code  := idu.io.decode_info.su_code
+  exereg.io.in.csru_code    := idu.io.decode_info.csru_code
+  exereg.io.in.putch    := idu.io.putch
   //ieu
-  ieu.io.decode_info <> exereg.io.decode_info_out
-  ieu.io.op1 := exereg.io.op1_out
-  ieu.io.op2 := exereg.io.op2_out
-  ieu.io.pc  := exereg.io.pc_out
-  ieu.io.imm := exereg.io.imm_out
-  ieu.io.rs1_addr := exereg.io.rs1_addr_out
-
+  ieu.io.decode_info.fu_code  := exereg.io.out.fu_code
+  ieu.io.decode_info.alu_code := exereg.io.out.alu_code
+  ieu.io.decode_info.bu_code  := exereg.io.out.bu_code
+  ieu.io.decode_info.mdu_code := exereg.io.out.mdu_code
+  ieu.io.decode_info.lu_code  := exereg.io.out.lu_code
+  ieu.io.decode_info.su_code  := exereg.io.out.su_code
+  ieu.io.decode_info.csru_code := exereg.io.out.csru_code
+  ieu.io.op1 := exereg.io.out.op1
+  ieu.io.op2 := exereg.io.out.op2
+  ieu.io.pc  := exereg.io.out.pc
+  ieu.io.imm := exereg.io.out.imm
+  ieu.io.rs1_addr := exereg.io.out.rs1_addr
   ieu.io.csr_rdata := csru.io.rdata
   //memreg
-  memreg.io.pc_in       := exereg.io.pc_out
-  memreg.io.inst_in     := exereg.io.inst_out
-  memreg.io.rd_en_in    := exereg.io.rd_en_out
-  memreg.io.rd_addr_in  := exereg.io.rd_addr_out
-  memreg.io.imm_in      := exereg.io.imm_out
-  memreg.io.op1_in      := exereg.io.op1_out
-  memreg.io.op2_in      := exereg.io.op2_out
-  memreg.io.decode_info_in <> exereg.io.decode_info_out
+  memreg.io.in.pc       := exereg.io.out.pc
+  memreg.io.in.inst     := exereg.io.out.inst
+  memreg.io.in.rd_en    := exereg.io.out.rd_en
+  memreg.io.in.rd_addr  := exereg.io.out.rd_addr
+  memreg.io.in.imm      := exereg.io.out.imm
+  memreg.io.in.op1      := exereg.io.out.op1
+  memreg.io.in.op2      := exereg.io.out.op2
+  memreg.io.in.fu_code  := exereg.io.out.fu_code
+  memreg.io.in.alu_code := exereg.io.out.alu_code
+  memreg.io.in.bu_code  := exereg.io.out.bu_code
+  memreg.io.in.mdu_code := exereg.io.out.mdu_code
+  memreg.io.in.lu_code  := exereg.io.out.lu_code
+  memreg.io.in.su_code  := exereg.io.out.su_code
+  memreg.io.in.csru_code := exereg.io.out.csru_code
 
-  memreg.io.alu_out_in  := ieu.io.alu_out
-  memreg.io.bu_out_in   := ieu.io.bu_out
-  memreg.io.mdu_out_in  := ieu.io.mdu_out
-  memreg.io.csru_out_in := ieu.io.csru_out
+  memreg.io.in.alu_out  := ieu.io.alu_out
+  memreg.io.in.bu_out   := ieu.io.bu_out
+  memreg.io.in.mdu_out  := ieu.io.mdu_out
+  memreg.io.in.csru_out := ieu.io.csru_out
 
-  memreg.io.putch_in      := exereg.io.putch_out
-  memreg.io.csr_wen_in    := ieu.io.csr_wen
-  memreg.io.csr_waddr_in  := ieu.io.csr_waddr
-  memreg.io.csr_wdata_in  := ieu.io.csr_wdata
+  memreg.io.in.putch      := exereg.io.out.putch
+  memreg.io.in.csr_wen    := ieu.io.csr_wen
+  memreg.io.in.csr_waddr  := ieu.io.csr_waddr
+  memreg.io.in.csr_wdata  := ieu.io.csr_wdata
   //preamu
-  preamu.io.lu_code := memreg.io.decode_info_out.lu_code
-  preamu.io.su_code := memreg.io.decode_info_out.su_code
-  preamu.io.op1     := memreg.io.op1_out
-  preamu.io.op2     := memreg.io.op2_out
-  preamu.io.imm     := memreg.io.imm_out
+  preamu.io.lu_code := memreg.io.out.lu_code
+  preamu.io.su_code := memreg.io.out.su_code
+  preamu.io.op1     := memreg.io.out.op1
+  preamu.io.op2     := memreg.io.out.op2
+  preamu.io.imm     := memreg.io.out.imm
   //dmem
   val dmem_en = preamu.io.ren || preamu.io.wen
   val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
   val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
-  io.dmem.en    := dmem_en & memreg.io.pr.valid_out //必须是有效的流水线指令才读写
+  io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
   io.dmem.op    := dmem_op
   io.dmem.addr  := dmem_addr
   io.dmem.wdata := preamu.io.wdata
   io.dmem.wmask := preamu.io.wmask
+  // io.dmem.ren   := preamu.io.ren & memreg.io.pr.valid_out //必须是有效的流水线指令才读取
+  // io.dmem.raddr := preamu.io.raddr
+  // io.dmem.wen   := preamu.io.wen & memreg.io.pr.valid_out //必须是有效的流水线指令才写入
+  // io.dmem.waddr := preamu.io.waddr
+  // io.dmem.wdata := preamu.io.wdata
+  // io.dmem.wmask := preamu.io.wmask
   //wbreg
-  wbreg.io.pc_in        := memreg.io.pc_out
-  wbreg.io.inst_in      := memreg.io.inst_out
-  wbreg.io.rd_en_in     := memreg.io.rd_en_out
-  wbreg.io.rd_addr_in   := memreg.io.rd_addr_out
-  wbreg.io.alu_out_in   := memreg.io.alu_out_out
-  wbreg.io.bu_out_in    := memreg.io.bu_out_out
-  wbreg.io.mdu_out_in   := memreg.io.mdu_out_out
-  wbreg.io.csru_out_in  := memreg.io.csru_out_out
-  wbreg.io.fu_code_in   := memreg.io.decode_info_out.fu_code
-  wbreg.io.lu_code_in   := memreg.io.decode_info_out.lu_code
-  wbreg.io.csru_code_in := memreg.io.decode_info_out.csru_code
+  wbreg.io.in.pc        := memreg.io.out.pc
+  wbreg.io.in.inst      := memreg.io.out.inst
+  wbreg.io.in.rd_en     := memreg.io.out.rd_en
+  wbreg.io.in.rd_addr   := memreg.io.out.rd_addr
+  wbreg.io.in.alu_out   := memreg.io.out.alu_out
+  wbreg.io.in.bu_out    := memreg.io.out.bu_out
+  wbreg.io.in.mdu_out   := memreg.io.out.mdu_out
+  wbreg.io.in.csru_out  := memreg.io.out.csru_out
+  wbreg.io.in.fu_code   := memreg.io.out.fu_code
+  wbreg.io.in.lu_code   := memreg.io.out.lu_code
+  wbreg.io.in.csru_code := memreg.io.out.csru_code
   
-  wbreg.io.lu_shift_in := preamu.io.lu_shift
+  wbreg.io.in.lu_shift  := preamu.io.lu_shift
 
-  wbreg.io.putch_in     := memreg.io.putch_out
-  wbreg.io.csr_wen_in   := memreg.io.csr_wen_out
-  wbreg.io.csr_waddr_in := memreg.io.csr_waddr_out
-  wbreg.io.csr_wdata_in := memreg.io.csr_wdata_out
+  wbreg.io.in.putch     := memreg.io.out.putch
+  wbreg.io.in.csr_wen   := memreg.io.out.csr_wen
+  wbreg.io.in.csr_waddr := memreg.io.out.csr_waddr
+  wbreg.io.in.csr_wdata := memreg.io.out.csr_wdata
   //amu
-  amu.io.lu_code  := wbreg.io.lu_code_out
-  amu.io.lu_shift := wbreg.io.lu_shift_out
+  amu.io.lu_code  := wbreg.io.out.lu_code
+  amu.io.lu_shift := wbreg.io.out.lu_shift
   amu.io.rdata    := io.dmem.rdata
   //wbu
-  wbu.io.fu_code  := wbreg.io.fu_code_out
-  wbu.io.alu_out  := wbreg.io.alu_out_out
-  wbu.io.bu_out   := wbreg.io.bu_out_out
-  wbu.io.mdu_out  := wbreg.io.mdu_out_out
-  wbu.io.csru_out := wbreg.io.csru_out_out
+  wbu.io.fu_code  := wbreg.io.out.fu_code
+  wbu.io.alu_out  := wbreg.io.out.alu_out
+  wbu.io.bu_out   := wbreg.io.out.bu_out
+  wbu.io.mdu_out  := wbreg.io.out.mdu_out
+  wbu.io.csru_out := wbreg.io.out.csru_out
   wbu.io.lu_out   := amu.io.lu_out
 
   //rfu
+  // rfu.io.rs1_en   := idu.io.rs1_en
+  // rfu.io.rs2_en   := idu.io.rs2_en
   rfu.io.rs1_addr := idu.io.rs1_addr
   rfu.io.rs2_addr := idu.io.rs2_addr
 
-  rfu.io.rd_addr  := wbreg.io.rd_addr_out
+  rfu.io.rd_addr  := wbreg.io.out.rd_addr
   // rfu.io.rd_data  := Mux(wbreg.io.inst_out === "hff86b683".U, csru.io.mcycle, wbu.io.out)
   rfu.io.rd_data  := wbu.io.out
 
   //csru
   csru.io.raddr     := ieu.io.csr_raddr
-  csru.io.waddr     := wbreg.io.csr_waddr_out
-  csru.io.wdata     := wbreg.io.csr_wdata_out
-  csru.io.csru_code := wbreg.io.csru_code_out
-  csru.io.pc        := wbreg.io.pc_out
+  csru.io.waddr     := wbreg.io.out.csr_waddr
+  csru.io.wdata     := wbreg.io.out.csr_wdata
+  csru.io.csru_code := wbreg.io.out.csru_code
+  csru.io.pc        := wbreg.io.out.pc
 
   
   /*********************** 相关性冲突 ***********************/
-  rfconflict.io.rs_valid    := idreg.io.pr.valid_out
+  rfconflict.io.rs_valid   := idreg.io.out.valid
   rfconflict.io.rs1_en     := idu.io.rs1_en
   rfconflict.io.rs2_en     := idu.io.rs2_en
   rfconflict.io.rs1_addr   := idu.io.rs1_addr
   rfconflict.io.rs2_addr   := idu.io.rs2_addr
-  rfconflict.io.rd1_valid  := exereg.io.pr.valid_out
-  rfconflict.io.rd1_en     := exereg.io.rd_en_out
-  rfconflict.io.rd1_addr   := exereg.io.rd_addr_out
-  rfconflict.io.rd2_valid  := memreg.io.pr.valid_out
-  rfconflict.io.rd2_en     := memreg.io.rd_en_out
-  rfconflict.io.rd2_addr   := memreg.io.rd_addr_out
-  rfconflict.io.rd3_valid  := wbreg.io.pr.valid_out
-  rfconflict.io.rd3_en     := wbreg.io.rd_en_out
-  rfconflict.io.rd3_addr   := wbreg.io.rd_addr_out
+  rfconflict.io.rd1_valid  := exereg.io.out.valid
+  rfconflict.io.rd1_en     := exereg.io.out.rd_en
+  rfconflict.io.rd1_addr   := exereg.io.out.rd_addr
+  rfconflict.io.rd2_valid  := memreg.io.out.valid
+  rfconflict.io.rd2_en     := memreg.io.out.rd_en
+  rfconflict.io.rd2_addr   := memreg.io.out.rd_addr
+  rfconflict.io.rd3_valid  := wbreg.io.out.valid
+  rfconflict.io.rd3_en     := wbreg.io.out.rd_en
+  rfconflict.io.rd3_addr   := wbreg.io.out.rd_addr
 
   //--------------------流水线控制------------------
-  val imem_not_ok = !io.imem.data_ok
+  val imem_not_ok = !io.imem.ok
   val dmem_not_ok = !io.dmem.ok
 
   val stall = rfconflict.io.conflict || imem_not_ok  
@@ -189,52 +213,46 @@ class Core extends Module {
   //  1.全部流水线寄存器都保持原值
   //  2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
   
-  idreg.io.pr.valid_in  := ifu.io.valid
-  exereg.io.pr.valid_in := idreg.io.pr.valid_out && (!stall) 
-  memreg.io.pr.valid_in := exereg.io.pr.valid_out
-  wbreg.io.pr.valid_in  := memreg.io.pr.valid_out
-  val commit_valid = wbreg.io.pr.valid_out && !stall_all
+  idreg.io.in.valid  := ifu.io.valid
+  exereg.io.in.valid := idreg.io.out.valid && (!stall) 
+  memreg.io.in.valid := exereg.io.out.valid
+  wbreg.io.in.valid  := memreg.io.out.valid
+  val commit_valid = wbreg.io.out.valid && !stall_all
   
-  idreg.io.pr.en  := !stall && !stall_all
-  exereg.io.pr.en := !stall_all
-  memreg.io.pr.en := !stall_all
-  wbreg.io.pr.en  := !stall_all
+  idreg.io.en  := !stall && !stall_all
+  exereg.io.en := !stall_all
+  memreg.io.en := !stall_all
+  wbreg.io.en  := !stall_all
 
   // 改变计算机状态的单元 
-  ifu.io.en     := stall || stall_all
-  rfu.io.rd_en  := wbreg.io.rd_en_out && commit_valid  //必须是有效的流水线指令才写入
-  csru.io.wen   := wbreg.io.csr_wen_out && commit_valid
+  //ifu.io.en     := stall || stall_all
+  rfu.io.rd_en  := wbreg.io.out.rd_en && commit_valid  //必须是有效的流水线指令才写入
+  csru.io.wen   := wbreg.io.out.csr_wen && commit_valid
   csru.io.csru_code_valid := commit_valid
 
   
   // putch
   val regfile_a0 = WireInit(0.U(64.W))
   BoringUtils.addSink(regfile_a0, "rf_a0")
-  when(wbreg.io.putch_out && commit_valid) {printf("%c",regfile_a0)}
+  when(wbreg.io.out.putch && commit_valid) {printf("%c",regfile_a0)}
 
   /* ----- Difftest ------------------------------ */
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
-  // skip inst
-  val inst = wbreg.io.inst_out
-  val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
-  val read_mtime = inst === "hff86b683".U
-  val write_mtimecmp = inst === "h00d7b023".U
-
- 
+  
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
   dt_ic.io.coreid   := 0.U
   dt_ic.io.index    := 0.U
   dt_ic.io.valid    := RegNext(commit_valid)
-  dt_ic.io.pc       := RegNext(wbreg.io.pc_out)
-  dt_ic.io.instr    := RegNext(wbreg.io.inst_out)
+  dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
+  dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(wbreg.io.inst_out === PUTCH || read_mcycle || read_mtime || write_mtimecmp)// || inst === "h0007b703".U)
+  dt_ic.io.skip     := RegNext(wbreg.io.out.inst === PUTCH)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
-  dt_ic.io.wen      := RegNext(wbreg.io.rd_en_out)
+  dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)
   dt_ic.io.wdata    := RegNext(wbu.io.out)
-  dt_ic.io.wdest    := RegNext(wbreg.io.rd_addr_out)
+  dt_ic.io.wdest    := RegNext(wbreg.io.out.rd_addr)
 
   val dt_ae = Module(new DifftestArchEvent)
   dt_ae.io.clock        := clock
@@ -255,9 +273,9 @@ class Core extends Module {
   val dt_te = Module(new DifftestTrapEvent)
   dt_te.io.clock    := clock
   dt_te.io.coreid   := 0.U
-  dt_te.io.valid    := (wbreg.io.inst_out === "h0000006b".U) && commit_valid
+  dt_te.io.valid    := (wbreg.io.out.inst === "h0000006b".U) && commit_valid
   dt_te.io.code     := rf_a0(2, 0)
-  dt_te.io.pc       := wbreg.io.pc_out
+  dt_te.io.pc       := wbreg.io.out.pc
   dt_te.io.cycleCnt := cycle_cnt
   dt_te.io.instrCnt := instr_cnt
 

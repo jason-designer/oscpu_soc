@@ -2,8 +2,15 @@ import chisel3._
 import chisel3.util._
 import Instructions._
 
-
-
+object Decode_constant{
+    val fu_code_length  = 6
+    val alu_code_length = 16
+    val bu_code_length  = 8
+    val lu_code_length  = 7
+    val su_code_length  = 4
+    val mdu_code_length = 10
+    val csru_code_length = 7
+}
 class DecodeInfo extends Bundle{
     val fu_code   = Output(UInt())
     val alu_code  = Output(UInt())
@@ -117,7 +124,6 @@ class Decode extends Module{
     val csrrs   = inst === CSRRS
     val csrrw   = inst === CSRRW
     val csrrc   = inst === CSRRC
-    val csrrsi  = inst === CSRRSI
     val csrrwi  = inst === CSRRWI
     val csrrci  = inst === CSRRCI
 
@@ -162,7 +168,7 @@ class Decode extends Module{
     val mdu_code = Cat(remuw, remu, remw, rem, divuw, divu, divw, div, mulw, mul)
     val mdu_en   = mdu_code =/= 0.U
     //csrrs
-    val csru_code = Cat(csrrci, csrrwi, csrrsi, csrrc, csrrw, csrrs, mret, ecall)
+    val csru_code = Cat(csrrci, csrrwi, csrrc, csrrw, csrrs, mret, ecall)
     val csr_en    = csru_code =/= 0.U
     //fu_code
     val fu_code = Cat(csr_en, mdu_en, su_en, lu_en, bu_en, alu_en)
@@ -182,7 +188,7 @@ class Decode extends Module{
                     slti  || sltiu ||
                     jalr  ||
                     lb    || lh    || lw    || ld    || lbu    || lhu    || lwu ||
-                    ecall || csrrs || csrrw || csrrc || csrrwi || csrrci || csrrsi
+                    ecall || csrrs || csrrw || csrrc || csrrwi || csrrci 
     val type_s =    sb    || sh    || sw    || sd
     val type_b =    beq   || bne   || blt   || bge   || bltu   || bgeu
     val type_u =    lui   || auipc 
@@ -243,12 +249,12 @@ class Decode extends Module{
     ))
 
     val csru_jump_pc = MuxLookup(csru_code, 0.U, Array(
-        "b00000001".U -> io.mtvec,    //ecall
-        "b00000010".U -> io.mepc,     //mret
+        "b0001".U -> io.mtvec,    //ecall
+        "b0010".U -> io.mepc,     //mret
     ))
     val csru_jump_en = MuxLookup(csru_code, false.B, Array(
-        "b00000001".U -> true.B,   //ecall
-        "b00000010".U -> true.B,   //mret
+        "b0001".U -> true.B,   //ecall
+        "b0010".U -> true.B,   //mret
     ))
 
     io.jump_en := bu_jump_en || csru_jump_en                // 按理说不会两个都enable

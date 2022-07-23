@@ -4,9 +4,9 @@ import chisel3.util.experimental._
 import scala.math._
 
 trait CacheParameters {
-    val OffsetWidth     = 6     // 这个大于3，因为dcache写入的最低单位是64位。
+    val OffsetWidth     = 4     // 这个大于3，因为dcache写入的最低单位是64位。
                                 // 因为后面的axi的transfer大小设为了4Byte（这个条件要求它>=2）
-    val IndexWidth      = 5
+    val IndexWidth      = 2
     val TagWidth        = 64 - OffsetWidth - IndexWidth // 三个数之和为64
 
     val CacheWay        = 2
@@ -21,7 +21,7 @@ class ICacheIO extends Bundle{
     val addr        = Input(UInt(64.W))
     val en          = Input(Bool())
     val data        = Output(UInt(32.W))
-    val data_ok     = Output(Bool())
+    val ok          = Output(Bool())
 }
 
 class ICacheAxiIO extends Bundle with CacheParameters{
@@ -31,18 +31,23 @@ class ICacheAxiIO extends Bundle with CacheParameters{
     val data    = Input(UInt(CacheLineWidth.W))
 }
 
-// 同步ram，组合逻辑在寄存器前面，也就是延迟在idreg前面，以此减轻decode的延迟
-// 虽然初始化为data_ok=true,但是此时的data是无效的，在data_ok初始化为true仅仅是为了避免复位时就stall
-// icache miss后等待axi返回数据的时候，addr需要保存不变才能正确更新cache
+
+// 1.同步icache.当en的时候会把操作数都保存到寄存器内，并开始取值。
+// 若发生miss，icache会通过axi取值，此时会输出的ok为false，这
+// 时即使输入的en为true也不会接受新的input请求
+// 2.icache初始化时ok为true，此时data并非为有效值，只是为了避免core进入stall状态
 class ICache extends Module with CacheParameters{
     val io = IO(new Bundle{
         val imem    = new ICacheIO
         val axi     = new ICacheAxiIO
     })
+    // addr reg
+    val addr = RegEnable(io.imem.addr, 0.U(64.W), io.imem.en && io.imem.ok)
+
     // addr
-    val tag_addr    = io.imem.addr(OffsetWidth + IndexWidth + TagWidth - 1, OffsetWidth + IndexWidth)
-    val index_addr  = io.imem.addr(OffsetWidth + IndexWidth - 1, OffsetWidth)
-    val offset_addr = io.imem.addr(OffsetWidth - 1, 0)
+    val tag_addr    = addr(OffsetWidth + IndexWidth + TagWidth - 1, OffsetWidth + IndexWidth)
+    val index_addr  = addr(OffsetWidth + IndexWidth - 1, OffsetWidth)
+    val offset_addr = addr(OffsetWidth - 1, 0)
     // cache data
     val v1      = RegInit(VecInit(Seq.fill(CacheLineNum)(false.B)))
     val age1    = RegInit(VecInit(Seq.fill(CacheLineNum)(false.B)))
@@ -60,23 +65,24 @@ class ICache extends Module with CacheParameters{
     //
     val hit     = hit1 || hit2
     val data    = Mux(hit2, data2, Mux(hit1, data1, 0.U))   // 两个都hit就随便取一个,按理说不会两个都hit
-    val data_ok = io.imem.en && hit
     // update age
-    // 当en且hit1和hit2的值不同时，age才需要发生改变
-    age1(index_addr) := Mux(io.imem.en && (hit1 ^ hit2), hit1, age1(index_addr))
-    age2(index_addr) := Mux(io.imem.en && (hit1 ^ hit2), hit2, age2(index_addr))
-    // icache output
-    io.imem.data    := RegNext(data)
-    io.imem.data_ok := RegNext(data_ok, true.B) //data_ok初始化为true仅仅是为了避免复位时就stall
-
-
-    //state machine
+    // 当hit1和hit2的值不同时，age才需要发生改变
+    age1(index_addr) := Mux(hit1 ^ hit2, hit1, age1(index_addr))
+    age2(index_addr) := Mux(hit1 ^ hit2, hit2, age2(index_addr))
+    //state machine define
     val idle :: miss :: Nil = Enum(2)
     val state = RegInit(idle)
 
+    // icache output
+    val not_en_yet  = RegInit(true.B)                       // 用于复位后让icache输出ok，避免进入stall
+    not_en_yet      := Mux(io.imem.en, false.B, not_en_yet) // 复位后在en没来前还需要保持state的idle状态
+
+    io.imem.data    := data
+    io.imem.ok      := (hit || not_en_yet) && state === idle 
+
     switch(state){
         is(idle){
-            when(!hit && io.imem.en) {state := miss}
+            when(!hit && !not_en_yet) {state := miss}
         }
         is(miss){
             when(io.axi.valid) {state := idle}
@@ -85,7 +91,7 @@ class ICache extends Module with CacheParameters{
 
     //axi request signals
     io.axi.req    := state === miss
-    io.axi.addr   := io.imem.addr & Cat(Fill(IndexWidth + TagWidth, 1.U(1.W)), 0.U(OffsetWidth.W))
+    io.axi.addr   := addr & Cat(Fill(IndexWidth + TagWidth, 1.U(1.W)), 0.U(OffsetWidth.W))
 
     // update cache data
     val age = Cat(age2(index_addr), age1(index_addr))

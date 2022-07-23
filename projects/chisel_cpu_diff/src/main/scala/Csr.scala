@@ -50,11 +50,16 @@ class Csr extends Module with CsrConstant{
     val satp        = RegInit(0.U(64.W))
     // Csr read --------------------------------------
     io.rdata := MuxLookup(io.raddr, 0.U, Array(
-        MSTATUS -> mstatus,
-        MTVEC   -> mtvec,
-        MEPC    -> mepc,
-        MCAUSE  -> mcause,
-        MCYCLE  -> mcycle,
+        MSTATUS     -> mstatus,
+        MTVEC       -> mtvec,
+        MEPC        -> mepc,
+        MCAUSE      -> mcause,
+        MCYCLE      -> mcycle,
+        MHARTID     -> mhartid,
+        MIE         -> mie,
+        MIP         -> mip,
+        MSCRATCH    -> mscratch,
+        SATP        -> satp
     ))
     // Csr val change ---------------------------------
     mcycle  := Mux(io.wen && io.waddr === MCYCLE, io.wdata, mcycle + 1.U) 
@@ -79,7 +84,7 @@ class Csr extends Module with CsrConstant{
     .elsewhen(io.csru_code_valid && io.csru_code === "b0001".U) {mepc := io.pc} // ecall
     .otherwise {mepc := mepc}
     // mcause
-    mcause  := Mux(io.wen && io.waddr === MCAUSE, io.wdata, mcause) 
+    // mcause  := Mux(io.wen && io.waddr === MCAUSE, io.wdata, mcause) 
     when(io.wen && io.waddr === MCAUSE) {mcause := io.wdata}
     .elsewhen(io.csru_code_valid && io.csru_code === "b0001".U) {mcause := "hb".U} // ecall
     .otherwise {mcause := mcause}
