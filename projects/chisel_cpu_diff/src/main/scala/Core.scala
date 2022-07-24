@@ -38,6 +38,9 @@ class Core extends Module {
 
   val rfconflict  = Module(new RegfileConflict)
 
+  val mmio = Module(new MMIO)
+  val clintreg = Module(new ClintReg)
+
   val idreg   = Module(new IDReg)
   val exereg  = Module(new ExeReg)
   val memreg  = Module(new MemReg)
@@ -48,6 +51,9 @@ class Core extends Module {
   ifu.io.pc       := idreg.io.out.pc
   //idreg
   idreg.io.imem <> io.imem
+  // when(clintreg.io.set_mtip){
+  //   idreg.io.imem.data := "b00000000000000000000000001110011".U
+  // }
   idreg.io.in.pc  := ifu.io.next_pc
   //idu
   idu.io.pc       := idreg.io.out.pc
@@ -118,15 +124,30 @@ class Core extends Module {
   preamu.io.op1     := memreg.io.out.op1
   preamu.io.op2     := memreg.io.out.op2
   preamu.io.imm     := memreg.io.out.imm
-  //dmem
+  //dmem with mmio
   val dmem_en = preamu.io.ren || preamu.io.wen
   val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
   val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
-  io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
-  io.dmem.op    := dmem_op
-  io.dmem.addr  := dmem_addr
-  io.dmem.wdata := preamu.io.wdata
-  io.dmem.wmask := preamu.io.wmask
+
+  mmio.io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
+  mmio.io.dmem.op    := dmem_op
+  mmio.io.dmem.addr  := dmem_addr
+  mmio.io.dmem.wdata := preamu.io.wdata
+  mmio.io.dmem.wmask := preamu.io.wmask
+
+  mmio.io.mem0 <> io.dmem
+  mmio.io.mem1 <> clintreg.io.mem
+  mmio.io.mem2.ok := true.B
+  mmio.io.mem2.rdata := 0.U
+  // val dmem_en = preamu.io.ren || preamu.io.wen
+  // val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
+  // val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
+  // io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
+  // io.dmem.op    := dmem_op
+  // io.dmem.addr  := dmem_addr
+  // io.dmem.wdata := preamu.io.wdata
+  // io.dmem.wmask := preamu.io.wmask
+
   // io.dmem.ren   := preamu.io.ren & memreg.io.pr.valid_out //必须是有效的流水线指令才读取
   // io.dmem.raddr := preamu.io.raddr
   // io.dmem.wen   := preamu.io.wen & memreg.io.pr.valid_out //必须是有效的流水线指令才写入
@@ -152,10 +173,13 @@ class Core extends Module {
   wbreg.io.in.csr_wen   := memreg.io.out.csr_wen
   wbreg.io.in.csr_waddr := memreg.io.out.csr_waddr
   wbreg.io.in.csr_wdata := memreg.io.out.csr_wdata
+
+  wbreg.io.in.csr_set_mtip    := clintreg.io.set_mtip
+  wbreg.io.in.csr_clear_mtip  := clintreg.io.clear_mtip
   //amu
   amu.io.lu_code  := wbreg.io.out.lu_code
   amu.io.lu_shift := wbreg.io.out.lu_shift
-  amu.io.rdata    := io.dmem.rdata
+  amu.io.rdata    := mmio.io.dmem.rdata
   //wbu
   wbu.io.fu_code  := wbreg.io.out.fu_code
   wbu.io.alu_out  := wbreg.io.out.alu_out
@@ -181,6 +205,8 @@ class Core extends Module {
   csru.io.csru_code := wbreg.io.out.csru_code
   csru.io.pc        := wbreg.io.out.pc
 
+  csru.io.set_mtip    := wbreg.io.out.csr_set_mtip
+  csru.io.clear_mtip  := wbreg.io.out.csr_clear_mtip
   
   /*********************** 相关性冲突 ***********************/
   rfconflict.io.rs_valid   := idreg.io.out.valid
@@ -200,18 +226,24 @@ class Core extends Module {
 
   //--------------------流水线控制------------------
   val imem_not_ok = !io.imem.ok
-  val dmem_not_ok = !io.dmem.ok
-
-  val stall = rfconflict.io.conflict || imem_not_ok  
+  val dmem_not_ok = !mmio.io.dmem.ok
+  // 对于异常调用的处理
+  // 当idreg遇到ecall和mret的时候阻塞idreg，直到 
+  // 
+  //
+  val stall_ecall = idreg.io.out.inst === ECALL
+  val stall_mret = idreg.io.out.inst === MRET
   //熄火的时候（暂停idreg以及自前的流水线）: 
   //          1.exereg的valid要为false.B
   //          2.ifu维持原值
   //          3.idreg维持原值(en为false)
   //          其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
-  val stall_all = dmem_not_ok
+  val stall = rfconflict.io.conflict || imem_not_ok  
   //全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:
   //  1.全部流水线寄存器都保持原值
   //  2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
+  val stall_all = dmem_not_ok
+  
   
   idreg.io.in.valid  := ifu.io.valid
   exereg.io.in.valid := idreg.io.out.valid && (!stall) 
@@ -246,6 +278,9 @@ class Core extends Module {
   // when(io.dmem.en && io.dmem.addr >= "h02000000".U && io.dmem.addr < "h0200c000".U){
   //   printf("pc=%x addr=%x op=%d \n", memreg.io.out.pc, io.dmem.addr, io.dmem.op)
   // }
+  // when(wbreg.io.out.fu_code === 0.U && !wbreg.io.out.putch && wbreg.io.out.inst =/= 0.U){
+  //   printf("unknown inst at pc=%x inst=%x!!!!!!---------\n",wbreg.io.out.pc,wbreg.io.out.inst);
+  // }
 
   /* ----- Difftest ------------------------------ */
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
@@ -255,6 +290,7 @@ class Core extends Module {
   val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
   val read_mtime = inst === "hff86b683".U
   val write_mtimecmp = inst === "h00d7b023".U
+
   
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
@@ -264,7 +300,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
   dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || read_mtime || write_mtimecmp || inst === "h0007b703".U)
+  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || read_mtime || write_mtimecmp)// || inst === "h344737f3".U || inst === "h0007b703".U)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)

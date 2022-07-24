@@ -28,6 +28,9 @@ class Csr extends Module with CsrConstant{
         val waddr = Input(UInt(12.W))
         val wdata = Input(UInt(64.W))
 
+        val set_mtip = Input(Bool())
+        val clear_mtip = Input(Bool())
+
         val csru_code_valid = Input(Bool())
         val csru_code = Input(UInt())
         val pc    = Input(UInt(64.W))
@@ -88,10 +91,14 @@ class Csr extends Module with CsrConstant{
     when(io.wen && io.waddr === MCAUSE) {mcause := io.wdata}
     .elsewhen(io.csru_code_valid && io.csru_code === "b0001".U) {mcause := "hb".U} // ecall
     .otherwise {mcause := mcause}
-    // mhartid, mie, mip, mscratch, sato
+    // mip
+    when(io.clear_mtip) {mip := mip & "hffffffffffffff7f".U}        // clear的优先级要高于set
+    .elsewhen(io.set_mtip) {mip := mip | "h0000000000000080".U}
+    .elsewhen(io.wen && io.waddr === MIP) {mip := io.wdata & "h0000000000000080".U}  // mtip位只读
+    .otherwise {mip := mip}
+    // mhartid, mie, mscratch, sato
     mhartid     := Mux(io.wen && io.waddr === MHARTID, io.wdata, mhartid) 
     mie         := Mux(io.wen && io.waddr === MIE, io.wdata, mie) 
-    mip         := Mux(io.wen && io.waddr === MIP, io.wdata, mip) 
     mscratch    := Mux(io.wen && io.waddr === MSCRATCH, io.wdata, mscratch) 
     satp        := Mux(io.wen && io.waddr === SATP, io.wdata, satp) 
     
@@ -117,7 +124,7 @@ class Csr extends Module with CsrConstant{
     dt_cs.io.mcause         := mcause
     dt_cs.io.scause         := 0.U
     dt_cs.io.satp           := satp
-    dt_cs.io.mip            := mip
+    // dt_cs.io.mip            := mip
     dt_cs.io.mie            := mie
     dt_cs.io.mscratch       := mscratch
     dt_cs.io.sscratch       := 0.U

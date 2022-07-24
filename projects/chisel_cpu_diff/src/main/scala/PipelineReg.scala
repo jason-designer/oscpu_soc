@@ -128,6 +128,9 @@ class WBReg_BUS_R extends Bundle {
     val csr_wen = Bool()
     val csr_waddr = UInt(12.W)
     val csr_wdata = UInt(64.W)
+    //
+    val csr_set_mtip = Bool()
+    val csr_clear_mtip = Bool()
 }
 
 class WBReg extends Module {

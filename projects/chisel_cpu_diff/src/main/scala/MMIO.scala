@@ -71,8 +71,8 @@ class ClintReg extends Module {
     val wmask   = RegNext(io.mem.wmask, 0.U(8.W))
 
     // define reg
-    val mtime = RegInit(0.U(64.W))
-    val mtimecmp = RegInit(0.U(64.W))
+    val mtime = RegInit(0.U(64.W))    
+    val mtimecmp = RegInit("hffffffffffffffff".U(64.W))
     // process wdata value
     val wm = wmask
     val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
@@ -95,7 +95,7 @@ class ClintReg extends Module {
         ))
     }
     .otherwise{io.mem.rdata := 0.U}
-    io.set_mtip := mtimecmp <= mtime
+    io.set_mtip := !io.clear_mtip && mtimecmp <= mtime  // 有clear的时候，clear优先
     io.clear_mtip := en && op && sel === "b10".U
 }
 
