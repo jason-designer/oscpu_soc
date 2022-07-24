@@ -72,7 +72,7 @@ class ClintReg extends Module {
 
     // define reg
     val mtime = RegInit(0.U(64.W))    
-    val mtimecmp = RegInit("hffffffffffffffff".U(64.W))
+    val mtimecmp = RegInit("h0".U(64.W))
     // process wdata value
     val wm = wmask
     val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
@@ -82,7 +82,7 @@ class ClintReg extends Module {
     val sel = Cat(addr === "h02004000".U, addr === "h0200bff8".U) 
     // update mtime
     when(en && op && sel === "b01".U){mtime := mtime_update}
-    .otherwise{mtime := mtime + "h100".U}
+    .otherwise{mtime := mtime + "h1".U}
     // update mtimecmp
     when(en && op && sel === "b10".U){mtimecmp := mtimecmp_update}
     .otherwise{mtimecmp := mtimecmp}

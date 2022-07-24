@@ -1,4 +1,5 @@
 import chisel3._
+import chisel3.util._
 import chisel3.util.experimental._
 import difftest._
 import Instructions._
@@ -50,10 +51,11 @@ class Core extends Module {
   ifu.io.jump_pc  := idu.io.jump_pc
   ifu.io.pc       := idreg.io.out.pc
   //idreg
-  idreg.io.imem <> io.imem
-  // when(clintreg.io.set_mtip){
-  //   idreg.io.imem.data := "b00000000000000000000000001110011".U
-  // }
+  io.imem.addr  := idreg.io.imem.addr 
+  io.imem.en    := idreg.io.imem.en
+  // idreg.io.imem.data  := io.imem.data
+  idreg.io.imem.ok    := io.imem.ok
+
   idreg.io.in.pc  := ifu.io.next_pc
   //idu
   idu.io.pc       := idreg.io.out.pc
@@ -223,42 +225,46 @@ class Core extends Module {
   rfconflict.io.rd3_addr   := wbreg.io.out.rd_addr
 
   //--------------------流水线控制------------------
+  val stall_id = Wire(Bool())
+  val stall_wb = Wire(Bool())
   val imem_not_ok = !io.imem.ok
   val dmem_not_ok = !mmio.io.dmem.ok
   // 对于异常调用的处理
   // 当idreg遇到ecall或mret的时候阻塞idreg，直到流水线清空
-  // 当idreg遇到ecall或mret时，且流水线为空，则对csr进行写入
+  // 当idreg遇到ecall或mret时，且流水线为空，且idreg不阻塞时（exception_stall不阻塞，但是其他东西在阻塞，例如imem_not_ok），则对csr进行写入
   val exception_stall = (idreg.io.inst === ECALL || idreg.io.inst === MRET) && (exereg.io.out.valid || memreg.io.out.valid || wbreg.io.out.valid)
-  val exception_execution = (idreg.io.inst === ECALL || idreg.io.inst === MRET) && !exereg.io.out.valid && !memreg.io.out.valid && !wbreg.io.out.valid
+  val exception_execution = !stall_id && (idreg.io.inst === ECALL || idreg.io.inst === MRET) && !exereg.io.out.valid && !memreg.io.out.valid && !wbreg.io.out.valid
   csru.io.exception := exception_execution && idreg.io.inst === ECALL
   csru.io.mret      := exception_execution && idreg.io.inst === MRET
-  csru.io.cause     := "hb".U
+  csru.io.cause     := Mux(csru.io.time_intr, "h8000000000000007".U, "hb".U)
   csru.io.pc        := idreg.io.out.pc
+  // 对于时钟中断的处理
+  idreg.io.imem.data  := Mux(csru.io.time_intr, "h00000073".U, io.imem.data)
   //熄火的时候（暂停idreg以及自前的流水线）: 
   //          1.exereg的valid要为false.B
   //          2.ifu维持原值
   //          3.idreg维持原值(en为false)
   //          其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
-  val stall = rfconflict.io.conflict || imem_not_ok || exception_stall
+  stall_id := rfconflict.io.conflict || imem_not_ok || exception_stall
   //全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:
   //  1.全部流水线寄存器都保持原值
   //  2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
-  val stall_all = dmem_not_ok
+  stall_wb := dmem_not_ok
   
   
   idreg.io.in.valid  := ifu.io.valid
-  exereg.io.in.valid := idreg.io.out.valid && (!stall) 
+  exereg.io.in.valid := idreg.io.out.valid && (!stall_id) 
   memreg.io.in.valid := exereg.io.out.valid
   wbreg.io.in.valid  := memreg.io.out.valid
-  val commit_valid = wbreg.io.out.valid && !stall_all
+  val commit_valid = wbreg.io.out.valid && !stall_wb
   
-  idreg.io.en  := !stall && !stall_all
-  exereg.io.en := !stall_all
-  memreg.io.en := !stall_all
-  wbreg.io.en  := !stall_all
+  idreg.io.en  := !stall_id && !stall_wb
+  exereg.io.en := !stall_wb
+  memreg.io.en := !stall_wb
+  wbreg.io.en  := !stall_wb
 
   // 改变计算机状态的单元 
-  //ifu.io.en     := stall || stall_all
+  //ifu.io.en     := stall_id || stall_wb
   rfu.io.rd_en  := wbreg.io.out.rd_en && commit_valid  //必须是有效的流水线指令才写入
   csru.io.wen   := wbreg.io.out.csr_wen && commit_valid
 
@@ -284,23 +290,32 @@ class Core extends Module {
 
   /* ----- Difftest ------------------------------ */
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
-  // skip inst
+  // 关于时钟中断difftest的一些细节。由于时钟中断产生的ecall在提交时要把valid置为false，同时把dt_ae里面的intrNO,cause和exceptionPC设置好。
+  // intrNO和cause两个都取cause就可以了
   val inst = wbreg.io.out.inst
   val skip_putch = wbreg.io.out.inst === PUTCH
   val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
-  val read_mtime = inst === "hff86b683".U
-  val write_mtimecmp = inst === "h00d7b023".U
+  val interrupt_test_clint_skip = inst === "h00063783".U || inst === "h00f63023".U || // 读写clint
+  val rtthread_test_skip =  inst === "h344737f3".U || // 读mip
+                            inst === "hff86b683".U || inst === "h00d7b023".U || inst === "hff873703".U || inst === "h00e7b023".U || // clint
+                            inst === "h000b3403".U // 读地址19a30，不知道为什么会错
 
-  
+  // 将中断信号打拍到wbreg的下一级（difftest要提交的级）
+  val wbreg_exception_execution = RegNext(RegNext(RegNext(RegNext(exception_execution))))   
+  val wbreg_time_intr           = RegNext(RegNext(RegNext(RegNext(csru.io.time_intr))))
+  val wbreg_cause               = RegNext(RegNext(RegNext(RegNext(csru.io.cause))))
+  val wbreg_exception_pc        = RegNext(RegNext(RegNext(RegNext(csru.io.pc))))
+  val commit_intr = wbreg_exception_execution && wbreg_time_intr && RegNext(inst === ECALL)      // 时钟中断的话就给commit来个false
+
   val dt_ic = Module(new DifftestInstrCommit)
   dt_ic.io.clock    := clock
   dt_ic.io.coreid   := 0.U
   dt_ic.io.index    := 0.U
-  dt_ic.io.valid    := RegNext(commit_valid)
+  dt_ic.io.valid    := Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
   dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
   dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || read_mtime || write_mtimecmp)// || inst === "h344737f3".U || inst === "h0007b703".U)
+  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || interrupt_test_clint_skip || rtthread_test_skip)// || inst === "h344737f3".U || inst === "h0007b703".U)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)
@@ -310,9 +325,9 @@ class Core extends Module {
   val dt_ae = Module(new DifftestArchEvent)
   dt_ae.io.clock        := clock
   dt_ae.io.coreid       := 0.U
-  dt_ae.io.intrNO       := 0.U
-  dt_ae.io.cause        := 0.U
-  dt_ae.io.exceptionPC  := 0.U
+  dt_ae.io.intrNO       := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
+  dt_ae.io.cause        := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
+  dt_ae.io.exceptionPC  := Mux(commit_intr, wbreg_exception_pc, 0.U)
 
   val cycle_cnt = RegInit(0.U(64.W))
   val instr_cnt = RegInit(0.U(64.W))

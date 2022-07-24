@@ -28,16 +28,17 @@ class Csr extends Module with CsrConstant{
         val waddr = Input(UInt(12.W))
         val wdata = Input(UInt(64.W))
 
-        val set_mtip = Input(Bool())
-        val clear_mtip = Input(Bool())
+        val set_mtip    = Input(Bool())
+        val clear_mtip  = Input(Bool())
 
-        val exception = Input(Bool())   // 包括ecall和中断，通过cause来区分
-        val cause = Input(UInt(64.W))   // 异常号
-        val mret = Input(Bool())
-        
-        val pc    = Input(UInt(64.W))
-        val mtvec = Output(UInt(64.W))
-        val mepc  = Output(UInt(64.W))
+        val exception   = Input(Bool())   // 包括ecall和中断，通过cause来区分
+        val cause       = Input(UInt(64.W))   // 异常号
+        val mret        = Input(Bool())
+        val pc          = Input(UInt(64.W))
+
+        val mtvec   = Output(UInt(64.W))
+        val mepc    = Output(UInt(64.W))
+        val time_intr   = Output(Bool())
     })
     // Csr
     val mstatus     = RegInit("h00001800".U(64.W))
@@ -105,7 +106,7 @@ class Csr extends Module with CsrConstant{
     // Csr output-----------------------------------------------------
     io.mtvec := mtvec
     io.mepc  := mepc
-
+    io.time_intr := mip(7) && mie(7) && mstatus(3)
 
     /************** difftest for CSR state *****************/
     val dt_cs = Module(new DifftestCSRState)
