@@ -202,8 +202,6 @@ class Core extends Module {
   csru.io.raddr     := ieu.io.csr_raddr
   csru.io.waddr     := wbreg.io.out.csr_waddr
   csru.io.wdata     := wbreg.io.out.csr_wdata
-  csru.io.csru_code := wbreg.io.out.csru_code
-  csru.io.pc        := wbreg.io.out.pc
 
   csru.io.set_mtip    := wbreg.io.out.csr_set_mtip
   csru.io.clear_mtip  := wbreg.io.out.csr_clear_mtip
@@ -228,17 +226,20 @@ class Core extends Module {
   val imem_not_ok = !io.imem.ok
   val dmem_not_ok = !mmio.io.dmem.ok
   // 对于异常调用的处理
-  // 当idreg遇到ecall和mret的时候阻塞idreg，直到 
-  // 
-  //
-  val stall_ecall = idreg.io.out.inst === ECALL
-  val stall_mret = idreg.io.out.inst === MRET
+  // 当idreg遇到ecall或mret的时候阻塞idreg，直到流水线清空
+  // 当idreg遇到ecall或mret时，且流水线为空，则对csr进行写入
+  val exception_stall = (idreg.io.inst === ECALL || idreg.io.inst === MRET) && (exereg.io.out.valid || memreg.io.out.valid || wbreg.io.out.valid)
+  val exception_execution = (idreg.io.inst === ECALL || idreg.io.inst === MRET) && !exereg.io.out.valid && !memreg.io.out.valid && !wbreg.io.out.valid
+  csru.io.exception := exception_execution && idreg.io.inst === ECALL
+  csru.io.mret      := exception_execution && idreg.io.inst === MRET
+  csru.io.cause     := "hb".U
+  csru.io.pc        := idreg.io.out.pc
   //熄火的时候（暂停idreg以及自前的流水线）: 
   //          1.exereg的valid要为false.B
   //          2.ifu维持原值
   //          3.idreg维持原值(en为false)
   //          其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
-  val stall = rfconflict.io.conflict || imem_not_ok  
+  val stall = rfconflict.io.conflict || imem_not_ok || exception_stall
   //全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:
   //  1.全部流水线寄存器都保持原值
   //  2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
@@ -260,7 +261,6 @@ class Core extends Module {
   //ifu.io.en     := stall || stall_all
   rfu.io.rd_en  := wbreg.io.out.rd_en && commit_valid  //必须是有效的流水线指令才写入
   csru.io.wen   := wbreg.io.out.csr_wen && commit_valid
-  csru.io.csru_code_valid := commit_valid
 
   
   // putch
