@@ -89,7 +89,7 @@ class ClintReg extends Module {
     // ------------------------------------------------------------------------------------------------
     // val mtime_clk = RegInit(0.U(1.W))
     // mtime_clk := mtime_clk + 1.U
-    // when(en && op && sel === "b01".U){mtime := mtime_update}
+    when(en && op && sel === "b01".U){mtime := mtime_update}
     .otherwise{
         // when(mtime_clk === 0.U){mtime := mtime + "h1".U}
         mtime := mtime + "h1".U

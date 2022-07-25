@@ -50,13 +50,17 @@ class AxiIO extends Bundle with AxiParameters{
     val ar      = Decoupled(new AxiA)
     val r       = Flipped(Decoupled(new AxiR))
 }
+/********************* 外设mmio接口 ************************/
 
 
+/********************* AXI实现 *****************************/
 class AXI extends Module with CacheParameters{
     val io = IO(new Bundle{
         val out = new AxiIO
         val icacheio = Flipped(new ICacheAxiIO)
         val dcacheio = Flipped(new DCacheAxiIO)
+        // val icacheBypassIO = Flipped(new ICacheBypassAxiIO)
+        // val dcacheBypassIO = Flipped(new DCacheBypassAxiIO)
     })
     //
     val out = io.out
@@ -73,6 +77,7 @@ class AXI extends Module with CacheParameters{
     val w_idle :: w_addr :: w_data :: w_resp :: w_done :: Nil = Enum(5)
     val rstate = RegInit(r_idle)
     val wstate = RegInit(w_idle)
+    // val bypass = RegInit(false.B)
 
     // read state machine
     switch(rstate){
@@ -140,15 +145,17 @@ class AXI extends Module with CacheParameters{
     // icacheio signals---------------------------------------
     // icacheio.req
     // icacheio.addr
-    var idata = ibuffer(0)
-    for(i <- 1 to (AxiArLen - 1)) idata = Cat(ibuffer(i), idata)
+    var idata = 0.U(1.W)
+    for(i <- 0 to (AxiArLen - 1)) idata = Cat(ibuffer(i), idata)
+    idata = idata(AxiArLen * 64 ,1)
     icacheio.valid  := rstate === r_idone
     icacheio.data   := idata
     // dcacheio signals---------------------------------------
     // dcacheio.req
     // dcacheio.raddr
-    var drdata = drbuffer(0)
-    for(i <- 1 to (AxiArLen - 1)) drdata = Cat(drbuffer(i), drdata)
+    var drdata = 0.U(1.W)
+    for(i <- 0 to (AxiArLen - 1)) drdata = Cat(drbuffer(i), drdata)
+    drdata = drdata(AxiArLen * 64 ,1)
     dcacheio.rvalid := rstate === r_ddone
     dcacheio.rdata  := drdata
 
@@ -196,7 +203,7 @@ class AXI extends Module with CacheParameters{
     out.w.valid         := wstate === w_data
     out.w.bits.data     := (dcacheio.wdata >> (dwcnt << 6))(63, 0)
     out.w.bits.strb     := "hff".U
-    out.w.bits.last     := dwcnt === AxiArLen.U
+    out.w.bits.last     := dwcnt === (AxiArLen-1).U
     // resp channel signals ----------------------------------
     out.b.ready         := wstate === w_done
 }

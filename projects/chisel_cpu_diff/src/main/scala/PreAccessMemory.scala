@@ -32,12 +32,12 @@ class PreAccessMemory extends Module{
     val su_waddr  = su_offset & "hfffffffffffffff8".U
     val su_wdata  = io.op2 << su_shift
     val su_wmask  = MuxLookup(io.su_code, 0.U, Array(
-        "b0001".U -> ("b00000001".U << su_offset(2, 0)),   //sb
-        "b0010".U -> ("b00000011".U << su_offset(2, 0)),   //sh
-        "b0100".U -> ("b00001111".U << su_offset(2, 0)),   //sw
-        "b1000".U -> "b11111111".U ,                //sd
+        "b0001".U -> ("b00000001".U << su_offset(2, 0)),    //sb
+        "b0010".U -> ("b00000011".U << su_offset(2, 0)),    //sh
+        "b0100".U -> ("b00001111".U << su_offset(2, 0)),    //sw
+        "b1000".U -> "b11111111".U ,                        //sd
     ))
-    
+
     io.lu_shift := lu_shift
     io.ren      := lu_ren
     io.raddr    := lu_raddr

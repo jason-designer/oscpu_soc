@@ -22,6 +22,16 @@ simnowave:
 simall:
 	./build.sh -e chisel_cpu_diff -b -r "non-output/cpu-tests non-output/riscv-tests"
 
+simtestall:
+	make simall
+	make simnowave ALL=non-output/microbench/microbench-test.bin
+	make simnowave ALL=custom-output/hello/amtest-hello.bin
+	make simnowave ALL=custom-output/time-test/amtest-time-test.bin
+	make simnowave ALL=custom-output/benchmark/microbench/microbench-test.bin
+	make simnowave ALL=custom-output/yield-test/amtest-yield-test.bin
+	make simnowave ALL=custom-output/interrupt-test/amtest-interrupt-test.bin
+	make simnowave ALL=custom-output/rt-thread/rtthread.bin
+
 wave:
 	gtkwave $(BUILD_PATH)/wave.vcd
 
