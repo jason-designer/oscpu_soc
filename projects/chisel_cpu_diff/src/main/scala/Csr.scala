@@ -86,7 +86,8 @@ class Csr extends Module with CsrConstant{
     mtvec   := Mux(io.wen && io.waddr === MTVEC, io.wdata, mtvec)
     // mepc
     when(io.exception) {mepc := io.pc} // ecall
-    .elsewhen(io.wen && io.waddr === MEPC) {mepc := io.wdata}
+    .elsewhen(io.wen && io.waddr === MEPC) {mepc := Cat(io.wdata(63, 2), 0.U(2.W))}
+    // .elsewhen(io.wen && io.waddr === MEPC) {mepc := io.wdata}
     .otherwise {mepc := mepc}
     // mcause
     when(io.exception) {mcause := io.cause} // ecall

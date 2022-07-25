@@ -295,7 +295,7 @@ class Core extends Module {
   val inst = wbreg.io.out.inst
   val skip_putch = wbreg.io.out.inst === PUTCH
   val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
-  val interrupt_test_clint_skip = inst === "h00063783".U || inst === "h00f63023".U || // 读写clint
+  val interrupt_test_clint_skip = inst === "h00063783".U || inst === "h00f63023".U  // 读写clint
   val rtthread_test_skip =  inst === "h344737f3".U || // 读mip
                             inst === "hff86b683".U || inst === "h00d7b023".U || inst === "hff873703".U || inst === "h00e7b023".U || // clint
                             inst === "h000b3403".U // 读地址19a30，不知道为什么会错
@@ -315,7 +315,7 @@ class Core extends Module {
   dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
   dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || interrupt_test_clint_skip || rtthread_test_skip)// || inst === "h344737f3".U || inst === "h0007b703".U)
+  dt_ic.io.skip     := RegNext(skip_putch || read_mcycle || interrupt_test_clint_skip )//|| rtthread_test_skip)// || inst === "h344737f3".U || inst === "h0007b703".U)
   dt_ic.io.isRVC    := false.B
   dt_ic.io.scFailed := false.B
   dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)

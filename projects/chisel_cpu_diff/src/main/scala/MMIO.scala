@@ -82,7 +82,7 @@ class ClintReg extends Module {
     val sel = Cat(addr === "h02004000".U, addr === "h0200bff8".U) 
     // update mtime
     when(en && op && sel === "b01".U){mtime := mtime_update}
-    .otherwise{mtime := mtime + "h1".U}
+    .otherwise{mtime := mtime + "h10".U}
     // update mtimecmp
     when(en && op && sel === "b10".U){mtimecmp := mtimecmp_update}
     .otherwise{mtimecmp := mtimecmp}
