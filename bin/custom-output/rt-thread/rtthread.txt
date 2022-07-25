@@ -581,7 +581,7 @@ Disassembly of section .text:
     80000794:	5640006f          	j	80000cf8 <rt_timer_check>
     80000798:	00040513          	mv	a0,s0
     8000079c:	8bdff0ef          	jal	ra,80000058 <rt_hw_interrupt_enable>
-    800007a0:	fe9ff06f          	j	80000788 <rt_tick_increase+0x5c>
+    800007a0:	fe9ff06f          	j 	80000788 <rt_tick_increase+0x5c>
 
 00000000800007a4 <rt_tick_from_millisecond>:
     800007a4:	06054c63          	bltz	a0,8000081c <rt_tick_from_millisecond+0x78>

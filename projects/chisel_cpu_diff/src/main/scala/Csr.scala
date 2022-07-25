@@ -83,11 +83,10 @@ class Csr extends Module with CsrConstant{
         mstatus := mstatus
     }
     // mtvec
-    mtvec   := Mux(io.wen && io.waddr === MTVEC, io.wdata, mtvec)
+    mtvec := Mux(io.wen && io.waddr === MTVEC, io.wdata, mtvec)
     // mepc
     when(io.exception) {mepc := io.pc} // ecall
     .elsewhen(io.wen && io.waddr === MEPC) {mepc := Cat(io.wdata(63, 2), 0.U(2.W))}
-    // .elsewhen(io.wen && io.waddr === MEPC) {mepc := io.wdata}
     .otherwise {mepc := mepc}
     // mcause
     when(io.exception) {mcause := io.cause} // ecall
@@ -96,7 +95,8 @@ class Csr extends Module with CsrConstant{
     // mip
     when(io.clear_mtip) {mip := mip & "hffffffffffffff7f".U}        // clear的优先级要高于set
     .elsewhen(io.set_mtip) {mip := mip | "h0000000000000080".U}
-    .elsewhen(io.wen && io.waddr === MIP) {mip := io.wdata & "h0000000000000080".U}  // mtip位只读
+    .elsewhen(io.wen && io.waddr === MIP) {mip := Cat(io.wdata(63, 8), mip(7), io.wdata(6, 0))}  // mtip位只读
+    // .elsewhen(io.wen && io.waddr === MIP) {mip := io.wdata}  // mtip位只读
     .otherwise {mip := mip}
     // mhartid, mie, mscratch, sato
     mhartid     := Mux(io.wen && io.waddr === MHARTID, io.wdata, mhartid) 

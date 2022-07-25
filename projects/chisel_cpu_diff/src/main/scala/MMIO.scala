@@ -81,8 +81,19 @@ class ClintReg extends Module {
     // 
     val sel = Cat(addr === "h02004000".U, addr === "h0200bff8".U) 
     // update mtime
-    when(en && op && sel === "b01".U){mtime := mtime_update}
-    .otherwise{mtime := mtime + "h10".U}
+    // ------------------------------------------------------------------------------------------------
+    // 注意！！！！！！！！！！
+    // mtime自增太快会导致在跑rtthread的时候，上一个时钟中断还没处理完下一个时钟中断就来了，这样会导致代码跑飞，而且很难从difftest看出
+    // 这里即使mtime自增1也是太快了，所以进行了分频. 
+    // 也可以把Cache调到4KB，这样运算比较快，就可以mtime自增1了
+    // ------------------------------------------------------------------------------------------------
+    // val mtime_clk = RegInit(0.U(1.W))
+    // mtime_clk := mtime_clk + 1.U
+    // when(en && op && sel === "b01".U){mtime := mtime_update}
+    .otherwise{
+        // when(mtime_clk === 0.U){mtime := mtime + "h1".U}
+        mtime := mtime + "h1".U
+    }
     // update mtimecmp
     when(en && op && sel === "b10".U){mtimecmp := mtimecmp_update}
     .otherwise{mtimecmp := mtimecmp}
@@ -99,36 +110,3 @@ class ClintReg extends Module {
     io.clear_mtip := en && op && sel === "b10".U
 }
 
-// class Mtime extends Module {
-//     val io = IO(new Bundle {
-//         val mem = new DCacheIO
-//     })
-//     val mtime = RegInit(0.U(64.W))
-
-//     val wm = io.mem.wmask
-//     val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
-//     val mtime_update = (mtime & (~mask64)) | (mask64 & io.mem.wdata)
-
-//     when(io.mem.en && io.mem.op){mtime := mtime_update}
-//     .otherwise{mtime := mtime}
-
-//     io.mem.rdata := mtime
-//     io.mem.ok := true.B
-// }
-
-// class Mtimecmp extends Module{
-//     val io = IO(new Bundle {
-//         val mem = new DCacheIO
-//     })
-//     val mtimecmp = RegInit(0.U(64.W))
-
-//     val wm = io.mem.wmask
-//     val mask64 = Cat(Fill(8,wm(7)),Fill(8,wm(6)),Fill(8,wm(5)),Fill(8,wm(4)),Fill(8,wm(3)),Fill(8,wm(2)),Fill(8,wm(1)),Fill(8,wm(0)))
-//     val mtimecmp_update = (mtimecmp & (~mask64)) | (mask64 & io.mem.wdata)
-
-//     when(io.mem.en && io.mem.op){mtimecmp := mtimecmp_update}
-//     .otherwise{mtimecmp := mtimecmp}
-
-//     io.mem.rdata := mtimecmp
-//     io.mem.ok := true.B
-// }
