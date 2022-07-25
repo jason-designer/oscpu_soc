@@ -51,6 +51,7 @@ class AxiIO extends Bundle with AxiParameters{
     val r       = Flipped(Decoupled(new AxiR))
 }
 
+
 class AXI extends Module with CacheParameters{
     val io = IO(new Bundle{
         val out = new AxiIO
