@@ -1,7 +1,7 @@
 import chisel3._
 import chisel3.util._
 
-class MMIO extends Module {
+class DMMIO extends Module {
     val io = IO(new Bundle {
         val dmem = new DCacheIO
         val mem0 = Flipped(new DCacheIO)
@@ -15,7 +15,7 @@ class MMIO extends Module {
 
     when(!io.mem0.ok){sel := 0.U}
     .elsewhen(!io.mem1.ok){sel := 1.U}
-    .elsewhen(!io.mem1.ok){sel := 2.U}
+    .elsewhen(!io.mem2.ok){sel := 2.U}
     .otherwise{
         // set mmio address
         when("h02000000".U <= io.dmem.addr && io.dmem.addr < "h0200c000".U){sel := 1.U}
@@ -55,6 +55,45 @@ class MMIO extends Module {
 
     io.dmem.ok := out_ok
     io.dmem.rdata := out_rdata
+}
+
+class IMMIO extends Module {
+    val io = IO(new Bundle {
+        val imem = new ICacheIO
+        val mem0 = Flipped(new ICacheIO)
+        val mem1 = Flipped(new ICacheIO)
+    })
+    
+    val sel = WireInit(0.U)
+    val out_ok = WireInit(false.B)
+    val out_data = WireInit(0.U(64.W))
+
+    when(!io.mem0.ok){sel := 0.U}
+    .elsewhen(!io.mem1.ok){sel := 1.U}
+    .otherwise{
+        // set mmio address
+        when(io.imem.addr < "h80000000".U){sel := 1.U}
+        .otherwise{sel := 0.U}
+    }
+
+    val sel_r = RegEnable(sel, 0.U, out_ok)
+
+    io.mem0.en      := Mux(sel === 0.U, io.imem.en, false.B)
+    io.mem0.addr    := Mux(sel === 0.U, io.imem.addr, 0.U)
+    io.mem1.en      := Mux(sel === 1.U, io.imem.en, false.B)
+    io.mem1.addr    := Mux(sel === 1.U, io.imem.addr, 0.U)
+
+    out_ok := MuxLookup(sel_r, 0.U, Array(
+        0.U -> io.mem0.ok,
+        1.U -> io.mem1.ok,
+    ))
+    out_data := MuxLookup(sel_r, 0.U, Array(
+        0.U -> io.mem0.data,
+        1.U -> io.mem1.data,
+    ))
+
+    io.imem.ok := out_ok
+    io.imem.data := out_data
 }
 
 class ClintReg extends Module {

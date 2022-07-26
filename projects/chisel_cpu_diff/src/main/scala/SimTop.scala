@@ -29,7 +29,18 @@ class SimTop extends Module {
 
   icache.io.axi <> axi.io.icacheio
   dcache.io.axi <> axi.io.dcacheio
+  //
+  axi.io.icacheBypassIO.req := false.B
+  axi.io.icacheBypassIO.addr := 0.U
+  axi.io.dcacheBypassIO.req := false.B
+  axi.io.dcacheBypassIO.raddr := 0.U
+  axi.io.dcacheBypassIO.weq := false.B
+  axi.io.dcacheBypassIO.waddr := 0.U
+  axi.io.dcacheBypassIO.wdata := 0.U
+  axi.io.dcacheBypassIO.wmask := 0.U
+  //
 
+  
   axi.io.out.ar <> io.memAXI_0.ar
   axi.io.out.r  <> io.memAXI_0.r
   axi.io.out.aw <> io.memAXI_0.aw

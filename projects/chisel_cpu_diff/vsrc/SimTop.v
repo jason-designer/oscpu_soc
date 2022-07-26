@@ -1398,7 +1398,7 @@ module RegfileConflict(
   assign cconflict3_io_rd_en = io_rd3_en; // @[PipelineReg.scala 215:29]
   assign cconflict3_io_rd_addr = io_rd3_addr; // @[PipelineReg.scala 216:29]
 endmodule
-module MMIO(
+module DMMIO(
   input         clock,
   input         reset,
   input         io_dmem_en,
@@ -1526,13 +1526,13 @@ module ClintReg(
   reg [63:0] _RAND_5;
   reg [63:0] _RAND_6;
 `endif // RANDOMIZE_REG_INIT
-  reg  en; // @[MMIO.scala 67:26]
-  reg  op; // @[MMIO.scala 68:26]
-  reg [63:0] addr; // @[MMIO.scala 69:26]
-  reg [63:0] wdata; // @[MMIO.scala 70:26]
-  reg [7:0] wm; // @[MMIO.scala 71:26]
-  reg [63:0] mtime; // @[MMIO.scala 74:24]
-  reg [63:0] mtimecmp; // @[MMIO.scala 75:27]
+  reg  en; // @[MMIO.scala 106:26]
+  reg  op; // @[MMIO.scala 107:26]
+  reg [63:0] addr; // @[MMIO.scala 108:26]
+  reg [63:0] wdata; // @[MMIO.scala 109:26]
+  reg [7:0] wm; // @[MMIO.scala 110:26]
+  reg [63:0] mtime; // @[MMIO.scala 113:24]
+  reg [63:0] mtimecmp; // @[MMIO.scala 114:27]
   wire [7:0] mask64_hi_hi_hi = wm[7] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [7:0] mask64_hi_hi_lo = wm[6] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [7:0] mask64_hi_lo_hi = wm[5] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
@@ -1543,60 +1543,60 @@ module ClintReg(
   wire [7:0] mask64_lo_lo_lo = wm[0] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [63:0] mask64 = {mask64_hi_hi_hi,mask64_hi_hi_lo,mask64_hi_lo_hi,mask64_hi_lo_lo,mask64_lo_hi_hi,mask64_lo_hi_lo,
     mask64_lo_lo_hi,mask64_lo_lo_lo}; // @[Cat.scala 30:58]
-  wire [63:0] _mtime_update_T = ~mask64; // @[MMIO.scala 79:34]
-  wire [63:0] _mtime_update_T_1 = mtime & _mtime_update_T; // @[MMIO.scala 79:31]
-  wire [63:0] _mtime_update_T_2 = mask64 & wdata; // @[MMIO.scala 79:54]
-  wire [63:0] mtime_update = _mtime_update_T_1 | _mtime_update_T_2; // @[MMIO.scala 79:44]
-  wire [63:0] _mtimecmp_update_T_1 = mtimecmp & _mtime_update_T; // @[MMIO.scala 80:37]
-  wire [63:0] mtimecmp_update = _mtimecmp_update_T_1 | _mtime_update_T_2; // @[MMIO.scala 80:50]
-  wire  sel_hi = addr == 64'h2004000; // @[MMIO.scala 82:24]
-  wire  sel_lo = addr == 64'h200bff8; // @[MMIO.scala 82:48]
+  wire [63:0] _mtime_update_T = ~mask64; // @[MMIO.scala 118:34]
+  wire [63:0] _mtime_update_T_1 = mtime & _mtime_update_T; // @[MMIO.scala 118:31]
+  wire [63:0] _mtime_update_T_2 = mask64 & wdata; // @[MMIO.scala 118:54]
+  wire [63:0] mtime_update = _mtime_update_T_1 | _mtime_update_T_2; // @[MMIO.scala 118:44]
+  wire [63:0] _mtimecmp_update_T_1 = mtimecmp & _mtime_update_T; // @[MMIO.scala 119:37]
+  wire [63:0] mtimecmp_update = _mtimecmp_update_T_1 | _mtime_update_T_2; // @[MMIO.scala 119:50]
+  wire  sel_hi = addr == 64'h2004000; // @[MMIO.scala 121:24]
+  wire  sel_lo = addr == 64'h200bff8; // @[MMIO.scala 121:48]
   wire [1:0] sel = {sel_hi,sel_lo}; // @[Cat.scala 30:58]
-  wire  _T = en & op; // @[MMIO.scala 92:13]
-  wire [63:0] _mtime_T_1 = mtime + 64'h1; // @[MMIO.scala 95:24]
-  wire  _T_4 = sel == 2'h2; // @[MMIO.scala 98:26]
+  wire  _T = en & op; // @[MMIO.scala 131:13]
+  wire [63:0] _mtime_T_1 = mtime + 64'h1; // @[MMIO.scala 134:24]
+  wire  _T_4 = sel == 2'h2; // @[MMIO.scala 137:26]
   wire [63:0] _io_mem_rdata_T_1 = 2'h1 == sel ? mtime : 64'h0; // @[Mux.scala 80:57]
   wire [63:0] _io_mem_rdata_T_3 = 2'h2 == sel ? mtimecmp : _io_mem_rdata_T_1; // @[Mux.scala 80:57]
-  assign io_mem_rdata = en & ~op ? _io_mem_rdata_T_3 : 64'h0; // @[MMIO.scala 102:20 MMIO.scala 103:22 MMIO.scala 108:29]
-  assign io_set_mtip = ~io_clear_mtip & mtimecmp <= mtime; // @[MMIO.scala 109:35]
-  assign io_clear_mtip = _T & _T_4; // @[MMIO.scala 110:31]
+  assign io_mem_rdata = en & ~op ? _io_mem_rdata_T_3 : 64'h0; // @[MMIO.scala 141:20 MMIO.scala 142:22 MMIO.scala 147:29]
+  assign io_set_mtip = ~io_clear_mtip & mtimecmp <= mtime; // @[MMIO.scala 148:35]
+  assign io_clear_mtip = _T & _T_4; // @[MMIO.scala 149:31]
   always @(posedge clock) begin
-    if (reset) begin // @[MMIO.scala 67:26]
-      en <= 1'h0; // @[MMIO.scala 67:26]
+    if (reset) begin // @[MMIO.scala 106:26]
+      en <= 1'h0; // @[MMIO.scala 106:26]
     end else begin
-      en <= io_mem_en; // @[MMIO.scala 67:26]
+      en <= io_mem_en; // @[MMIO.scala 106:26]
     end
-    if (reset) begin // @[MMIO.scala 68:26]
-      op <= 1'h0; // @[MMIO.scala 68:26]
+    if (reset) begin // @[MMIO.scala 107:26]
+      op <= 1'h0; // @[MMIO.scala 107:26]
     end else begin
-      op <= io_mem_op; // @[MMIO.scala 68:26]
+      op <= io_mem_op; // @[MMIO.scala 107:26]
     end
-    if (reset) begin // @[MMIO.scala 69:26]
-      addr <= 64'h0; // @[MMIO.scala 69:26]
+    if (reset) begin // @[MMIO.scala 108:26]
+      addr <= 64'h0; // @[MMIO.scala 108:26]
     end else begin
-      addr <= io_mem_addr; // @[MMIO.scala 69:26]
+      addr <= io_mem_addr; // @[MMIO.scala 108:26]
     end
-    if (reset) begin // @[MMIO.scala 70:26]
-      wdata <= 64'h0; // @[MMIO.scala 70:26]
+    if (reset) begin // @[MMIO.scala 109:26]
+      wdata <= 64'h0; // @[MMIO.scala 109:26]
     end else begin
-      wdata <= io_mem_wdata; // @[MMIO.scala 70:26]
+      wdata <= io_mem_wdata; // @[MMIO.scala 109:26]
     end
-    if (reset) begin // @[MMIO.scala 71:26]
-      wm <= 8'h0; // @[MMIO.scala 71:26]
+    if (reset) begin // @[MMIO.scala 110:26]
+      wm <= 8'h0; // @[MMIO.scala 110:26]
     end else begin
-      wm <= io_mem_wmask; // @[MMIO.scala 71:26]
+      wm <= io_mem_wmask; // @[MMIO.scala 110:26]
     end
-    if (reset) begin // @[MMIO.scala 74:24]
-      mtime <= 64'h0; // @[MMIO.scala 74:24]
-    end else if (en & op & sel == 2'h1) begin // @[MMIO.scala 92:38]
-      mtime <= mtime_update; // @[MMIO.scala 92:45]
+    if (reset) begin // @[MMIO.scala 113:24]
+      mtime <= 64'h0; // @[MMIO.scala 113:24]
+    end else if (en & op & sel == 2'h1) begin // @[MMIO.scala 131:38]
+      mtime <= mtime_update; // @[MMIO.scala 131:45]
     end else begin
-      mtime <= _mtime_T_1; // @[MMIO.scala 95:15]
+      mtime <= _mtime_T_1; // @[MMIO.scala 134:15]
     end
-    if (reset) begin // @[MMIO.scala 75:27]
-      mtimecmp <= 64'h0; // @[MMIO.scala 75:27]
-    end else if (_T & sel == 2'h2) begin // @[MMIO.scala 98:38]
-      mtimecmp <= mtimecmp_update; // @[MMIO.scala 98:48]
+    if (reset) begin // @[MMIO.scala 114:27]
+      mtimecmp <= 64'h0; // @[MMIO.scala 114:27]
+    end else if (_T & sel == 2'h2) begin // @[MMIO.scala 137:38]
+      mtimecmp <= mtimecmp_update; // @[MMIO.scala 137:48]
     end
   end
 // Register and memory initialization
@@ -2705,28 +2705,28 @@ module Core(
   wire  rfconflict_io_rd3_en; // @[Core.scala 40:27]
   wire [4:0] rfconflict_io_rd3_addr; // @[Core.scala 40:27]
   wire  rfconflict_io_conflict; // @[Core.scala 40:27]
-  wire  mmio_clock; // @[Core.scala 42:20]
-  wire  mmio_reset; // @[Core.scala 42:20]
-  wire  mmio_io_dmem_en; // @[Core.scala 42:20]
-  wire  mmio_io_dmem_op; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_dmem_addr; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_dmem_wdata; // @[Core.scala 42:20]
-  wire [7:0] mmio_io_dmem_wmask; // @[Core.scala 42:20]
-  wire  mmio_io_dmem_ok; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_dmem_rdata; // @[Core.scala 42:20]
-  wire  mmio_io_mem0_en; // @[Core.scala 42:20]
-  wire  mmio_io_mem0_op; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem0_addr; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem0_wdata; // @[Core.scala 42:20]
-  wire [7:0] mmio_io_mem0_wmask; // @[Core.scala 42:20]
-  wire  mmio_io_mem0_ok; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem0_rdata; // @[Core.scala 42:20]
-  wire  mmio_io_mem1_en; // @[Core.scala 42:20]
-  wire  mmio_io_mem1_op; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem1_addr; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem1_wdata; // @[Core.scala 42:20]
-  wire [7:0] mmio_io_mem1_wmask; // @[Core.scala 42:20]
-  wire [63:0] mmio_io_mem1_rdata; // @[Core.scala 42:20]
+  wire  dmmio_clock; // @[Core.scala 42:21]
+  wire  dmmio_reset; // @[Core.scala 42:21]
+  wire  dmmio_io_dmem_en; // @[Core.scala 42:21]
+  wire  dmmio_io_dmem_op; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_dmem_addr; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_dmem_wdata; // @[Core.scala 42:21]
+  wire [7:0] dmmio_io_dmem_wmask; // @[Core.scala 42:21]
+  wire  dmmio_io_dmem_ok; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_dmem_rdata; // @[Core.scala 42:21]
+  wire  dmmio_io_mem0_en; // @[Core.scala 42:21]
+  wire  dmmio_io_mem0_op; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem0_addr; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem0_wdata; // @[Core.scala 42:21]
+  wire [7:0] dmmio_io_mem0_wmask; // @[Core.scala 42:21]
+  wire  dmmio_io_mem0_ok; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem0_rdata; // @[Core.scala 42:21]
+  wire  dmmio_io_mem1_en; // @[Core.scala 42:21]
+  wire  dmmio_io_mem1_op; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem1_addr; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem1_wdata; // @[Core.scala 42:21]
+  wire [7:0] dmmio_io_mem1_wmask; // @[Core.scala 42:21]
+  wire [63:0] dmmio_io_mem1_rdata; // @[Core.scala 42:21]
   wire  clintreg_clock; // @[Core.scala 43:24]
   wire  clintreg_reset; // @[Core.scala 43:24]
   wire  clintreg_io_mem_en; // @[Core.scala 43:24]
@@ -2893,7 +2893,7 @@ module Core(
   wire [63:0] dt_te_instrCnt; // @[Core.scala 339:21]
   wire  dmem_en = preamu_io_ren | preamu_io_wen; // @[Core.scala 130:31]
   wire  imem_not_ok = ~io_imem_ok; // @[Core.scala 230:21]
-  wire  dmem_not_ok = ~mmio_io_dmem_ok; // @[Core.scala 231:21]
+  wire  dmem_not_ok = ~dmmio_io_dmem_ok; // @[Core.scala 231:21]
   wire [31:0] _exception_stall_T = idreg_io_inst; // @[Core.scala 235:40]
   wire  _exception_stall_T_1 = 32'h73 == _exception_stall_T; // @[Core.scala 235:40]
   wire  _exception_stall_T_3 = 32'h30200073 == _exception_stall_T; // @[Core.scala 235:67]
@@ -3073,29 +3073,29 @@ module Core(
     .io_rd3_addr(rfconflict_io_rd3_addr),
     .io_conflict(rfconflict_io_conflict)
   );
-  MMIO mmio ( // @[Core.scala 42:20]
-    .clock(mmio_clock),
-    .reset(mmio_reset),
-    .io_dmem_en(mmio_io_dmem_en),
-    .io_dmem_op(mmio_io_dmem_op),
-    .io_dmem_addr(mmio_io_dmem_addr),
-    .io_dmem_wdata(mmio_io_dmem_wdata),
-    .io_dmem_wmask(mmio_io_dmem_wmask),
-    .io_dmem_ok(mmio_io_dmem_ok),
-    .io_dmem_rdata(mmio_io_dmem_rdata),
-    .io_mem0_en(mmio_io_mem0_en),
-    .io_mem0_op(mmio_io_mem0_op),
-    .io_mem0_addr(mmio_io_mem0_addr),
-    .io_mem0_wdata(mmio_io_mem0_wdata),
-    .io_mem0_wmask(mmio_io_mem0_wmask),
-    .io_mem0_ok(mmio_io_mem0_ok),
-    .io_mem0_rdata(mmio_io_mem0_rdata),
-    .io_mem1_en(mmio_io_mem1_en),
-    .io_mem1_op(mmio_io_mem1_op),
-    .io_mem1_addr(mmio_io_mem1_addr),
-    .io_mem1_wdata(mmio_io_mem1_wdata),
-    .io_mem1_wmask(mmio_io_mem1_wmask),
-    .io_mem1_rdata(mmio_io_mem1_rdata)
+  DMMIO dmmio ( // @[Core.scala 42:21]
+    .clock(dmmio_clock),
+    .reset(dmmio_reset),
+    .io_dmem_en(dmmio_io_dmem_en),
+    .io_dmem_op(dmmio_io_dmem_op),
+    .io_dmem_addr(dmmio_io_dmem_addr),
+    .io_dmem_wdata(dmmio_io_dmem_wdata),
+    .io_dmem_wmask(dmmio_io_dmem_wmask),
+    .io_dmem_ok(dmmio_io_dmem_ok),
+    .io_dmem_rdata(dmmio_io_dmem_rdata),
+    .io_mem0_en(dmmio_io_mem0_en),
+    .io_mem0_op(dmmio_io_mem0_op),
+    .io_mem0_addr(dmmio_io_mem0_addr),
+    .io_mem0_wdata(dmmio_io_mem0_wdata),
+    .io_mem0_wmask(dmmio_io_mem0_wmask),
+    .io_mem0_ok(dmmio_io_mem0_ok),
+    .io_mem0_rdata(dmmio_io_mem0_rdata),
+    .io_mem1_en(dmmio_io_mem1_en),
+    .io_mem1_op(dmmio_io_mem1_op),
+    .io_mem1_addr(dmmio_io_mem1_addr),
+    .io_mem1_wdata(dmmio_io_mem1_wdata),
+    .io_mem1_wmask(dmmio_io_mem1_wmask),
+    .io_mem1_rdata(dmmio_io_mem1_rdata)
   );
   ClintReg clintreg ( // @[Core.scala 43:24]
     .clock(clintreg_clock),
@@ -3279,11 +3279,11 @@ module Core(
   );
   assign io_imem_addr = idreg_io_imem__addr; // @[Core.scala 54:17]
   assign io_imem_en = idreg_io_imem__en; // @[Core.scala 55:17]
-  assign io_dmem_en = mmio_io_mem0_en; // @[Core.scala 140:16]
-  assign io_dmem_op = mmio_io_mem0_op; // @[Core.scala 140:16]
-  assign io_dmem_addr = mmio_io_mem0_addr; // @[Core.scala 140:16]
-  assign io_dmem_wdata = mmio_io_mem0_wdata; // @[Core.scala 140:16]
-  assign io_dmem_wmask = mmio_io_mem0_wmask; // @[Core.scala 140:16]
+  assign io_dmem_en = dmmio_io_mem0_en; // @[Core.scala 140:17]
+  assign io_dmem_op = dmmio_io_mem0_op; // @[Core.scala 140:17]
+  assign io_dmem_addr = dmmio_io_mem0_addr; // @[Core.scala 140:17]
+  assign io_dmem_wdata = dmmio_io_mem0_wdata; // @[Core.scala 140:17]
+  assign io_dmem_wmask = dmmio_io_mem0_wmask; // @[Core.scala 140:17]
   assign ifu_reset = reset;
   assign ifu_io_jump_en = idu_io_jump_en; // @[Core.scala 50:19]
   assign ifu_io_jump_pc = idu_io_jump_pc; // @[Core.scala 51:19]
@@ -3329,7 +3329,7 @@ module Core(
   assign preamu_io_imm = memreg_io_out_imm; // @[Core.scala 128:21]
   assign amu_io_lu_code = wbreg_io_out_lu_code; // @[Core.scala 182:19]
   assign amu_io_lu_shift = wbreg_io_out_lu_shift; // @[Core.scala 183:19]
-  assign amu_io_rdata = mmio_io_dmem_rdata; // @[Core.scala 184:19]
+  assign amu_io_rdata = dmmio_io_dmem_rdata; // @[Core.scala 184:19]
   assign wbu_io_fu_code = wbreg_io_out_fu_code; // @[Core.scala 186:19]
   assign wbu_io_alu_out = wbreg_io_out_alu_out; // @[Core.scala 187:19]
   assign wbu_io_bu_out = wbreg_io_out_bu_out; // @[Core.scala 188:19]
@@ -3350,23 +3350,23 @@ module Core(
   assign rfconflict_io_rd3_valid = wbreg_io_out_valid; // @[Core.scala 223:28]
   assign rfconflict_io_rd3_en = wbreg_io_out_rd_en; // @[Core.scala 224:28]
   assign rfconflict_io_rd3_addr = wbreg_io_out_rd_addr; // @[Core.scala 225:28]
-  assign mmio_clock = clock;
-  assign mmio_reset = reset;
-  assign mmio_io_dmem_en = dmem_en & memreg_io_out_valid; // @[Core.scala 134:33]
-  assign mmio_io_dmem_op = preamu_io_wen; // @[Core.scala 135:22]
-  assign mmio_io_dmem_addr = preamu_io_wen ? preamu_io_waddr : preamu_io_raddr; // @[Core.scala 132:22]
-  assign mmio_io_dmem_wdata = preamu_io_wdata; // @[Core.scala 137:22]
-  assign mmio_io_dmem_wmask = preamu_io_wmask; // @[Core.scala 138:22]
-  assign mmio_io_mem0_ok = io_dmem_ok; // @[Core.scala 140:16]
-  assign mmio_io_mem0_rdata = io_dmem_rdata; // @[Core.scala 140:16]
-  assign mmio_io_mem1_rdata = clintreg_io_mem_rdata; // @[Core.scala 141:16]
+  assign dmmio_clock = clock;
+  assign dmmio_reset = reset;
+  assign dmmio_io_dmem_en = dmem_en & memreg_io_out_valid; // @[Core.scala 134:34]
+  assign dmmio_io_dmem_op = preamu_io_wen; // @[Core.scala 135:23]
+  assign dmmio_io_dmem_addr = preamu_io_wen ? preamu_io_waddr : preamu_io_raddr; // @[Core.scala 132:22]
+  assign dmmio_io_dmem_wdata = preamu_io_wdata; // @[Core.scala 137:23]
+  assign dmmio_io_dmem_wmask = preamu_io_wmask; // @[Core.scala 138:23]
+  assign dmmio_io_mem0_ok = io_dmem_ok; // @[Core.scala 140:17]
+  assign dmmio_io_mem0_rdata = io_dmem_rdata; // @[Core.scala 140:17]
+  assign dmmio_io_mem1_rdata = clintreg_io_mem_rdata; // @[Core.scala 141:17]
   assign clintreg_clock = clock;
   assign clintreg_reset = reset;
-  assign clintreg_io_mem_en = mmio_io_mem1_en; // @[Core.scala 141:16]
-  assign clintreg_io_mem_op = mmio_io_mem1_op; // @[Core.scala 141:16]
-  assign clintreg_io_mem_addr = mmio_io_mem1_addr; // @[Core.scala 141:16]
-  assign clintreg_io_mem_wdata = mmio_io_mem1_wdata; // @[Core.scala 141:16]
-  assign clintreg_io_mem_wmask = mmio_io_mem1_wmask; // @[Core.scala 141:16]
+  assign clintreg_io_mem_en = dmmio_io_mem1_en; // @[Core.scala 141:17]
+  assign clintreg_io_mem_op = dmmio_io_mem1_op; // @[Core.scala 141:17]
+  assign clintreg_io_mem_addr = dmmio_io_mem1_addr; // @[Core.scala 141:17]
+  assign clintreg_io_mem_wdata = dmmio_io_mem1_wdata; // @[Core.scala 141:17]
+  assign clintreg_io_mem_wmask = dmmio_io_mem1_wmask; // @[Core.scala 141:17]
   assign idreg_clock = clock;
   assign idreg_reset = reset;
   assign idreg_io_en = _exception_execution_T & _commit_valid_T; // @[Core.scala 261:29]
@@ -3463,7 +3463,7 @@ module Core(
   assign dt_te_cycleCnt = cycle_cnt; // @[Core.scala 345:21]
   assign dt_te_instrCnt = instr_cnt; // @[Core.scala 346:21]
   always @(posedge clock) begin
-    skip_clint_REG <= mmio_io_mem1_en & (mmio_io_mem1_addr == 64'h200bff8 | mmio_io_mem1_addr == 64'h2004000); // @[Core.scala 299:52]
+    skip_clint_REG <= dmmio_io_mem1_en & (dmmio_io_mem1_addr == 64'h200bff8 | dmmio_io_mem1_addr == 64'h2004000); // @[Core.scala 299:53]
     skip_clint <= skip_clint_REG; // @[Core.scala 299:27]
     wbreg_exception_execution_REG <= ~stall_id & _exception_stall_T_4 & ~exereg_io_out_valid & ~memreg_io_out_valid & ~
       wbreg_io_out_valid; // @[Core.scala 236:142]
@@ -12253,322 +12253,325 @@ module AXI(
   reg [31:0] _RAND_19;
   reg [31:0] _RAND_20;
 `endif // RANDOMIZE_REG_INIT
-  reg [63:0] ibuffer_0; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_1; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_2; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_3; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_4; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_5; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_6; // @[AXI.scala 70:30]
-  reg [63:0] ibuffer_7; // @[AXI.scala 70:30]
-  reg [63:0] drbuffer_0; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_1; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_2; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_3; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_4; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_5; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_6; // @[AXI.scala 71:30]
-  reg [63:0] drbuffer_7; // @[AXI.scala 71:30]
-  reg [5:0] icnt; // @[AXI.scala 72:30]
-  reg [5:0] drcnt; // @[AXI.scala 73:30]
-  reg [5:0] dwcnt; // @[AXI.scala 74:30]
-  reg [3:0] rstate; // @[AXI.scala 78:25]
-  reg [2:0] wstate; // @[AXI.scala 79:25]
+  reg [63:0] ibuffer_0; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_1; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_2; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_3; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_4; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_5; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_6; // @[AXI.scala 71:30]
+  reg [63:0] ibuffer_7; // @[AXI.scala 71:30]
+  reg [63:0] drbuffer_0; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_1; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_2; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_3; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_4; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_5; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_6; // @[AXI.scala 72:30]
+  reg [63:0] drbuffer_7; // @[AXI.scala 72:30]
+  reg [5:0] icnt; // @[AXI.scala 73:30]
+  reg [5:0] drcnt; // @[AXI.scala 74:30]
+  reg [5:0] dwcnt; // @[AXI.scala 75:30]
+  reg [3:0] rstate; // @[AXI.scala 79:25]
+  reg [2:0] wstate; // @[AXI.scala 80:25]
   wire  _T = 4'h0 == rstate; // @[Conditional.scala 37:30]
   wire  _T_1 = 4'h1 == rstate; // @[Conditional.scala 37:30]
   wire  _T_2 = 4'h2 == rstate; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_3 = io_out_r_valid ? 4'h3 : rstate; // @[AXI.scala 93:31 AXI.scala 93:39 AXI.scala 78:25]
+  wire [3:0] _GEN_9 = io_out_r_valid ? 4'h3 : rstate; // @[AXI.scala 108:31 AXI.scala 108:39 AXI.scala 79:25]
   wire  _T_3 = 4'h3 == rstate; // @[Conditional.scala 37:30]
-  wire  _T_5 = ~io_out_r_valid | io_out_r_bits_last; // @[AXI.scala 96:42]
-  wire [3:0] _GEN_4 = ~io_out_r_valid | io_out_r_bits_last ? 4'h4 : rstate; // @[AXI.scala 96:62 AXI.scala 96:70 AXI.scala 78:25]
+  wire  _T_5 = ~io_out_r_valid | io_out_r_bits_last; // @[AXI.scala 111:42]
+  wire [3:0] _GEN_10 = ~io_out_r_valid | io_out_r_bits_last ? 4'h4 : rstate; // @[AXI.scala 111:62 AXI.scala 111:70 AXI.scala 79:25]
   wire  _T_6 = 4'h4 == rstate; // @[Conditional.scala 37:30]
   wire  _T_7 = 4'h5 == rstate; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_5 = io_out_ar_ready ? 4'h6 : rstate; // @[AXI.scala 103:32 AXI.scala 103:40 AXI.scala 78:25]
+  wire [3:0] _GEN_11 = io_out_ar_ready ? 4'h6 : rstate; // @[AXI.scala 118:32 AXI.scala 118:40 AXI.scala 79:25]
   wire  _T_8 = 4'h6 == rstate; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_6 = io_out_r_valid ? 4'h7 : rstate; // @[AXI.scala 106:31 AXI.scala 106:39 AXI.scala 78:25]
+  wire [3:0] _GEN_12 = io_out_r_valid ? 4'h7 : rstate; // @[AXI.scala 121:31 AXI.scala 121:39 AXI.scala 79:25]
   wire  _T_9 = 4'h7 == rstate; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_7 = _T_5 ? 4'h8 : rstate; // @[AXI.scala 109:62 AXI.scala 109:70 AXI.scala 78:25]
+  wire [3:0] _GEN_13 = _T_5 ? 4'h8 : rstate; // @[AXI.scala 124:62 AXI.scala 124:70 AXI.scala 79:25]
   wire  _T_12 = 4'h8 == rstate; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_8 = _T_12 ? 4'h0 : rstate; // @[Conditional.scala 39:67 AXI.scala 112:20 AXI.scala 78:25]
-  wire [3:0] _GEN_9 = _T_9 ? _GEN_7 : _GEN_8; // @[Conditional.scala 39:67]
-  wire [3:0] _GEN_10 = _T_8 ? _GEN_6 : _GEN_9; // @[Conditional.scala 39:67]
-  wire [3:0] _GEN_11 = _T_7 ? _GEN_5 : _GEN_10; // @[Conditional.scala 39:67]
-  wire [3:0] _GEN_12 = _T_6 ? 4'h0 : _GEN_11; // @[Conditional.scala 39:67 AXI.scala 99:20]
-  wire [3:0] _GEN_13 = _T_3 ? _GEN_4 : _GEN_12; // @[Conditional.scala 39:67]
+  wire [3:0] _GEN_14 = _T_12 ? 4'h0 : rstate; // @[Conditional.scala 39:67 AXI.scala 127:20 AXI.scala 79:25]
+  wire [3:0] _GEN_15 = _T_9 ? _GEN_13 : _GEN_14; // @[Conditional.scala 39:67]
+  wire [3:0] _GEN_16 = _T_8 ? _GEN_12 : _GEN_15; // @[Conditional.scala 39:67]
+  wire [3:0] _GEN_17 = _T_7 ? _GEN_11 : _GEN_16; // @[Conditional.scala 39:67]
+  wire [3:0] _GEN_18 = _T_6 ? 4'h0 : _GEN_17; // @[Conditional.scala 39:67 AXI.scala 114:20]
+  wire [3:0] _GEN_19 = _T_3 ? _GEN_10 : _GEN_18; // @[Conditional.scala 39:67]
   wire  _T_13 = 3'h0 == wstate; // @[Conditional.scala 37:30]
   wire  _T_14 = 3'h1 == wstate; // @[Conditional.scala 37:30]
   wire  _T_15 = 3'h2 == wstate; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_19 = io_out_w_bits_last ? 3'h3 : wstate; // @[AXI.scala 125:35 AXI.scala 125:43 AXI.scala 79:25]
+  wire [2:0] _GEN_29 = io_out_w_bits_last ? 3'h3 : wstate; // @[AXI.scala 147:35 AXI.scala 147:43 AXI.scala 80:25]
   wire  _T_16 = 3'h3 == wstate; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_20 = io_out_b_valid ? 3'h4 : wstate; // @[AXI.scala 128:31 AXI.scala 128:39 AXI.scala 79:25]
+  wire [2:0] _GEN_30 = io_out_b_valid ? 3'h4 : wstate; // @[AXI.scala 150:31 AXI.scala 150:39 AXI.scala 80:25]
   wire  _T_17 = 3'h4 == wstate; // @[Conditional.scala 37:30]
-  wire  _T_18 = ~io_out_b_valid; // @[AXI.scala 131:18]
-  wire [2:0] _GEN_21 = ~io_out_b_valid ? 3'h0 : wstate; // @[AXI.scala 131:32 AXI.scala 131:40 AXI.scala 79:25]
-  wire [2:0] _GEN_22 = _T_17 ? _GEN_21 : wstate; // @[Conditional.scala 39:67 AXI.scala 79:25]
-  wire [2:0] _GEN_23 = _T_16 ? _GEN_20 : _GEN_22; // @[Conditional.scala 39:67]
-  wire  _ibuffer_T = rstate == 4'h3; // @[AXI.scala 137:33]
-  wire [63:0] _GEN_28 = 3'h1 == icnt[2:0] ? ibuffer_1 : ibuffer_0; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [63:0] _GEN_29 = 3'h2 == icnt[2:0] ? ibuffer_2 : _GEN_28; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [63:0] _GEN_30 = 3'h3 == icnt[2:0] ? ibuffer_3 : _GEN_29; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [63:0] _GEN_31 = 3'h4 == icnt[2:0] ? ibuffer_4 : _GEN_30; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [63:0] _GEN_32 = 3'h5 == icnt[2:0] ? ibuffer_5 : _GEN_31; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [63:0] _GEN_33 = 3'h6 == icnt[2:0] ? ibuffer_6 : _GEN_32; // @[AXI.scala 137:25 AXI.scala 137:25]
-  wire [5:0] _icnt_T_2 = icnt + 6'h1; // @[AXI.scala 138:42]
-  wire  _drbuffer_T = rstate == 4'h7; // @[AXI.scala 139:35]
-  wire [63:0] _GEN_44 = 3'h1 == drcnt[2:0] ? drbuffer_1 : drbuffer_0; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [63:0] _GEN_45 = 3'h2 == drcnt[2:0] ? drbuffer_2 : _GEN_44; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [63:0] _GEN_46 = 3'h3 == drcnt[2:0] ? drbuffer_3 : _GEN_45; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [63:0] _GEN_47 = 3'h4 == drcnt[2:0] ? drbuffer_4 : _GEN_46; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [63:0] _GEN_48 = 3'h5 == drcnt[2:0] ? drbuffer_5 : _GEN_47; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [63:0] _GEN_49 = 3'h6 == drcnt[2:0] ? drbuffer_6 : _GEN_48; // @[AXI.scala 139:27 AXI.scala 139:27]
-  wire [5:0] _drcnt_T_2 = drcnt + 6'h1; // @[AXI.scala 140:44]
-  wire [5:0] _dwcnt_T_3 = dwcnt + 6'h1; // @[AXI.scala 141:58]
+  wire  _T_18 = ~io_out_b_valid; // @[AXI.scala 153:18]
+  wire [2:0] _GEN_31 = ~io_out_b_valid ? 3'h0 : wstate; // @[AXI.scala 153:32 AXI.scala 153:40 AXI.scala 80:25]
+  wire [2:0] _GEN_32 = _T_17 ? _GEN_31 : wstate; // @[Conditional.scala 39:67 AXI.scala 80:25]
+  wire [2:0] _GEN_33 = _T_16 ? _GEN_30 : _GEN_32; // @[Conditional.scala 39:67]
+  wire  _ibuffer_T = rstate == 4'h3; // @[AXI.scala 159:33]
+  wire [63:0] _GEN_39 = 3'h1 == icnt[2:0] ? ibuffer_1 : ibuffer_0; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [63:0] _GEN_40 = 3'h2 == icnt[2:0] ? ibuffer_2 : _GEN_39; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [63:0] _GEN_41 = 3'h3 == icnt[2:0] ? ibuffer_3 : _GEN_40; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [63:0] _GEN_42 = 3'h4 == icnt[2:0] ? ibuffer_4 : _GEN_41; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [63:0] _GEN_43 = 3'h5 == icnt[2:0] ? ibuffer_5 : _GEN_42; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [63:0] _GEN_44 = 3'h6 == icnt[2:0] ? ibuffer_6 : _GEN_43; // @[AXI.scala 159:25 AXI.scala 159:25]
+  wire [5:0] _icnt_T_2 = icnt + 6'h1; // @[AXI.scala 160:42]
+  wire  _drbuffer_T = rstate == 4'h7; // @[AXI.scala 161:35]
+  wire [63:0] _GEN_55 = 3'h1 == drcnt[2:0] ? drbuffer_1 : drbuffer_0; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [63:0] _GEN_56 = 3'h2 == drcnt[2:0] ? drbuffer_2 : _GEN_55; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [63:0] _GEN_57 = 3'h3 == drcnt[2:0] ? drbuffer_3 : _GEN_56; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [63:0] _GEN_58 = 3'h4 == drcnt[2:0] ? drbuffer_4 : _GEN_57; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [63:0] _GEN_59 = 3'h5 == drcnt[2:0] ? drbuffer_5 : _GEN_58; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [63:0] _GEN_60 = 3'h6 == drcnt[2:0] ? drbuffer_6 : _GEN_59; // @[AXI.scala 161:27 AXI.scala 161:27]
+  wire [5:0] _drcnt_T_2 = drcnt + 6'h1; // @[AXI.scala 162:44]
+  wire [5:0] _dwcnt_T_3 = dwcnt + 6'h1; // @[AXI.scala 163:58]
   wire [512:0] _T_21 = {ibuffer_7,ibuffer_6,ibuffer_5,ibuffer_4,ibuffer_3,ibuffer_2,ibuffer_1,ibuffer_0,1'h0}; // @[Cat.scala 30:58]
   wire [512:0] _T_22 = {drbuffer_7,drbuffer_6,drbuffer_5,drbuffer_4,drbuffer_3,drbuffer_2,drbuffer_1,drbuffer_0,1'h0}; // @[Cat.scala 30:58]
-  wire  _io_out_ar_valid_T = rstate == 4'h1; // @[AXI.scala 168:35]
-  wire  _io_out_ar_valid_T_1 = rstate == 4'h5; // @[AXI.scala 168:57]
-  wire [63:0] _io_out_ar_bits_addr_T_2 = _io_out_ar_valid_T_1 ? io_dcacheio_raddr : 64'h0; // @[AXI.scala 169:70]
-  wire [11:0] _io_out_w_bits_data_T = {dwcnt, 6'h0}; // @[AXI.scala 204:54]
-  wire [511:0] _io_out_w_bits_data_T_1 = io_dcacheio_wdata >> _io_out_w_bits_data_T; // @[AXI.scala 204:44]
-  assign io_out_aw_valid = wstate == 3'h1; // @[AXI.scala 191:35]
-  assign io_out_aw_bits_addr = io_dcacheio_waddr; // @[AXI.scala 192:25]
-  assign io_out_w_valid = wstate == 3'h2; // @[AXI.scala 203:35]
-  assign io_out_w_bits_data = _io_out_w_bits_data_T_1[63:0]; // @[AXI.scala 204:60]
-  assign io_out_w_bits_last = dwcnt == 6'h7; // @[AXI.scala 206:34]
-  assign io_out_b_ready = wstate == 3'h4; // @[AXI.scala 208:35]
-  assign io_out_ar_valid = rstate == 4'h1 | rstate == 4'h5; // @[AXI.scala 168:47]
-  assign io_out_ar_bits_addr = _io_out_ar_valid_T ? io_icacheio_addr : _io_out_ar_bits_addr_T_2; // @[AXI.scala 169:31]
-  assign io_out_r_ready = _ibuffer_T | _drbuffer_T; // @[AXI.scala 187:47]
-  assign io_icacheio_valid = rstate == 4'h4; // @[AXI.scala 151:31]
-  assign io_icacheio_data = _T_21[512:1]; // @[AXI.scala 150:18]
-  assign io_dcacheio_rvalid = rstate == 4'h8; // @[AXI.scala 159:31]
-  assign io_dcacheio_rdata = _T_22[512:1]; // @[AXI.scala 158:20]
-  assign io_dcacheio_wdone = wstate == 3'h4 & _T_18; // @[AXI.scala 162:42]
+  wire  sel_hi_hi = rstate == 4'h1; // @[AXI.scala 200:26]
+  wire  sel_hi_lo = rstate == 4'h5; // @[AXI.scala 200:46]
+  wire [2:0] sel = {sel_hi_hi,sel_hi_lo,1'h0}; // @[Cat.scala 30:58]
+  wire [63:0] _io_out_ar_bits_addr_T_1 = 3'h4 == sel ? io_icacheio_addr : 64'h0; // @[Mux.scala 80:57]
+  wire [63:0] _io_out_ar_bits_addr_T_3 = 3'h2 == sel ? io_dcacheio_raddr : _io_out_ar_bits_addr_T_1; // @[Mux.scala 80:57]
+  wire [63:0] _io_out_ar_bits_addr_T_5 = 3'h5 == sel ? 64'h0 : _io_out_ar_bits_addr_T_3; // @[Mux.scala 80:57]
+  wire [11:0] _io_out_w_bits_data_T = {dwcnt, 6'h0}; // @[AXI.scala 244:88]
+  wire [511:0] _io_out_w_bits_data_T_1 = io_dcacheio_wdata >> _io_out_w_bits_data_T; // @[AXI.scala 244:78]
+  assign io_out_aw_valid = wstate == 3'h1; // @[AXI.scala 231:35]
+  assign io_out_aw_bits_addr = io_dcacheio_waddr; // @[AXI.scala 232:31]
+  assign io_out_w_valid = wstate == 3'h2; // @[AXI.scala 243:35]
+  assign io_out_w_bits_data = _io_out_w_bits_data_T_1[63:0]; // @[AXI.scala 244:94]
+  assign io_out_w_bits_last = dwcnt == 6'h7; // @[AXI.scala 246:51]
+  assign io_out_b_ready = wstate == 3'h4; // @[AXI.scala 248:35]
+  assign io_out_ar_valid = sel_hi_hi | sel_hi_lo; // @[AXI.scala 203:47]
+  assign io_out_ar_bits_addr = 3'h3 == sel ? 64'h0 : _io_out_ar_bits_addr_T_5; // @[Mux.scala 80:57]
+  assign io_out_r_ready = _ibuffer_T | _drbuffer_T; // @[AXI.scala 227:47]
+  assign io_icacheio_valid = rstate == 4'h4; // @[AXI.scala 177:31]
+  assign io_icacheio_data = _T_21[512:1]; // @[AXI.scala 169:18]
+  assign io_dcacheio_rvalid = rstate == 4'h8; // @[AXI.scala 182:31]
+  assign io_dcacheio_rdata = _T_22[512:1]; // @[AXI.scala 172:20]
+  assign io_dcacheio_wdone = wstate == 3'h4 & _T_18; // @[AXI.scala 184:42]
   always @(posedge clock) begin
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_0 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h0 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_0 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h0 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_0 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_0 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_0 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_0 <= _GEN_33;
+        ibuffer_0 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_1 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h1 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_1 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h1 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_1 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_1 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_1 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_1 <= _GEN_33;
+        ibuffer_1 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_2 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h2 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_2 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h2 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_2 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_2 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_2 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_2 <= _GEN_33;
+        ibuffer_2 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_3 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h3 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_3 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h3 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_3 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_3 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_3 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_3 <= _GEN_33;
+        ibuffer_3 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_4 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h4 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_4 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h4 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_4 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_4 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_4 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_4 <= _GEN_33;
+        ibuffer_4 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_5 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h5 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_5 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h5 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_5 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_5 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_5 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_5 <= _GEN_33;
+        ibuffer_5 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_6 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h6 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_6 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h6 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_6 <= io_out_r_bits_data;
-      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:25]
-        ibuffer_6 <= ibuffer_7; // @[AXI.scala 137:25]
+      end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:25]
+        ibuffer_6 <= ibuffer_7; // @[AXI.scala 159:25]
       end else begin
-        ibuffer_6 <= _GEN_33;
+        ibuffer_6 <= _GEN_44;
       end
     end
-    if (reset) begin // @[AXI.scala 70:30]
-      ibuffer_7 <= 64'h0; // @[AXI.scala 70:30]
-    end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 137:19]
-      if (rstate == 4'h3) begin // @[AXI.scala 137:25]
+    if (reset) begin // @[AXI.scala 71:30]
+      ibuffer_7 <= 64'h0; // @[AXI.scala 71:30]
+    end else if (3'h7 == icnt[2:0]) begin // @[AXI.scala 159:19]
+      if (rstate == 4'h3) begin // @[AXI.scala 159:25]
         ibuffer_7 <= io_out_r_bits_data;
-      end else if (!(3'h7 == icnt[2:0])) begin // @[AXI.scala 137:25]
-        ibuffer_7 <= _GEN_33;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_0 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h0 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_0 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_0 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_0 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_1 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h1 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_1 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_1 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_1 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_2 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h2 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_2 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_2 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_2 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_3 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h3 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_3 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_3 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_3 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_4 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h4 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_4 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_4 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_4 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_5 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h5 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_5 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_5 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_5 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_6 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h6 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_6 <= io_out_r_bits_data;
-      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:27]
-        drbuffer_6 <= drbuffer_7; // @[AXI.scala 139:27]
-      end else begin
-        drbuffer_6 <= _GEN_49;
-      end
-    end
-    if (reset) begin // @[AXI.scala 71:30]
-      drbuffer_7 <= 64'h0; // @[AXI.scala 71:30]
-    end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 139:21]
-      if (rstate == 4'h7) begin // @[AXI.scala 139:27]
-        drbuffer_7 <= io_out_r_bits_data;
-      end else if (!(3'h7 == drcnt[2:0])) begin // @[AXI.scala 139:27]
-        drbuffer_7 <= _GEN_49;
+      end else if (!(3'h7 == icnt[2:0])) begin // @[AXI.scala 159:25]
+        ibuffer_7 <= _GEN_44;
       end
     end
     if (reset) begin // @[AXI.scala 72:30]
-      icnt <= 6'h0; // @[AXI.scala 72:30]
-    end else if (_ibuffer_T) begin // @[AXI.scala 138:16]
+      drbuffer_0 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h0 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_0 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_0 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_0 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_1 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h1 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_1 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_1 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_1 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_2 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h2 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_2 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_2 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_2 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_3 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h3 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_3 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_3 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_3 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_4 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h4 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_4 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_4 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_4 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_5 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h5 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_5 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_5 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_5 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_6 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h6 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_6 <= io_out_r_bits_data;
+      end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:27]
+        drbuffer_6 <= drbuffer_7; // @[AXI.scala 161:27]
+      end else begin
+        drbuffer_6 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 72:30]
+      drbuffer_7 <= 64'h0; // @[AXI.scala 72:30]
+    end else if (3'h7 == drcnt[2:0]) begin // @[AXI.scala 161:21]
+      if (rstate == 4'h7) begin // @[AXI.scala 161:27]
+        drbuffer_7 <= io_out_r_bits_data;
+      end else if (!(3'h7 == drcnt[2:0])) begin // @[AXI.scala 161:27]
+        drbuffer_7 <= _GEN_60;
+      end
+    end
+    if (reset) begin // @[AXI.scala 73:30]
+      icnt <= 6'h0; // @[AXI.scala 73:30]
+    end else if (_ibuffer_T) begin // @[AXI.scala 160:16]
       icnt <= _icnt_T_2;
     end else begin
       icnt <= 6'h0;
     end
-    if (reset) begin // @[AXI.scala 73:30]
-      drcnt <= 6'h0; // @[AXI.scala 73:30]
-    end else if (_drbuffer_T) begin // @[AXI.scala 140:17]
+    if (reset) begin // @[AXI.scala 74:30]
+      drcnt <= 6'h0; // @[AXI.scala 74:30]
+    end else if (_drbuffer_T) begin // @[AXI.scala 162:17]
       drcnt <= _drcnt_T_2;
     end else begin
       drcnt <= 6'h0;
     end
-    if (reset) begin // @[AXI.scala 74:30]
-      dwcnt <= 6'h0; // @[AXI.scala 74:30]
-    end else if (wstate == 3'h2 & io_out_w_ready) begin // @[AXI.scala 141:17]
+    if (reset) begin // @[AXI.scala 75:30]
+      dwcnt <= 6'h0; // @[AXI.scala 75:30]
+    end else if (wstate == 3'h2 & io_out_w_ready) begin // @[AXI.scala 163:17]
       dwcnt <= _dwcnt_T_3;
     end else begin
       dwcnt <= 6'h0;
     end
-    if (reset) begin // @[AXI.scala 78:25]
-      rstate <= 4'h0; // @[AXI.scala 78:25]
+    if (reset) begin // @[AXI.scala 79:25]
+      rstate <= 4'h0; // @[AXI.scala 79:25]
     end else if (_T) begin // @[Conditional.scala 40:58]
-      if (io_icacheio_req) begin // @[AXI.scala 85:32]
-        rstate <= 4'h1; // @[AXI.scala 85:40]
-      end else if (io_dcacheio_req) begin // @[AXI.scala 86:37]
-        rstate <= 4'h5; // @[AXI.scala 86:45]
+      if (io_icacheio_req) begin // @[AXI.scala 86:31]
+        rstate <= 4'h1; // @[AXI.scala 87:24]
+      end else if (io_dcacheio_req) begin // @[AXI.scala 90:36]
+        rstate <= 4'h5; // @[AXI.scala 91:24]
       end
     end else if (_T_1) begin // @[Conditional.scala 39:67]
-      if (io_out_ar_ready) begin // @[AXI.scala 90:32]
-        rstate <= 4'h2; // @[AXI.scala 90:40]
+      if (io_out_ar_ready) begin // @[AXI.scala 105:32]
+        rstate <= 4'h2; // @[AXI.scala 105:40]
       end
     end else if (_T_2) begin // @[Conditional.scala 39:67]
-      rstate <= _GEN_3;
+      rstate <= _GEN_9;
     end else begin
-      rstate <= _GEN_13;
+      rstate <= _GEN_19;
     end
-    if (reset) begin // @[AXI.scala 79:25]
-      wstate <= 3'h0; // @[AXI.scala 79:25]
+    if (reset) begin // @[AXI.scala 80:25]
+      wstate <= 3'h0; // @[AXI.scala 80:25]
     end else if (_T_13) begin // @[Conditional.scala 40:58]
-      if (io_dcacheio_weq) begin // @[AXI.scala 119:32]
-        wstate <= 3'h1; // @[AXI.scala 119:40]
+      if (io_dcacheio_weq) begin // @[AXI.scala 134:31]
+        wstate <= 3'h1; // @[AXI.scala 135:24]
       end
     end else if (_T_14) begin // @[Conditional.scala 39:67]
-      if (io_out_aw_ready) begin // @[AXI.scala 122:32]
-        wstate <= 3'h2; // @[AXI.scala 122:40]
+      if (io_out_aw_ready) begin // @[AXI.scala 144:32]
+        wstate <= 3'h2; // @[AXI.scala 144:40]
       end
     end else if (_T_15) begin // @[Conditional.scala 39:67]
-      wstate <= _GEN_19;
+      wstate <= _GEN_29;
     end else begin
-      wstate <= _GEN_23;
+      wstate <= _GEN_33;
     end
   end
 // Register and memory initialization
@@ -12859,37 +12862,37 @@ module SimTop(
     .io_dcacheio_wdata(axi_io_dcacheio_wdata),
     .io_dcacheio_wdone(axi_io_dcacheio_wdone)
   );
-  assign io_uart_out_valid = 1'h0; // @[SimTop.scala 51:21]
-  assign io_uart_out_ch = 8'h0; // @[SimTop.scala 52:18]
-  assign io_uart_in_valid = 1'h0; // @[SimTop.scala 53:20]
-  assign io_memAXI_0_aw_valid = axi_io_out_aw_valid; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_len = 8'h7; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_size = 3'h3; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_burst = 2'h1; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_lock = 1'h0; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_cache = 4'h2; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_qos = 4'h0; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_addr = axi_io_out_aw_bits_addr; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_prot = 3'h0; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_id = 4'h0; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_aw_bits_user = 4'h0; // @[SimTop.scala 35:17]
-  assign io_memAXI_0_w_valid = axi_io_out_w_valid; // @[SimTop.scala 36:17]
-  assign io_memAXI_0_w_bits_data = axi_io_out_w_bits_data; // @[SimTop.scala 36:17]
-  assign io_memAXI_0_w_bits_strb = 8'hff; // @[SimTop.scala 36:17]
-  assign io_memAXI_0_w_bits_last = axi_io_out_w_bits_last; // @[SimTop.scala 36:17]
-  assign io_memAXI_0_b_ready = axi_io_out_b_ready; // @[SimTop.scala 37:17]
-  assign io_memAXI_0_ar_valid = axi_io_out_ar_valid; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_len = 8'h7; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_size = 3'h3; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_burst = 2'h1; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_lock = 1'h0; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_cache = 4'h2; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_qos = 4'h0; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_addr = axi_io_out_ar_bits_addr; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_prot = 3'h0; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_id = 4'h0; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_ar_bits_user = 4'h0; // @[SimTop.scala 33:17]
-  assign io_memAXI_0_r_ready = axi_io_out_r_ready; // @[SimTop.scala 34:17]
+  assign io_uart_out_valid = 1'h0; // @[SimTop.scala 62:21]
+  assign io_uart_out_ch = 8'h0; // @[SimTop.scala 63:18]
+  assign io_uart_in_valid = 1'h0; // @[SimTop.scala 64:20]
+  assign io_memAXI_0_aw_valid = axi_io_out_aw_valid; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_len = 8'h7; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_size = 3'h3; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_burst = 2'h1; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_lock = 1'h0; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_cache = 4'h2; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_qos = 4'h0; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_addr = axi_io_out_aw_bits_addr; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_prot = 3'h0; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_id = 4'h0; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_aw_bits_user = 4'h0; // @[SimTop.scala 46:17]
+  assign io_memAXI_0_w_valid = axi_io_out_w_valid; // @[SimTop.scala 47:17]
+  assign io_memAXI_0_w_bits_data = axi_io_out_w_bits_data; // @[SimTop.scala 47:17]
+  assign io_memAXI_0_w_bits_strb = 8'hff; // @[SimTop.scala 47:17]
+  assign io_memAXI_0_w_bits_last = axi_io_out_w_bits_last; // @[SimTop.scala 47:17]
+  assign io_memAXI_0_b_ready = axi_io_out_b_ready; // @[SimTop.scala 48:17]
+  assign io_memAXI_0_ar_valid = axi_io_out_ar_valid; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_len = 8'h7; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_size = 3'h3; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_burst = 2'h1; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_lock = 1'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_cache = 4'h2; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_qos = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_addr = axi_io_out_ar_bits_addr; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_prot = 3'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_id = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_ar_bits_user = 4'h0; // @[SimTop.scala 44:17]
+  assign io_memAXI_0_r_ready = axi_io_out_r_ready; // @[SimTop.scala 45:17]
   assign core_clock = clock;
   assign core_reset = reset;
   assign core_io_imem_data = icache_io_imem_data; // @[SimTop.scala 21:17]
@@ -12914,13 +12917,13 @@ module SimTop(
   assign dcache_io_axi_wdone = axi_io_dcacheio_wdone; // @[SimTop.scala 31:17]
   assign axi_clock = clock;
   assign axi_reset = reset;
-  assign axi_io_out_aw_ready = io_memAXI_0_aw_ready; // @[SimTop.scala 35:17]
-  assign axi_io_out_w_ready = io_memAXI_0_w_ready; // @[SimTop.scala 36:17]
-  assign axi_io_out_b_valid = io_memAXI_0_b_valid; // @[SimTop.scala 37:17]
-  assign axi_io_out_ar_ready = io_memAXI_0_ar_ready; // @[SimTop.scala 33:17]
-  assign axi_io_out_r_valid = io_memAXI_0_r_valid; // @[SimTop.scala 34:17]
-  assign axi_io_out_r_bits_data = io_memAXI_0_r_bits_data; // @[SimTop.scala 34:17]
-  assign axi_io_out_r_bits_last = io_memAXI_0_r_bits_last; // @[SimTop.scala 34:17]
+  assign axi_io_out_aw_ready = io_memAXI_0_aw_ready; // @[SimTop.scala 46:17]
+  assign axi_io_out_w_ready = io_memAXI_0_w_ready; // @[SimTop.scala 47:17]
+  assign axi_io_out_b_valid = io_memAXI_0_b_valid; // @[SimTop.scala 48:17]
+  assign axi_io_out_ar_ready = io_memAXI_0_ar_ready; // @[SimTop.scala 44:17]
+  assign axi_io_out_r_valid = io_memAXI_0_r_valid; // @[SimTop.scala 45:17]
+  assign axi_io_out_r_bits_data = io_memAXI_0_r_bits_data; // @[SimTop.scala 45:17]
+  assign axi_io_out_r_bits_last = io_memAXI_0_r_bits_last; // @[SimTop.scala 45:17]
   assign axi_io_icacheio_req = icache_io_axi_req; // @[SimTop.scala 30:17]
   assign axi_io_icacheio_addr = icache_io_axi_addr; // @[SimTop.scala 30:17]
   assign axi_io_dcacheio_req = dcache_io_axi_req; // @[SimTop.scala 31:17]

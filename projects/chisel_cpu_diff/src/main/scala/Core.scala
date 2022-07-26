@@ -39,7 +39,7 @@ class Core extends Module {
 
   val rfconflict  = Module(new RegfileConflict)
 
-  val mmio = Module(new MMIO)
+  val dmmio = Module(new DMMIO)
   val clintreg = Module(new ClintReg)
 
   val idreg   = Module(new IDReg)
@@ -126,21 +126,21 @@ class Core extends Module {
   preamu.io.op1     := memreg.io.out.op1
   preamu.io.op2     := memreg.io.out.op2
   preamu.io.imm     := memreg.io.out.imm
-  //dmem with mmio
+  //dmem with dmmio
   val dmem_en = preamu.io.ren || preamu.io.wen
   val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
   val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
 
-  mmio.io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
-  mmio.io.dmem.op    := dmem_op
-  mmio.io.dmem.addr  := dmem_addr
-  mmio.io.dmem.wdata := preamu.io.wdata
-  mmio.io.dmem.wmask := preamu.io.wmask
+  dmmio.io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
+  dmmio.io.dmem.op    := dmem_op
+  dmmio.io.dmem.addr  := dmem_addr
+  dmmio.io.dmem.wdata := preamu.io.wdata
+  dmmio.io.dmem.wmask := preamu.io.wmask
 
-  mmio.io.mem0 <> io.dmem
-  mmio.io.mem1 <> clintreg.io.mem
-  mmio.io.mem2.ok := true.B
-  mmio.io.mem2.rdata := 0.U
+  dmmio.io.mem0 <> io.dmem
+  dmmio.io.mem1 <> clintreg.io.mem
+  dmmio.io.mem2.ok := true.B
+  dmmio.io.mem2.rdata := 0.U
   // val dmem_en = preamu.io.ren || preamu.io.wen
   // val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
   // val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
@@ -181,7 +181,7 @@ class Core extends Module {
   //amu
   amu.io.lu_code  := wbreg.io.out.lu_code
   amu.io.lu_shift := wbreg.io.out.lu_shift
-  amu.io.rdata    := mmio.io.dmem.rdata
+  amu.io.rdata    := dmmio.io.dmem.rdata
   //wbu
   wbu.io.fu_code  := wbreg.io.out.fu_code
   wbu.io.alu_out  := wbreg.io.out.alu_out
@@ -228,7 +228,7 @@ class Core extends Module {
   val stall_id = Wire(Bool())
   val stall_wb = Wire(Bool())
   val imem_not_ok = !io.imem.ok
-  val dmem_not_ok = !mmio.io.dmem.ok
+  val dmem_not_ok = !dmmio.io.dmem.ok
   // 对于异常调用的处理
   // 当idreg遇到ecall或mret的时候阻塞idreg，直到流水线清空
   // 当idreg遇到ecall或mret时，且流水线为空，且idreg不阻塞时（exception_stall不阻塞，但是其他东西在阻塞，例如imem_not_ok），则对csr进行写入
@@ -296,7 +296,7 @@ class Core extends Module {
   val skip_putch = wbreg.io.out.inst === PUTCH
   val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
   val rtthread_test_skip =  inst === "h344737f3".U // 读mip
-  val skip_clint = RegNext(RegNext(mmio.io.mem1.en && (mmio.io.mem1.addr === "h0200bff8".U || mmio.io.mem1.addr === "h02004000".U)))
+  val skip_clint = RegNext(RegNext(dmmio.io.mem1.en && (dmmio.io.mem1.addr === "h0200bff8".U || dmmio.io.mem1.addr === "h02004000".U)))
 
   // 将中断信号打拍到wbreg的下一级（difftest要提交的级）
   val wbreg_exception_execution = RegNext(RegNext(RegNext(RegNext(exception_execution))))   
