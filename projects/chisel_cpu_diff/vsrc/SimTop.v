@@ -12804,68 +12804,46 @@ module ICacheBypass(
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
-  reg [31:0] _RAND_1;
+  reg [63:0] _RAND_1;
   reg [31:0] _RAND_2;
-  reg [31:0] _RAND_3;
-  reg [31:0] _RAND_4;
-  reg [31:0] _RAND_5;
 `endif // RANDOMIZE_REG_INIT
-  wire  _addr_T = io_imem_en & io_imem_ok; // @[CacheBypass.scala 31:65]
-  reg [31:0] addr; // @[Reg.scala 27:20]
-  wire [63:0] _GEN_0 = _addr_T ? io_imem_addr : {{32'd0}, addr}; // @[Reg.scala 28:19 Reg.scala 28:23 Reg.scala 27:20]
-  reg  v; // @[CacheBypass.scala 33:26]
-  reg [31:0] tag; // @[CacheBypass.scala 34:26]
-  reg [31:0] block; // @[CacheBypass.scala 35:26]
-  wire  hit = addr == tag & v; // @[CacheBypass.scala 37:28]
-  reg [1:0] state; // @[CacheBypass.scala 40:24]
-  reg  not_en_yet; // @[CacheBypass.scala 42:30]
-  wire  _not_en_yet_T = io_imem_en ? 1'h0 : not_en_yet; // @[CacheBypass.scala 43:27]
+  reg [31:0] addr; // @[CacheBypass.scala 73:26]
+  reg [63:0] data; // @[CacheBypass.scala 74:25]
+  reg [1:0] state; // @[CacheBypass.scala 77:24]
   wire  _T = 2'h0 == state; // @[Conditional.scala 37:30]
-  wire  _T_4 = 2'h1 == state; // @[Conditional.scala 37:30]
-  wire  _T_5 = 2'h2 == state; // @[Conditional.scala 37:30]
-  wire  _block_T = state == 2'h2; // @[CacheBypass.scala 63:26]
-  wire [5:0] _block_T_2 = {addr[2:0], 3'h0}; // @[CacheBypass.scala 63:65]
-  wire [63:0] _block_T_3 = io_axi_data >> _block_T_2; // @[CacheBypass.scala 63:50]
-  wire [63:0] _block_T_4 = state == 2'h2 ? _block_T_3 : {{32'd0}, block}; // @[CacheBypass.scala 63:19]
-  assign io_imem_data = block; // @[CacheBypass.scala 45:21]
-  assign io_imem_ok = (hit | not_en_yet) & state == 2'h0; // @[CacheBypass.scala 46:44]
-  assign io_axi_req = state == 2'h1; // @[CacheBypass.scala 60:26]
-  assign io_axi_addr = addr & 32'hfffffff8; // @[CacheBypass.scala 61:25]
+  wire  _T_1 = 2'h1 == state; // @[Conditional.scala 37:30]
+  wire  _T_2 = 2'h2 == state; // @[Conditional.scala 37:30]
+  wire [63:0] _addr_T_2 = state == 2'h0 & io_imem_en ? io_imem_addr : {{32'd0}, addr}; // @[CacheBypass.scala 91:18]
+  wire [5:0] _data_T_2 = {addr[2:0], 3'h0}; // @[CacheBypass.scala 92:64]
+  wire [63:0] _data_T_3 = io_axi_data >> _data_T_2; // @[CacheBypass.scala 92:49]
+  assign io_imem_data = data[31:0]; // @[CacheBypass.scala 97:21]
+  assign io_imem_ok = state == 2'h0; // @[CacheBypass.scala 98:30]
+  assign io_axi_req = state == 2'h1; // @[CacheBypass.scala 94:30]
+  assign io_axi_addr = addr & 32'hfffffff8; // @[CacheBypass.scala 95:29]
   always @(posedge clock) begin
-    if (reset) begin // @[Reg.scala 27:20]
-      addr <= 32'h0; // @[Reg.scala 27:20]
+    if (reset) begin // @[CacheBypass.scala 73:26]
+      addr <= 32'h0; // @[CacheBypass.scala 73:26]
     end else begin
-      addr <= _GEN_0[31:0];
+      addr <= _addr_T_2[31:0]; // @[CacheBypass.scala 91:12]
     end
-    if (reset) begin // @[CacheBypass.scala 33:26]
-      v <= 1'h0; // @[CacheBypass.scala 33:26]
-    end else begin
-      v <= _block_T | v; // @[CacheBypass.scala 65:13]
+    if (reset) begin // @[CacheBypass.scala 74:25]
+      data <= 64'h0; // @[CacheBypass.scala 74:25]
+    end else if (state == 2'h2) begin // @[CacheBypass.scala 92:18]
+      data <= _data_T_3;
     end
-    if (reset) begin // @[CacheBypass.scala 34:26]
-      tag <= 32'h0; // @[CacheBypass.scala 34:26]
-    end else if (_block_T) begin // @[CacheBypass.scala 64:19]
-      tag <= addr;
-    end
-    if (reset) begin // @[CacheBypass.scala 35:26]
-      block <= 32'h0; // @[CacheBypass.scala 35:26]
-    end else begin
-      block <= _block_T_4[31:0]; // @[CacheBypass.scala 63:13]
-    end
-    if (reset) begin // @[CacheBypass.scala 40:24]
-      state <= 2'h0; // @[CacheBypass.scala 40:24]
+    if (reset) begin // @[CacheBypass.scala 77:24]
+      state <= 2'h0; // @[CacheBypass.scala 77:24]
     end else if (_T) begin // @[Conditional.scala 40:58]
-      if (~hit & ~not_en_yet) begin // @[CacheBypass.scala 50:39]
-        state <= 2'h1; // @[CacheBypass.scala 50:46]
+      if (io_imem_en) begin // @[CacheBypass.scala 81:30]
+        state <= 2'h1; // @[CacheBypass.scala 81:37]
       end
-    end else if (_T_4) begin // @[Conditional.scala 39:67]
-      if (io_axi_valid) begin // @[CacheBypass.scala 53:32]
-        state <= 2'h2; // @[CacheBypass.scala 53:39]
+    end else if (_T_1) begin // @[Conditional.scala 39:67]
+      if (io_axi_valid) begin // @[CacheBypass.scala 84:32]
+        state <= 2'h2; // @[CacheBypass.scala 84:39]
       end
-    end else if (_T_5) begin // @[Conditional.scala 39:67]
-      state <= 2'h0; // @[CacheBypass.scala 56:19]
+    end else if (_T_2) begin // @[Conditional.scala 39:67]
+      state <= 2'h0; // @[CacheBypass.scala 87:19]
     end
-    not_en_yet <= reset | _not_en_yet_T; // @[CacheBypass.scala 42:30 CacheBypass.scala 42:30 CacheBypass.scala 43:21]
   end
 // Register and memory initialization
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -12905,16 +12883,10 @@ initial begin
 `ifdef RANDOMIZE_REG_INIT
   _RAND_0 = {1{`RANDOM}};
   addr = _RAND_0[31:0];
-  _RAND_1 = {1{`RANDOM}};
-  v = _RAND_1[0:0];
+  _RAND_1 = {2{`RANDOM}};
+  data = _RAND_1[63:0];
   _RAND_2 = {1{`RANDOM}};
-  tag = _RAND_2[31:0];
-  _RAND_3 = {1{`RANDOM}};
-  block = _RAND_3[31:0];
-  _RAND_4 = {1{`RANDOM}};
-  state = _RAND_4[1:0];
-  _RAND_5 = {1{`RANDOM}};
-  not_en_yet = _RAND_5[0:0];
+  state = _RAND_2[1:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
