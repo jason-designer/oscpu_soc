@@ -1229,7 +1229,7 @@ module PreAccessMemory(
   wire [10:0] su_wmask = 4'h8 == io_su_code ? 11'hff : _su_wmask_T_11; // @[Mux.scala 80:57]
   assign io_lu_shift = {lu_offset[2:0], 3'h0}; // @[PreAccessMemory.scala 24:36]
   assign io_ren = io_lu_code != 7'h0; // @[PreAccessMemory.scala 25:29]
-  assign io_raddr = lu_offset & 64'hfffffffffffffff8; // @[PreAccessMemory.scala 26:30]
+  assign io_raddr = io_op1 + io_op2; // @[PreAccessMemory.scala 23:28]
   assign io_wen = io_su_code != 4'h0; // @[PreAccessMemory.scala 31:32]
   assign io_waddr = su_offset & 64'hfffffffffffffff8; // @[PreAccessMemory.scala 32:31]
   assign io_wdata = su_wdata[63:0]; // @[PreAccessMemory.scala 46:17]
@@ -1425,35 +1425,35 @@ module DMMIO(
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
 `endif // RANDOMIZE_REG_INIT
-  wire [1:0] _GEN_0 = io_dmem_addr == 64'h2004000 ? 2'h2 : 2'h0; // @[MMIO.scala 22:50 MMIO.scala 22:55 MMIO.scala 23:24]
-  wire [1:0] _GEN_1 = 64'h2000000 <= io_dmem_addr & io_dmem_addr < 64'h200c000 ? 2'h1 : _GEN_0; // @[MMIO.scala 21:76 MMIO.scala 21:81]
-  wire [1:0] sel = ~io_mem0_ok ? 2'h0 : _GEN_1; // @[MMIO.scala 16:22 MMIO.scala 16:27]
+  wire [1:0] _GEN_0 = io_dmem_addr == 64'h2004000 ? 2'h2 : 2'h0; // @[MMIO.scala 61:50 MMIO.scala 61:55 MMIO.scala 62:24]
+  wire [1:0] _GEN_1 = 64'h2000000 <= io_dmem_addr & io_dmem_addr < 64'h200c000 ? 2'h1 : _GEN_0; // @[MMIO.scala 60:76 MMIO.scala 60:81]
+  wire [1:0] sel = ~io_mem0_ok ? 2'h0 : _GEN_1; // @[MMIO.scala 55:22 MMIO.scala 55:27]
   reg [1:0] sel_r; // @[Reg.scala 27:20]
   wire  out_ok = 2'h2 == sel_r | (2'h1 == sel_r | 2'h0 == sel_r & io_mem0_ok); // @[Mux.scala 80:57]
-  wire  _io_mem0_en_T = sel == 2'h0; // @[MMIO.scala 28:32]
-  wire  _io_mem1_en_T = sel == 2'h1; // @[MMIO.scala 33:32]
+  wire  _io_mem0_en_T = sel == 2'h0; // @[MMIO.scala 67:32]
+  wire  _io_mem1_en_T = sel == 2'h1; // @[MMIO.scala 72:32]
   wire [63:0] _out_rdata_T_1 = 2'h0 == sel_r ? io_mem0_rdata : 64'h0; // @[Mux.scala 80:57]
   wire [63:0] _out_rdata_T_3 = 2'h1 == sel_r ? io_mem1_rdata : _out_rdata_T_1; // @[Mux.scala 80:57]
   assign io_dmem_ok = 2'h2 == sel_r | (2'h1 == sel_r | 2'h0 == sel_r & io_mem0_ok); // @[Mux.scala 80:57]
   assign io_dmem_rdata = 2'h2 == sel_r ? 64'h0 : _out_rdata_T_3; // @[Mux.scala 80:57]
-  assign io_mem0_en = sel == 2'h0 & io_dmem_en; // @[MMIO.scala 28:27]
-  assign io_mem0_op = _io_mem0_en_T & io_dmem_op; // @[MMIO.scala 29:27]
-  assign io_mem0_addr = _io_mem0_en_T ? io_dmem_addr : 64'h0; // @[MMIO.scala 30:27]
-  assign io_mem0_wdata = _io_mem0_en_T ? io_dmem_wdata : 64'h0; // @[MMIO.scala 31:27]
-  assign io_mem0_wmask = _io_mem0_en_T ? io_dmem_wmask : 8'h0; // @[MMIO.scala 32:27]
-  assign io_mem1_en = sel == 2'h1 & io_dmem_en; // @[MMIO.scala 33:27]
-  assign io_mem1_op = _io_mem1_en_T & io_dmem_op; // @[MMIO.scala 34:27]
-  assign io_mem1_addr = _io_mem1_en_T ? io_dmem_addr : 64'h0; // @[MMIO.scala 35:27]
-  assign io_mem1_wdata = _io_mem1_en_T ? io_dmem_wdata : 64'h0; // @[MMIO.scala 36:27]
-  assign io_mem1_wmask = _io_mem1_en_T ? io_dmem_wmask : 8'h0; // @[MMIO.scala 37:27]
+  assign io_mem0_en = sel == 2'h0 & io_dmem_en; // @[MMIO.scala 67:27]
+  assign io_mem0_op = _io_mem0_en_T & io_dmem_op; // @[MMIO.scala 68:27]
+  assign io_mem0_addr = _io_mem0_en_T ? io_dmem_addr : 64'h0; // @[MMIO.scala 69:27]
+  assign io_mem0_wdata = _io_mem0_en_T ? io_dmem_wdata : 64'h0; // @[MMIO.scala 70:27]
+  assign io_mem0_wmask = _io_mem0_en_T ? io_dmem_wmask : 8'h0; // @[MMIO.scala 71:27]
+  assign io_mem1_en = sel == 2'h1 & io_dmem_en; // @[MMIO.scala 72:27]
+  assign io_mem1_op = _io_mem1_en_T & io_dmem_op; // @[MMIO.scala 73:27]
+  assign io_mem1_addr = _io_mem1_en_T ? io_dmem_addr : 64'h0; // @[MMIO.scala 74:27]
+  assign io_mem1_wdata = _io_mem1_en_T ? io_dmem_wdata : 64'h0; // @[MMIO.scala 75:27]
+  assign io_mem1_wmask = _io_mem1_en_T ? io_dmem_wmask : 8'h0; // @[MMIO.scala 76:27]
   always @(posedge clock) begin
     if (reset) begin // @[Reg.scala 27:20]
       sel_r <= 2'h0; // @[Reg.scala 27:20]
     end else if (out_ok) begin // @[Reg.scala 28:19]
-      if (~io_mem0_ok) begin // @[MMIO.scala 16:22]
-        sel_r <= 2'h0; // @[MMIO.scala 16:27]
-      end else if (64'h2000000 <= io_dmem_addr & io_dmem_addr < 64'h200c000) begin // @[MMIO.scala 21:76]
-        sel_r <= 2'h1; // @[MMIO.scala 21:81]
+      if (~io_mem0_ok) begin // @[MMIO.scala 55:22]
+        sel_r <= 2'h0; // @[MMIO.scala 55:27]
+      end else if (64'h2000000 <= io_dmem_addr & io_dmem_addr < 64'h200c000) begin // @[MMIO.scala 60:76]
+        sel_r <= 2'h1; // @[MMIO.scala 60:81]
       end else begin
         sel_r <= _GEN_0;
       end
@@ -7765,671 +7765,672 @@ module DCache(
   reg [31:0] _RAND_324;
   reg [31:0] _RAND_325;
 `endif // RANDOMIZE_REG_INIT
-  wire  _op_T = io_dmem_en & io_dmem_ok; // @[DCache.scala 39:66]
+  wire  _op_T = io_dmem_en & io_dmem_ok; // @[DCache.scala 40:66]
   reg  op; // @[Reg.scala 27:20]
+  wire [63:0] _addr_T = io_dmem_addr & 64'hfffffffffffffff8; // @[DCache.scala 41:42]
   reg [63:0] addr; // @[Reg.scala 27:20]
   reg [63:0] wdata; // @[Reg.scala 27:20]
   reg [7:0] wm; // @[Reg.scala 27:20]
-  wire [52:0] tag_addr = addr[63:11]; // @[DCache.scala 45:27]
-  wire [4:0] index_addr = addr[10:6]; // @[DCache.scala 46:27]
-  wire [5:0] offset_addr = addr[5:0]; // @[DCache.scala 47:27]
-  reg  v1_0; // @[DCache.scala 49:26]
-  reg  v1_1; // @[DCache.scala 49:26]
-  reg  v1_2; // @[DCache.scala 49:26]
-  reg  v1_3; // @[DCache.scala 49:26]
-  reg  v1_4; // @[DCache.scala 49:26]
-  reg  v1_5; // @[DCache.scala 49:26]
-  reg  v1_6; // @[DCache.scala 49:26]
-  reg  v1_7; // @[DCache.scala 49:26]
-  reg  v1_8; // @[DCache.scala 49:26]
-  reg  v1_9; // @[DCache.scala 49:26]
-  reg  v1_10; // @[DCache.scala 49:26]
-  reg  v1_11; // @[DCache.scala 49:26]
-  reg  v1_12; // @[DCache.scala 49:26]
-  reg  v1_13; // @[DCache.scala 49:26]
-  reg  v1_14; // @[DCache.scala 49:26]
-  reg  v1_15; // @[DCache.scala 49:26]
-  reg  v1_16; // @[DCache.scala 49:26]
-  reg  v1_17; // @[DCache.scala 49:26]
-  reg  v1_18; // @[DCache.scala 49:26]
-  reg  v1_19; // @[DCache.scala 49:26]
-  reg  v1_20; // @[DCache.scala 49:26]
-  reg  v1_21; // @[DCache.scala 49:26]
-  reg  v1_22; // @[DCache.scala 49:26]
-  reg  v1_23; // @[DCache.scala 49:26]
-  reg  v1_24; // @[DCache.scala 49:26]
-  reg  v1_25; // @[DCache.scala 49:26]
-  reg  v1_26; // @[DCache.scala 49:26]
-  reg  v1_27; // @[DCache.scala 49:26]
-  reg  v1_28; // @[DCache.scala 49:26]
-  reg  v1_29; // @[DCache.scala 49:26]
-  reg  v1_30; // @[DCache.scala 49:26]
-  reg  v1_31; // @[DCache.scala 49:26]
-  reg  d1_0; // @[DCache.scala 50:26]
-  reg  d1_1; // @[DCache.scala 50:26]
-  reg  d1_2; // @[DCache.scala 50:26]
-  reg  d1_3; // @[DCache.scala 50:26]
-  reg  d1_4; // @[DCache.scala 50:26]
-  reg  d1_5; // @[DCache.scala 50:26]
-  reg  d1_6; // @[DCache.scala 50:26]
-  reg  d1_7; // @[DCache.scala 50:26]
-  reg  d1_8; // @[DCache.scala 50:26]
-  reg  d1_9; // @[DCache.scala 50:26]
-  reg  d1_10; // @[DCache.scala 50:26]
-  reg  d1_11; // @[DCache.scala 50:26]
-  reg  d1_12; // @[DCache.scala 50:26]
-  reg  d1_13; // @[DCache.scala 50:26]
-  reg  d1_14; // @[DCache.scala 50:26]
-  reg  d1_15; // @[DCache.scala 50:26]
-  reg  d1_16; // @[DCache.scala 50:26]
-  reg  d1_17; // @[DCache.scala 50:26]
-  reg  d1_18; // @[DCache.scala 50:26]
-  reg  d1_19; // @[DCache.scala 50:26]
-  reg  d1_20; // @[DCache.scala 50:26]
-  reg  d1_21; // @[DCache.scala 50:26]
-  reg  d1_22; // @[DCache.scala 50:26]
-  reg  d1_23; // @[DCache.scala 50:26]
-  reg  d1_24; // @[DCache.scala 50:26]
-  reg  d1_25; // @[DCache.scala 50:26]
-  reg  d1_26; // @[DCache.scala 50:26]
-  reg  d1_27; // @[DCache.scala 50:26]
-  reg  d1_28; // @[DCache.scala 50:26]
-  reg  d1_29; // @[DCache.scala 50:26]
-  reg  d1_30; // @[DCache.scala 50:26]
-  reg  d1_31; // @[DCache.scala 50:26]
-  reg  age1_0; // @[DCache.scala 51:26]
-  reg  age1_1; // @[DCache.scala 51:26]
-  reg  age1_2; // @[DCache.scala 51:26]
-  reg  age1_3; // @[DCache.scala 51:26]
-  reg  age1_4; // @[DCache.scala 51:26]
-  reg  age1_5; // @[DCache.scala 51:26]
-  reg  age1_6; // @[DCache.scala 51:26]
-  reg  age1_7; // @[DCache.scala 51:26]
-  reg  age1_8; // @[DCache.scala 51:26]
-  reg  age1_9; // @[DCache.scala 51:26]
-  reg  age1_10; // @[DCache.scala 51:26]
-  reg  age1_11; // @[DCache.scala 51:26]
-  reg  age1_12; // @[DCache.scala 51:26]
-  reg  age1_13; // @[DCache.scala 51:26]
-  reg  age1_14; // @[DCache.scala 51:26]
-  reg  age1_15; // @[DCache.scala 51:26]
-  reg  age1_16; // @[DCache.scala 51:26]
-  reg  age1_17; // @[DCache.scala 51:26]
-  reg  age1_18; // @[DCache.scala 51:26]
-  reg  age1_19; // @[DCache.scala 51:26]
-  reg  age1_20; // @[DCache.scala 51:26]
-  reg  age1_21; // @[DCache.scala 51:26]
-  reg  age1_22; // @[DCache.scala 51:26]
-  reg  age1_23; // @[DCache.scala 51:26]
-  reg  age1_24; // @[DCache.scala 51:26]
-  reg  age1_25; // @[DCache.scala 51:26]
-  reg  age1_26; // @[DCache.scala 51:26]
-  reg  age1_27; // @[DCache.scala 51:26]
-  reg  age1_28; // @[DCache.scala 51:26]
-  reg  age1_29; // @[DCache.scala 51:26]
-  reg  age1_30; // @[DCache.scala 51:26]
-  reg  age1_31; // @[DCache.scala 51:26]
-  reg [52:0] tag1_0; // @[DCache.scala 52:26]
-  reg [52:0] tag1_1; // @[DCache.scala 52:26]
-  reg [52:0] tag1_2; // @[DCache.scala 52:26]
-  reg [52:0] tag1_3; // @[DCache.scala 52:26]
-  reg [52:0] tag1_4; // @[DCache.scala 52:26]
-  reg [52:0] tag1_5; // @[DCache.scala 52:26]
-  reg [52:0] tag1_6; // @[DCache.scala 52:26]
-  reg [52:0] tag1_7; // @[DCache.scala 52:26]
-  reg [52:0] tag1_8; // @[DCache.scala 52:26]
-  reg [52:0] tag1_9; // @[DCache.scala 52:26]
-  reg [52:0] tag1_10; // @[DCache.scala 52:26]
-  reg [52:0] tag1_11; // @[DCache.scala 52:26]
-  reg [52:0] tag1_12; // @[DCache.scala 52:26]
-  reg [52:0] tag1_13; // @[DCache.scala 52:26]
-  reg [52:0] tag1_14; // @[DCache.scala 52:26]
-  reg [52:0] tag1_15; // @[DCache.scala 52:26]
-  reg [52:0] tag1_16; // @[DCache.scala 52:26]
-  reg [52:0] tag1_17; // @[DCache.scala 52:26]
-  reg [52:0] tag1_18; // @[DCache.scala 52:26]
-  reg [52:0] tag1_19; // @[DCache.scala 52:26]
-  reg [52:0] tag1_20; // @[DCache.scala 52:26]
-  reg [52:0] tag1_21; // @[DCache.scala 52:26]
-  reg [52:0] tag1_22; // @[DCache.scala 52:26]
-  reg [52:0] tag1_23; // @[DCache.scala 52:26]
-  reg [52:0] tag1_24; // @[DCache.scala 52:26]
-  reg [52:0] tag1_25; // @[DCache.scala 52:26]
-  reg [52:0] tag1_26; // @[DCache.scala 52:26]
-  reg [52:0] tag1_27; // @[DCache.scala 52:26]
-  reg [52:0] tag1_28; // @[DCache.scala 52:26]
-  reg [52:0] tag1_29; // @[DCache.scala 52:26]
-  reg [52:0] tag1_30; // @[DCache.scala 52:26]
-  reg [52:0] tag1_31; // @[DCache.scala 52:26]
-  reg [511:0] block1_0; // @[DCache.scala 53:26]
-  reg [511:0] block1_1; // @[DCache.scala 53:26]
-  reg [511:0] block1_2; // @[DCache.scala 53:26]
-  reg [511:0] block1_3; // @[DCache.scala 53:26]
-  reg [511:0] block1_4; // @[DCache.scala 53:26]
-  reg [511:0] block1_5; // @[DCache.scala 53:26]
-  reg [511:0] block1_6; // @[DCache.scala 53:26]
-  reg [511:0] block1_7; // @[DCache.scala 53:26]
-  reg [511:0] block1_8; // @[DCache.scala 53:26]
-  reg [511:0] block1_9; // @[DCache.scala 53:26]
-  reg [511:0] block1_10; // @[DCache.scala 53:26]
-  reg [511:0] block1_11; // @[DCache.scala 53:26]
-  reg [511:0] block1_12; // @[DCache.scala 53:26]
-  reg [511:0] block1_13; // @[DCache.scala 53:26]
-  reg [511:0] block1_14; // @[DCache.scala 53:26]
-  reg [511:0] block1_15; // @[DCache.scala 53:26]
-  reg [511:0] block1_16; // @[DCache.scala 53:26]
-  reg [511:0] block1_17; // @[DCache.scala 53:26]
-  reg [511:0] block1_18; // @[DCache.scala 53:26]
-  reg [511:0] block1_19; // @[DCache.scala 53:26]
-  reg [511:0] block1_20; // @[DCache.scala 53:26]
-  reg [511:0] block1_21; // @[DCache.scala 53:26]
-  reg [511:0] block1_22; // @[DCache.scala 53:26]
-  reg [511:0] block1_23; // @[DCache.scala 53:26]
-  reg [511:0] block1_24; // @[DCache.scala 53:26]
-  reg [511:0] block1_25; // @[DCache.scala 53:26]
-  reg [511:0] block1_26; // @[DCache.scala 53:26]
-  reg [511:0] block1_27; // @[DCache.scala 53:26]
-  reg [511:0] block1_28; // @[DCache.scala 53:26]
-  reg [511:0] block1_29; // @[DCache.scala 53:26]
-  reg [511:0] block1_30; // @[DCache.scala 53:26]
-  reg [511:0] block1_31; // @[DCache.scala 53:26]
-  reg  v2_0; // @[DCache.scala 54:26]
-  reg  v2_1; // @[DCache.scala 54:26]
-  reg  v2_2; // @[DCache.scala 54:26]
-  reg  v2_3; // @[DCache.scala 54:26]
-  reg  v2_4; // @[DCache.scala 54:26]
-  reg  v2_5; // @[DCache.scala 54:26]
-  reg  v2_6; // @[DCache.scala 54:26]
-  reg  v2_7; // @[DCache.scala 54:26]
-  reg  v2_8; // @[DCache.scala 54:26]
-  reg  v2_9; // @[DCache.scala 54:26]
-  reg  v2_10; // @[DCache.scala 54:26]
-  reg  v2_11; // @[DCache.scala 54:26]
-  reg  v2_12; // @[DCache.scala 54:26]
-  reg  v2_13; // @[DCache.scala 54:26]
-  reg  v2_14; // @[DCache.scala 54:26]
-  reg  v2_15; // @[DCache.scala 54:26]
-  reg  v2_16; // @[DCache.scala 54:26]
-  reg  v2_17; // @[DCache.scala 54:26]
-  reg  v2_18; // @[DCache.scala 54:26]
-  reg  v2_19; // @[DCache.scala 54:26]
-  reg  v2_20; // @[DCache.scala 54:26]
-  reg  v2_21; // @[DCache.scala 54:26]
-  reg  v2_22; // @[DCache.scala 54:26]
-  reg  v2_23; // @[DCache.scala 54:26]
-  reg  v2_24; // @[DCache.scala 54:26]
-  reg  v2_25; // @[DCache.scala 54:26]
-  reg  v2_26; // @[DCache.scala 54:26]
-  reg  v2_27; // @[DCache.scala 54:26]
-  reg  v2_28; // @[DCache.scala 54:26]
-  reg  v2_29; // @[DCache.scala 54:26]
-  reg  v2_30; // @[DCache.scala 54:26]
-  reg  v2_31; // @[DCache.scala 54:26]
-  reg  d2_0; // @[DCache.scala 55:26]
-  reg  d2_1; // @[DCache.scala 55:26]
-  reg  d2_2; // @[DCache.scala 55:26]
-  reg  d2_3; // @[DCache.scala 55:26]
-  reg  d2_4; // @[DCache.scala 55:26]
-  reg  d2_5; // @[DCache.scala 55:26]
-  reg  d2_6; // @[DCache.scala 55:26]
-  reg  d2_7; // @[DCache.scala 55:26]
-  reg  d2_8; // @[DCache.scala 55:26]
-  reg  d2_9; // @[DCache.scala 55:26]
-  reg  d2_10; // @[DCache.scala 55:26]
-  reg  d2_11; // @[DCache.scala 55:26]
-  reg  d2_12; // @[DCache.scala 55:26]
-  reg  d2_13; // @[DCache.scala 55:26]
-  reg  d2_14; // @[DCache.scala 55:26]
-  reg  d2_15; // @[DCache.scala 55:26]
-  reg  d2_16; // @[DCache.scala 55:26]
-  reg  d2_17; // @[DCache.scala 55:26]
-  reg  d2_18; // @[DCache.scala 55:26]
-  reg  d2_19; // @[DCache.scala 55:26]
-  reg  d2_20; // @[DCache.scala 55:26]
-  reg  d2_21; // @[DCache.scala 55:26]
-  reg  d2_22; // @[DCache.scala 55:26]
-  reg  d2_23; // @[DCache.scala 55:26]
-  reg  d2_24; // @[DCache.scala 55:26]
-  reg  d2_25; // @[DCache.scala 55:26]
-  reg  d2_26; // @[DCache.scala 55:26]
-  reg  d2_27; // @[DCache.scala 55:26]
-  reg  d2_28; // @[DCache.scala 55:26]
-  reg  d2_29; // @[DCache.scala 55:26]
-  reg  d2_30; // @[DCache.scala 55:26]
-  reg  d2_31; // @[DCache.scala 55:26]
-  reg  age2_0; // @[DCache.scala 56:26]
-  reg  age2_1; // @[DCache.scala 56:26]
-  reg  age2_2; // @[DCache.scala 56:26]
-  reg  age2_3; // @[DCache.scala 56:26]
-  reg  age2_4; // @[DCache.scala 56:26]
-  reg  age2_5; // @[DCache.scala 56:26]
-  reg  age2_6; // @[DCache.scala 56:26]
-  reg  age2_7; // @[DCache.scala 56:26]
-  reg  age2_8; // @[DCache.scala 56:26]
-  reg  age2_9; // @[DCache.scala 56:26]
-  reg  age2_10; // @[DCache.scala 56:26]
-  reg  age2_11; // @[DCache.scala 56:26]
-  reg  age2_12; // @[DCache.scala 56:26]
-  reg  age2_13; // @[DCache.scala 56:26]
-  reg  age2_14; // @[DCache.scala 56:26]
-  reg  age2_15; // @[DCache.scala 56:26]
-  reg  age2_16; // @[DCache.scala 56:26]
-  reg  age2_17; // @[DCache.scala 56:26]
-  reg  age2_18; // @[DCache.scala 56:26]
-  reg  age2_19; // @[DCache.scala 56:26]
-  reg  age2_20; // @[DCache.scala 56:26]
-  reg  age2_21; // @[DCache.scala 56:26]
-  reg  age2_22; // @[DCache.scala 56:26]
-  reg  age2_23; // @[DCache.scala 56:26]
-  reg  age2_24; // @[DCache.scala 56:26]
-  reg  age2_25; // @[DCache.scala 56:26]
-  reg  age2_26; // @[DCache.scala 56:26]
-  reg  age2_27; // @[DCache.scala 56:26]
-  reg  age2_28; // @[DCache.scala 56:26]
-  reg  age2_29; // @[DCache.scala 56:26]
-  reg  age2_30; // @[DCache.scala 56:26]
-  reg  age2_31; // @[DCache.scala 56:26]
-  reg [52:0] tag2_0; // @[DCache.scala 57:26]
-  reg [52:0] tag2_1; // @[DCache.scala 57:26]
-  reg [52:0] tag2_2; // @[DCache.scala 57:26]
-  reg [52:0] tag2_3; // @[DCache.scala 57:26]
-  reg [52:0] tag2_4; // @[DCache.scala 57:26]
-  reg [52:0] tag2_5; // @[DCache.scala 57:26]
-  reg [52:0] tag2_6; // @[DCache.scala 57:26]
-  reg [52:0] tag2_7; // @[DCache.scala 57:26]
-  reg [52:0] tag2_8; // @[DCache.scala 57:26]
-  reg [52:0] tag2_9; // @[DCache.scala 57:26]
-  reg [52:0] tag2_10; // @[DCache.scala 57:26]
-  reg [52:0] tag2_11; // @[DCache.scala 57:26]
-  reg [52:0] tag2_12; // @[DCache.scala 57:26]
-  reg [52:0] tag2_13; // @[DCache.scala 57:26]
-  reg [52:0] tag2_14; // @[DCache.scala 57:26]
-  reg [52:0] tag2_15; // @[DCache.scala 57:26]
-  reg [52:0] tag2_16; // @[DCache.scala 57:26]
-  reg [52:0] tag2_17; // @[DCache.scala 57:26]
-  reg [52:0] tag2_18; // @[DCache.scala 57:26]
-  reg [52:0] tag2_19; // @[DCache.scala 57:26]
-  reg [52:0] tag2_20; // @[DCache.scala 57:26]
-  reg [52:0] tag2_21; // @[DCache.scala 57:26]
-  reg [52:0] tag2_22; // @[DCache.scala 57:26]
-  reg [52:0] tag2_23; // @[DCache.scala 57:26]
-  reg [52:0] tag2_24; // @[DCache.scala 57:26]
-  reg [52:0] tag2_25; // @[DCache.scala 57:26]
-  reg [52:0] tag2_26; // @[DCache.scala 57:26]
-  reg [52:0] tag2_27; // @[DCache.scala 57:26]
-  reg [52:0] tag2_28; // @[DCache.scala 57:26]
-  reg [52:0] tag2_29; // @[DCache.scala 57:26]
-  reg [52:0] tag2_30; // @[DCache.scala 57:26]
-  reg [52:0] tag2_31; // @[DCache.scala 57:26]
-  reg [511:0] block2_0; // @[DCache.scala 58:26]
-  reg [511:0] block2_1; // @[DCache.scala 58:26]
-  reg [511:0] block2_2; // @[DCache.scala 58:26]
-  reg [511:0] block2_3; // @[DCache.scala 58:26]
-  reg [511:0] block2_4; // @[DCache.scala 58:26]
-  reg [511:0] block2_5; // @[DCache.scala 58:26]
-  reg [511:0] block2_6; // @[DCache.scala 58:26]
-  reg [511:0] block2_7; // @[DCache.scala 58:26]
-  reg [511:0] block2_8; // @[DCache.scala 58:26]
-  reg [511:0] block2_9; // @[DCache.scala 58:26]
-  reg [511:0] block2_10; // @[DCache.scala 58:26]
-  reg [511:0] block2_11; // @[DCache.scala 58:26]
-  reg [511:0] block2_12; // @[DCache.scala 58:26]
-  reg [511:0] block2_13; // @[DCache.scala 58:26]
-  reg [511:0] block2_14; // @[DCache.scala 58:26]
-  reg [511:0] block2_15; // @[DCache.scala 58:26]
-  reg [511:0] block2_16; // @[DCache.scala 58:26]
-  reg [511:0] block2_17; // @[DCache.scala 58:26]
-  reg [511:0] block2_18; // @[DCache.scala 58:26]
-  reg [511:0] block2_19; // @[DCache.scala 58:26]
-  reg [511:0] block2_20; // @[DCache.scala 58:26]
-  reg [511:0] block2_21; // @[DCache.scala 58:26]
-  reg [511:0] block2_22; // @[DCache.scala 58:26]
-  reg [511:0] block2_23; // @[DCache.scala 58:26]
-  reg [511:0] block2_24; // @[DCache.scala 58:26]
-  reg [511:0] block2_25; // @[DCache.scala 58:26]
-  reg [511:0] block2_26; // @[DCache.scala 58:26]
-  reg [511:0] block2_27; // @[DCache.scala 58:26]
-  reg [511:0] block2_28; // @[DCache.scala 58:26]
-  reg [511:0] block2_29; // @[DCache.scala 58:26]
-  reg [511:0] block2_30; // @[DCache.scala 58:26]
-  reg [511:0] block2_31; // @[DCache.scala 58:26]
-  wire [52:0] _GEN_5 = 5'h1 == index_addr ? tag1_1 : tag1_0; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_6 = 5'h2 == index_addr ? tag1_2 : _GEN_5; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_7 = 5'h3 == index_addr ? tag1_3 : _GEN_6; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_8 = 5'h4 == index_addr ? tag1_4 : _GEN_7; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_9 = 5'h5 == index_addr ? tag1_5 : _GEN_8; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_10 = 5'h6 == index_addr ? tag1_6 : _GEN_9; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_11 = 5'h7 == index_addr ? tag1_7 : _GEN_10; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_12 = 5'h8 == index_addr ? tag1_8 : _GEN_11; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_13 = 5'h9 == index_addr ? tag1_9 : _GEN_12; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_14 = 5'ha == index_addr ? tag1_10 : _GEN_13; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_15 = 5'hb == index_addr ? tag1_11 : _GEN_14; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_16 = 5'hc == index_addr ? tag1_12 : _GEN_15; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_17 = 5'hd == index_addr ? tag1_13 : _GEN_16; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_18 = 5'he == index_addr ? tag1_14 : _GEN_17; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_19 = 5'hf == index_addr ? tag1_15 : _GEN_18; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_20 = 5'h10 == index_addr ? tag1_16 : _GEN_19; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_21 = 5'h11 == index_addr ? tag1_17 : _GEN_20; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_22 = 5'h12 == index_addr ? tag1_18 : _GEN_21; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_23 = 5'h13 == index_addr ? tag1_19 : _GEN_22; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_24 = 5'h14 == index_addr ? tag1_20 : _GEN_23; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_25 = 5'h15 == index_addr ? tag1_21 : _GEN_24; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_26 = 5'h16 == index_addr ? tag1_22 : _GEN_25; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_27 = 5'h17 == index_addr ? tag1_23 : _GEN_26; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_28 = 5'h18 == index_addr ? tag1_24 : _GEN_27; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_29 = 5'h19 == index_addr ? tag1_25 : _GEN_28; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_30 = 5'h1a == index_addr ? tag1_26 : _GEN_29; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_31 = 5'h1b == index_addr ? tag1_27 : _GEN_30; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_32 = 5'h1c == index_addr ? tag1_28 : _GEN_31; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_33 = 5'h1d == index_addr ? tag1_29 : _GEN_32; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_34 = 5'h1e == index_addr ? tag1_30 : _GEN_33; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire [52:0] _GEN_35 = 5'h1f == index_addr ? tag1_31 : _GEN_34; // @[DCache.scala 60:28 DCache.scala 60:28]
-  wire  _GEN_37 = 5'h1 == index_addr ? v1_1 : v1_0; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_38 = 5'h2 == index_addr ? v1_2 : _GEN_37; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_39 = 5'h3 == index_addr ? v1_3 : _GEN_38; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_40 = 5'h4 == index_addr ? v1_4 : _GEN_39; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_41 = 5'h5 == index_addr ? v1_5 : _GEN_40; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_42 = 5'h6 == index_addr ? v1_6 : _GEN_41; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_43 = 5'h7 == index_addr ? v1_7 : _GEN_42; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_44 = 5'h8 == index_addr ? v1_8 : _GEN_43; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_45 = 5'h9 == index_addr ? v1_9 : _GEN_44; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_46 = 5'ha == index_addr ? v1_10 : _GEN_45; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_47 = 5'hb == index_addr ? v1_11 : _GEN_46; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_48 = 5'hc == index_addr ? v1_12 : _GEN_47; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_49 = 5'hd == index_addr ? v1_13 : _GEN_48; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_50 = 5'he == index_addr ? v1_14 : _GEN_49; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_51 = 5'hf == index_addr ? v1_15 : _GEN_50; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_52 = 5'h10 == index_addr ? v1_16 : _GEN_51; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_53 = 5'h11 == index_addr ? v1_17 : _GEN_52; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_54 = 5'h12 == index_addr ? v1_18 : _GEN_53; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_55 = 5'h13 == index_addr ? v1_19 : _GEN_54; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_56 = 5'h14 == index_addr ? v1_20 : _GEN_55; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_57 = 5'h15 == index_addr ? v1_21 : _GEN_56; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_58 = 5'h16 == index_addr ? v1_22 : _GEN_57; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_59 = 5'h17 == index_addr ? v1_23 : _GEN_58; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_60 = 5'h18 == index_addr ? v1_24 : _GEN_59; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_61 = 5'h19 == index_addr ? v1_25 : _GEN_60; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_62 = 5'h1a == index_addr ? v1_26 : _GEN_61; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_63 = 5'h1b == index_addr ? v1_27 : _GEN_62; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_64 = 5'h1c == index_addr ? v1_28 : _GEN_63; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_65 = 5'h1d == index_addr ? v1_29 : _GEN_64; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_66 = 5'h1e == index_addr ? v1_30 : _GEN_65; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  _GEN_67 = 5'h1f == index_addr ? v1_31 : _GEN_66; // @[DCache.scala 60:67 DCache.scala 60:67]
-  wire  hit1 = tag_addr == _GEN_35 & _GEN_67; // @[DCache.scala 60:49]
-  wire [52:0] _GEN_69 = 5'h1 == index_addr ? tag2_1 : tag2_0; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_70 = 5'h2 == index_addr ? tag2_2 : _GEN_69; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_71 = 5'h3 == index_addr ? tag2_3 : _GEN_70; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_72 = 5'h4 == index_addr ? tag2_4 : _GEN_71; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_73 = 5'h5 == index_addr ? tag2_5 : _GEN_72; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_74 = 5'h6 == index_addr ? tag2_6 : _GEN_73; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_75 = 5'h7 == index_addr ? tag2_7 : _GEN_74; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_76 = 5'h8 == index_addr ? tag2_8 : _GEN_75; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_77 = 5'h9 == index_addr ? tag2_9 : _GEN_76; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_78 = 5'ha == index_addr ? tag2_10 : _GEN_77; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_79 = 5'hb == index_addr ? tag2_11 : _GEN_78; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_80 = 5'hc == index_addr ? tag2_12 : _GEN_79; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_81 = 5'hd == index_addr ? tag2_13 : _GEN_80; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_82 = 5'he == index_addr ? tag2_14 : _GEN_81; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_83 = 5'hf == index_addr ? tag2_15 : _GEN_82; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_84 = 5'h10 == index_addr ? tag2_16 : _GEN_83; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_85 = 5'h11 == index_addr ? tag2_17 : _GEN_84; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_86 = 5'h12 == index_addr ? tag2_18 : _GEN_85; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_87 = 5'h13 == index_addr ? tag2_19 : _GEN_86; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_88 = 5'h14 == index_addr ? tag2_20 : _GEN_87; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_89 = 5'h15 == index_addr ? tag2_21 : _GEN_88; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_90 = 5'h16 == index_addr ? tag2_22 : _GEN_89; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_91 = 5'h17 == index_addr ? tag2_23 : _GEN_90; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_92 = 5'h18 == index_addr ? tag2_24 : _GEN_91; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_93 = 5'h19 == index_addr ? tag2_25 : _GEN_92; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_94 = 5'h1a == index_addr ? tag2_26 : _GEN_93; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_95 = 5'h1b == index_addr ? tag2_27 : _GEN_94; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_96 = 5'h1c == index_addr ? tag2_28 : _GEN_95; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_97 = 5'h1d == index_addr ? tag2_29 : _GEN_96; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_98 = 5'h1e == index_addr ? tag2_30 : _GEN_97; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire [52:0] _GEN_99 = 5'h1f == index_addr ? tag2_31 : _GEN_98; // @[DCache.scala 61:28 DCache.scala 61:28]
-  wire  _GEN_101 = 5'h1 == index_addr ? v2_1 : v2_0; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_102 = 5'h2 == index_addr ? v2_2 : _GEN_101; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_103 = 5'h3 == index_addr ? v2_3 : _GEN_102; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_104 = 5'h4 == index_addr ? v2_4 : _GEN_103; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_105 = 5'h5 == index_addr ? v2_5 : _GEN_104; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_106 = 5'h6 == index_addr ? v2_6 : _GEN_105; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_107 = 5'h7 == index_addr ? v2_7 : _GEN_106; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_108 = 5'h8 == index_addr ? v2_8 : _GEN_107; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_109 = 5'h9 == index_addr ? v2_9 : _GEN_108; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_110 = 5'ha == index_addr ? v2_10 : _GEN_109; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_111 = 5'hb == index_addr ? v2_11 : _GEN_110; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_112 = 5'hc == index_addr ? v2_12 : _GEN_111; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_113 = 5'hd == index_addr ? v2_13 : _GEN_112; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_114 = 5'he == index_addr ? v2_14 : _GEN_113; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_115 = 5'hf == index_addr ? v2_15 : _GEN_114; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_116 = 5'h10 == index_addr ? v2_16 : _GEN_115; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_117 = 5'h11 == index_addr ? v2_17 : _GEN_116; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_118 = 5'h12 == index_addr ? v2_18 : _GEN_117; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_119 = 5'h13 == index_addr ? v2_19 : _GEN_118; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_120 = 5'h14 == index_addr ? v2_20 : _GEN_119; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_121 = 5'h15 == index_addr ? v2_21 : _GEN_120; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_122 = 5'h16 == index_addr ? v2_22 : _GEN_121; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_123 = 5'h17 == index_addr ? v2_23 : _GEN_122; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_124 = 5'h18 == index_addr ? v2_24 : _GEN_123; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_125 = 5'h19 == index_addr ? v2_25 : _GEN_124; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_126 = 5'h1a == index_addr ? v2_26 : _GEN_125; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_127 = 5'h1b == index_addr ? v2_27 : _GEN_126; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_128 = 5'h1c == index_addr ? v2_28 : _GEN_127; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_129 = 5'h1d == index_addr ? v2_29 : _GEN_128; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_130 = 5'h1e == index_addr ? v2_30 : _GEN_129; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  _GEN_131 = 5'h1f == index_addr ? v2_31 : _GEN_130; // @[DCache.scala 61:67 DCache.scala 61:67]
-  wire  hit2 = tag_addr == _GEN_99 & _GEN_131; // @[DCache.scala 61:49]
-  wire [8:0] _rdata1_T = {offset_addr, 3'h0}; // @[DCache.scala 62:55]
-  wire [511:0] _GEN_133 = 5'h1 == index_addr ? block1_1 : block1_0; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_134 = 5'h2 == index_addr ? block1_2 : _GEN_133; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_135 = 5'h3 == index_addr ? block1_3 : _GEN_134; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_136 = 5'h4 == index_addr ? block1_4 : _GEN_135; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_137 = 5'h5 == index_addr ? block1_5 : _GEN_136; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_138 = 5'h6 == index_addr ? block1_6 : _GEN_137; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_139 = 5'h7 == index_addr ? block1_7 : _GEN_138; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_140 = 5'h8 == index_addr ? block1_8 : _GEN_139; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_141 = 5'h9 == index_addr ? block1_9 : _GEN_140; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_142 = 5'ha == index_addr ? block1_10 : _GEN_141; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_143 = 5'hb == index_addr ? block1_11 : _GEN_142; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_144 = 5'hc == index_addr ? block1_12 : _GEN_143; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_145 = 5'hd == index_addr ? block1_13 : _GEN_144; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_146 = 5'he == index_addr ? block1_14 : _GEN_145; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_147 = 5'hf == index_addr ? block1_15 : _GEN_146; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_148 = 5'h10 == index_addr ? block1_16 : _GEN_147; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_149 = 5'h11 == index_addr ? block1_17 : _GEN_148; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_150 = 5'h12 == index_addr ? block1_18 : _GEN_149; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_151 = 5'h13 == index_addr ? block1_19 : _GEN_150; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_152 = 5'h14 == index_addr ? block1_20 : _GEN_151; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_153 = 5'h15 == index_addr ? block1_21 : _GEN_152; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_154 = 5'h16 == index_addr ? block1_22 : _GEN_153; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_155 = 5'h17 == index_addr ? block1_23 : _GEN_154; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_156 = 5'h18 == index_addr ? block1_24 : _GEN_155; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_157 = 5'h19 == index_addr ? block1_25 : _GEN_156; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_158 = 5'h1a == index_addr ? block1_26 : _GEN_157; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_159 = 5'h1b == index_addr ? block1_27 : _GEN_158; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_160 = 5'h1c == index_addr ? block1_28 : _GEN_159; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_161 = 5'h1d == index_addr ? block1_29 : _GEN_160; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_162 = 5'h1e == index_addr ? block1_30 : _GEN_161; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _GEN_163 = 5'h1f == index_addr ? block1_31 : _GEN_162; // @[DCache.scala 62:39 DCache.scala 62:39]
-  wire [511:0] _rdata1_T_1 = _GEN_163 >> _rdata1_T; // @[DCache.scala 62:39]
-  wire [63:0] rdata1 = _rdata1_T_1[63:0]; // @[DCache.scala 62:61]
-  wire [511:0] _GEN_165 = 5'h1 == index_addr ? block2_1 : block2_0; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_166 = 5'h2 == index_addr ? block2_2 : _GEN_165; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_167 = 5'h3 == index_addr ? block2_3 : _GEN_166; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_168 = 5'h4 == index_addr ? block2_4 : _GEN_167; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_169 = 5'h5 == index_addr ? block2_5 : _GEN_168; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_170 = 5'h6 == index_addr ? block2_6 : _GEN_169; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_171 = 5'h7 == index_addr ? block2_7 : _GEN_170; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_172 = 5'h8 == index_addr ? block2_8 : _GEN_171; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_173 = 5'h9 == index_addr ? block2_9 : _GEN_172; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_174 = 5'ha == index_addr ? block2_10 : _GEN_173; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_175 = 5'hb == index_addr ? block2_11 : _GEN_174; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_176 = 5'hc == index_addr ? block2_12 : _GEN_175; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_177 = 5'hd == index_addr ? block2_13 : _GEN_176; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_178 = 5'he == index_addr ? block2_14 : _GEN_177; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_179 = 5'hf == index_addr ? block2_15 : _GEN_178; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_180 = 5'h10 == index_addr ? block2_16 : _GEN_179; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_181 = 5'h11 == index_addr ? block2_17 : _GEN_180; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_182 = 5'h12 == index_addr ? block2_18 : _GEN_181; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_183 = 5'h13 == index_addr ? block2_19 : _GEN_182; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_184 = 5'h14 == index_addr ? block2_20 : _GEN_183; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_185 = 5'h15 == index_addr ? block2_21 : _GEN_184; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_186 = 5'h16 == index_addr ? block2_22 : _GEN_185; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_187 = 5'h17 == index_addr ? block2_23 : _GEN_186; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_188 = 5'h18 == index_addr ? block2_24 : _GEN_187; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_189 = 5'h19 == index_addr ? block2_25 : _GEN_188; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_190 = 5'h1a == index_addr ? block2_26 : _GEN_189; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_191 = 5'h1b == index_addr ? block2_27 : _GEN_190; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_192 = 5'h1c == index_addr ? block2_28 : _GEN_191; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_193 = 5'h1d == index_addr ? block2_29 : _GEN_192; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_194 = 5'h1e == index_addr ? block2_30 : _GEN_193; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _GEN_195 = 5'h1f == index_addr ? block2_31 : _GEN_194; // @[DCache.scala 63:39 DCache.scala 63:39]
-  wire [511:0] _rdata2_T_1 = _GEN_195 >> _rdata1_T; // @[DCache.scala 63:39]
-  wire [63:0] rdata2 = _rdata2_T_1[63:0]; // @[DCache.scala 63:61]
-  reg [1:0] state; // @[DCache.scala 66:24]
-  wire  hit = hit1 | hit2; // @[DCache.scala 68:28]
-  wire [63:0] _rdata_T = hit1 ? rdata1 : 64'h0; // @[DCache.scala 69:44]
-  reg  not_en_yet; // @[DCache.scala 71:30]
-  wire  _not_en_yet_T = io_dmem_en ? 1'h0 : not_en_yet; // @[DCache.scala 72:27]
-  wire  _age1_T = hit1 ^ hit2; // @[DCache.scala 78:35]
-  wire  _GEN_197 = 5'h1 == index_addr ? age1_1 : age1_0; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_198 = 5'h2 == index_addr ? age1_2 : _GEN_197; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_199 = 5'h3 == index_addr ? age1_3 : _GEN_198; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_200 = 5'h4 == index_addr ? age1_4 : _GEN_199; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_201 = 5'h5 == index_addr ? age1_5 : _GEN_200; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_202 = 5'h6 == index_addr ? age1_6 : _GEN_201; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_203 = 5'h7 == index_addr ? age1_7 : _GEN_202; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_204 = 5'h8 == index_addr ? age1_8 : _GEN_203; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_205 = 5'h9 == index_addr ? age1_9 : _GEN_204; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_206 = 5'ha == index_addr ? age1_10 : _GEN_205; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_207 = 5'hb == index_addr ? age1_11 : _GEN_206; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_208 = 5'hc == index_addr ? age1_12 : _GEN_207; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_209 = 5'hd == index_addr ? age1_13 : _GEN_208; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_210 = 5'he == index_addr ? age1_14 : _GEN_209; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_211 = 5'hf == index_addr ? age1_15 : _GEN_210; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_212 = 5'h10 == index_addr ? age1_16 : _GEN_211; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_213 = 5'h11 == index_addr ? age1_17 : _GEN_212; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_214 = 5'h12 == index_addr ? age1_18 : _GEN_213; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_215 = 5'h13 == index_addr ? age1_19 : _GEN_214; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_216 = 5'h14 == index_addr ? age1_20 : _GEN_215; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_217 = 5'h15 == index_addr ? age1_21 : _GEN_216; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_218 = 5'h16 == index_addr ? age1_22 : _GEN_217; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_219 = 5'h17 == index_addr ? age1_23 : _GEN_218; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_220 = 5'h18 == index_addr ? age1_24 : _GEN_219; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_221 = 5'h19 == index_addr ? age1_25 : _GEN_220; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_222 = 5'h1a == index_addr ? age1_26 : _GEN_221; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_223 = 5'h1b == index_addr ? age1_27 : _GEN_222; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_224 = 5'h1c == index_addr ? age1_28 : _GEN_223; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_225 = 5'h1d == index_addr ? age1_29 : _GEN_224; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_226 = 5'h1e == index_addr ? age1_30 : _GEN_225; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_227 = 5'h1f == index_addr ? age1_31 : _GEN_226; // @[DCache.scala 78:28 DCache.scala 78:28]
-  wire  _GEN_261 = 5'h1 == index_addr ? age2_1 : age2_0; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_262 = 5'h2 == index_addr ? age2_2 : _GEN_261; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_263 = 5'h3 == index_addr ? age2_3 : _GEN_262; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_264 = 5'h4 == index_addr ? age2_4 : _GEN_263; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_265 = 5'h5 == index_addr ? age2_5 : _GEN_264; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_266 = 5'h6 == index_addr ? age2_6 : _GEN_265; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_267 = 5'h7 == index_addr ? age2_7 : _GEN_266; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_268 = 5'h8 == index_addr ? age2_8 : _GEN_267; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_269 = 5'h9 == index_addr ? age2_9 : _GEN_268; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_270 = 5'ha == index_addr ? age2_10 : _GEN_269; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_271 = 5'hb == index_addr ? age2_11 : _GEN_270; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_272 = 5'hc == index_addr ? age2_12 : _GEN_271; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_273 = 5'hd == index_addr ? age2_13 : _GEN_272; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_274 = 5'he == index_addr ? age2_14 : _GEN_273; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_275 = 5'hf == index_addr ? age2_15 : _GEN_274; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_276 = 5'h10 == index_addr ? age2_16 : _GEN_275; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_277 = 5'h11 == index_addr ? age2_17 : _GEN_276; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_278 = 5'h12 == index_addr ? age2_18 : _GEN_277; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_279 = 5'h13 == index_addr ? age2_19 : _GEN_278; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_280 = 5'h14 == index_addr ? age2_20 : _GEN_279; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_281 = 5'h15 == index_addr ? age2_21 : _GEN_280; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_282 = 5'h16 == index_addr ? age2_22 : _GEN_281; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_283 = 5'h17 == index_addr ? age2_23 : _GEN_282; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_284 = 5'h18 == index_addr ? age2_24 : _GEN_283; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_285 = 5'h19 == index_addr ? age2_25 : _GEN_284; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_286 = 5'h1a == index_addr ? age2_26 : _GEN_285; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_287 = 5'h1b == index_addr ? age2_27 : _GEN_286; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_288 = 5'h1c == index_addr ? age2_28 : _GEN_287; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_289 = 5'h1d == index_addr ? age2_29 : _GEN_288; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_290 = 5'h1e == index_addr ? age2_30 : _GEN_289; // @[DCache.scala 79:28 DCache.scala 79:28]
-  wire  _GEN_291 = 5'h1f == index_addr ? age2_31 : _GEN_290; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire [52:0] tag_addr = addr[63:11]; // @[DCache.scala 46:27]
+  wire [4:0] index_addr = addr[10:6]; // @[DCache.scala 47:27]
+  wire [5:0] offset_addr = addr[5:0]; // @[DCache.scala 48:27]
+  reg  v1_0; // @[DCache.scala 50:26]
+  reg  v1_1; // @[DCache.scala 50:26]
+  reg  v1_2; // @[DCache.scala 50:26]
+  reg  v1_3; // @[DCache.scala 50:26]
+  reg  v1_4; // @[DCache.scala 50:26]
+  reg  v1_5; // @[DCache.scala 50:26]
+  reg  v1_6; // @[DCache.scala 50:26]
+  reg  v1_7; // @[DCache.scala 50:26]
+  reg  v1_8; // @[DCache.scala 50:26]
+  reg  v1_9; // @[DCache.scala 50:26]
+  reg  v1_10; // @[DCache.scala 50:26]
+  reg  v1_11; // @[DCache.scala 50:26]
+  reg  v1_12; // @[DCache.scala 50:26]
+  reg  v1_13; // @[DCache.scala 50:26]
+  reg  v1_14; // @[DCache.scala 50:26]
+  reg  v1_15; // @[DCache.scala 50:26]
+  reg  v1_16; // @[DCache.scala 50:26]
+  reg  v1_17; // @[DCache.scala 50:26]
+  reg  v1_18; // @[DCache.scala 50:26]
+  reg  v1_19; // @[DCache.scala 50:26]
+  reg  v1_20; // @[DCache.scala 50:26]
+  reg  v1_21; // @[DCache.scala 50:26]
+  reg  v1_22; // @[DCache.scala 50:26]
+  reg  v1_23; // @[DCache.scala 50:26]
+  reg  v1_24; // @[DCache.scala 50:26]
+  reg  v1_25; // @[DCache.scala 50:26]
+  reg  v1_26; // @[DCache.scala 50:26]
+  reg  v1_27; // @[DCache.scala 50:26]
+  reg  v1_28; // @[DCache.scala 50:26]
+  reg  v1_29; // @[DCache.scala 50:26]
+  reg  v1_30; // @[DCache.scala 50:26]
+  reg  v1_31; // @[DCache.scala 50:26]
+  reg  d1_0; // @[DCache.scala 51:26]
+  reg  d1_1; // @[DCache.scala 51:26]
+  reg  d1_2; // @[DCache.scala 51:26]
+  reg  d1_3; // @[DCache.scala 51:26]
+  reg  d1_4; // @[DCache.scala 51:26]
+  reg  d1_5; // @[DCache.scala 51:26]
+  reg  d1_6; // @[DCache.scala 51:26]
+  reg  d1_7; // @[DCache.scala 51:26]
+  reg  d1_8; // @[DCache.scala 51:26]
+  reg  d1_9; // @[DCache.scala 51:26]
+  reg  d1_10; // @[DCache.scala 51:26]
+  reg  d1_11; // @[DCache.scala 51:26]
+  reg  d1_12; // @[DCache.scala 51:26]
+  reg  d1_13; // @[DCache.scala 51:26]
+  reg  d1_14; // @[DCache.scala 51:26]
+  reg  d1_15; // @[DCache.scala 51:26]
+  reg  d1_16; // @[DCache.scala 51:26]
+  reg  d1_17; // @[DCache.scala 51:26]
+  reg  d1_18; // @[DCache.scala 51:26]
+  reg  d1_19; // @[DCache.scala 51:26]
+  reg  d1_20; // @[DCache.scala 51:26]
+  reg  d1_21; // @[DCache.scala 51:26]
+  reg  d1_22; // @[DCache.scala 51:26]
+  reg  d1_23; // @[DCache.scala 51:26]
+  reg  d1_24; // @[DCache.scala 51:26]
+  reg  d1_25; // @[DCache.scala 51:26]
+  reg  d1_26; // @[DCache.scala 51:26]
+  reg  d1_27; // @[DCache.scala 51:26]
+  reg  d1_28; // @[DCache.scala 51:26]
+  reg  d1_29; // @[DCache.scala 51:26]
+  reg  d1_30; // @[DCache.scala 51:26]
+  reg  d1_31; // @[DCache.scala 51:26]
+  reg  age1_0; // @[DCache.scala 52:26]
+  reg  age1_1; // @[DCache.scala 52:26]
+  reg  age1_2; // @[DCache.scala 52:26]
+  reg  age1_3; // @[DCache.scala 52:26]
+  reg  age1_4; // @[DCache.scala 52:26]
+  reg  age1_5; // @[DCache.scala 52:26]
+  reg  age1_6; // @[DCache.scala 52:26]
+  reg  age1_7; // @[DCache.scala 52:26]
+  reg  age1_8; // @[DCache.scala 52:26]
+  reg  age1_9; // @[DCache.scala 52:26]
+  reg  age1_10; // @[DCache.scala 52:26]
+  reg  age1_11; // @[DCache.scala 52:26]
+  reg  age1_12; // @[DCache.scala 52:26]
+  reg  age1_13; // @[DCache.scala 52:26]
+  reg  age1_14; // @[DCache.scala 52:26]
+  reg  age1_15; // @[DCache.scala 52:26]
+  reg  age1_16; // @[DCache.scala 52:26]
+  reg  age1_17; // @[DCache.scala 52:26]
+  reg  age1_18; // @[DCache.scala 52:26]
+  reg  age1_19; // @[DCache.scala 52:26]
+  reg  age1_20; // @[DCache.scala 52:26]
+  reg  age1_21; // @[DCache.scala 52:26]
+  reg  age1_22; // @[DCache.scala 52:26]
+  reg  age1_23; // @[DCache.scala 52:26]
+  reg  age1_24; // @[DCache.scala 52:26]
+  reg  age1_25; // @[DCache.scala 52:26]
+  reg  age1_26; // @[DCache.scala 52:26]
+  reg  age1_27; // @[DCache.scala 52:26]
+  reg  age1_28; // @[DCache.scala 52:26]
+  reg  age1_29; // @[DCache.scala 52:26]
+  reg  age1_30; // @[DCache.scala 52:26]
+  reg  age1_31; // @[DCache.scala 52:26]
+  reg [52:0] tag1_0; // @[DCache.scala 53:26]
+  reg [52:0] tag1_1; // @[DCache.scala 53:26]
+  reg [52:0] tag1_2; // @[DCache.scala 53:26]
+  reg [52:0] tag1_3; // @[DCache.scala 53:26]
+  reg [52:0] tag1_4; // @[DCache.scala 53:26]
+  reg [52:0] tag1_5; // @[DCache.scala 53:26]
+  reg [52:0] tag1_6; // @[DCache.scala 53:26]
+  reg [52:0] tag1_7; // @[DCache.scala 53:26]
+  reg [52:0] tag1_8; // @[DCache.scala 53:26]
+  reg [52:0] tag1_9; // @[DCache.scala 53:26]
+  reg [52:0] tag1_10; // @[DCache.scala 53:26]
+  reg [52:0] tag1_11; // @[DCache.scala 53:26]
+  reg [52:0] tag1_12; // @[DCache.scala 53:26]
+  reg [52:0] tag1_13; // @[DCache.scala 53:26]
+  reg [52:0] tag1_14; // @[DCache.scala 53:26]
+  reg [52:0] tag1_15; // @[DCache.scala 53:26]
+  reg [52:0] tag1_16; // @[DCache.scala 53:26]
+  reg [52:0] tag1_17; // @[DCache.scala 53:26]
+  reg [52:0] tag1_18; // @[DCache.scala 53:26]
+  reg [52:0] tag1_19; // @[DCache.scala 53:26]
+  reg [52:0] tag1_20; // @[DCache.scala 53:26]
+  reg [52:0] tag1_21; // @[DCache.scala 53:26]
+  reg [52:0] tag1_22; // @[DCache.scala 53:26]
+  reg [52:0] tag1_23; // @[DCache.scala 53:26]
+  reg [52:0] tag1_24; // @[DCache.scala 53:26]
+  reg [52:0] tag1_25; // @[DCache.scala 53:26]
+  reg [52:0] tag1_26; // @[DCache.scala 53:26]
+  reg [52:0] tag1_27; // @[DCache.scala 53:26]
+  reg [52:0] tag1_28; // @[DCache.scala 53:26]
+  reg [52:0] tag1_29; // @[DCache.scala 53:26]
+  reg [52:0] tag1_30; // @[DCache.scala 53:26]
+  reg [52:0] tag1_31; // @[DCache.scala 53:26]
+  reg [511:0] block1_0; // @[DCache.scala 54:26]
+  reg [511:0] block1_1; // @[DCache.scala 54:26]
+  reg [511:0] block1_2; // @[DCache.scala 54:26]
+  reg [511:0] block1_3; // @[DCache.scala 54:26]
+  reg [511:0] block1_4; // @[DCache.scala 54:26]
+  reg [511:0] block1_5; // @[DCache.scala 54:26]
+  reg [511:0] block1_6; // @[DCache.scala 54:26]
+  reg [511:0] block1_7; // @[DCache.scala 54:26]
+  reg [511:0] block1_8; // @[DCache.scala 54:26]
+  reg [511:0] block1_9; // @[DCache.scala 54:26]
+  reg [511:0] block1_10; // @[DCache.scala 54:26]
+  reg [511:0] block1_11; // @[DCache.scala 54:26]
+  reg [511:0] block1_12; // @[DCache.scala 54:26]
+  reg [511:0] block1_13; // @[DCache.scala 54:26]
+  reg [511:0] block1_14; // @[DCache.scala 54:26]
+  reg [511:0] block1_15; // @[DCache.scala 54:26]
+  reg [511:0] block1_16; // @[DCache.scala 54:26]
+  reg [511:0] block1_17; // @[DCache.scala 54:26]
+  reg [511:0] block1_18; // @[DCache.scala 54:26]
+  reg [511:0] block1_19; // @[DCache.scala 54:26]
+  reg [511:0] block1_20; // @[DCache.scala 54:26]
+  reg [511:0] block1_21; // @[DCache.scala 54:26]
+  reg [511:0] block1_22; // @[DCache.scala 54:26]
+  reg [511:0] block1_23; // @[DCache.scala 54:26]
+  reg [511:0] block1_24; // @[DCache.scala 54:26]
+  reg [511:0] block1_25; // @[DCache.scala 54:26]
+  reg [511:0] block1_26; // @[DCache.scala 54:26]
+  reg [511:0] block1_27; // @[DCache.scala 54:26]
+  reg [511:0] block1_28; // @[DCache.scala 54:26]
+  reg [511:0] block1_29; // @[DCache.scala 54:26]
+  reg [511:0] block1_30; // @[DCache.scala 54:26]
+  reg [511:0] block1_31; // @[DCache.scala 54:26]
+  reg  v2_0; // @[DCache.scala 55:26]
+  reg  v2_1; // @[DCache.scala 55:26]
+  reg  v2_2; // @[DCache.scala 55:26]
+  reg  v2_3; // @[DCache.scala 55:26]
+  reg  v2_4; // @[DCache.scala 55:26]
+  reg  v2_5; // @[DCache.scala 55:26]
+  reg  v2_6; // @[DCache.scala 55:26]
+  reg  v2_7; // @[DCache.scala 55:26]
+  reg  v2_8; // @[DCache.scala 55:26]
+  reg  v2_9; // @[DCache.scala 55:26]
+  reg  v2_10; // @[DCache.scala 55:26]
+  reg  v2_11; // @[DCache.scala 55:26]
+  reg  v2_12; // @[DCache.scala 55:26]
+  reg  v2_13; // @[DCache.scala 55:26]
+  reg  v2_14; // @[DCache.scala 55:26]
+  reg  v2_15; // @[DCache.scala 55:26]
+  reg  v2_16; // @[DCache.scala 55:26]
+  reg  v2_17; // @[DCache.scala 55:26]
+  reg  v2_18; // @[DCache.scala 55:26]
+  reg  v2_19; // @[DCache.scala 55:26]
+  reg  v2_20; // @[DCache.scala 55:26]
+  reg  v2_21; // @[DCache.scala 55:26]
+  reg  v2_22; // @[DCache.scala 55:26]
+  reg  v2_23; // @[DCache.scala 55:26]
+  reg  v2_24; // @[DCache.scala 55:26]
+  reg  v2_25; // @[DCache.scala 55:26]
+  reg  v2_26; // @[DCache.scala 55:26]
+  reg  v2_27; // @[DCache.scala 55:26]
+  reg  v2_28; // @[DCache.scala 55:26]
+  reg  v2_29; // @[DCache.scala 55:26]
+  reg  v2_30; // @[DCache.scala 55:26]
+  reg  v2_31; // @[DCache.scala 55:26]
+  reg  d2_0; // @[DCache.scala 56:26]
+  reg  d2_1; // @[DCache.scala 56:26]
+  reg  d2_2; // @[DCache.scala 56:26]
+  reg  d2_3; // @[DCache.scala 56:26]
+  reg  d2_4; // @[DCache.scala 56:26]
+  reg  d2_5; // @[DCache.scala 56:26]
+  reg  d2_6; // @[DCache.scala 56:26]
+  reg  d2_7; // @[DCache.scala 56:26]
+  reg  d2_8; // @[DCache.scala 56:26]
+  reg  d2_9; // @[DCache.scala 56:26]
+  reg  d2_10; // @[DCache.scala 56:26]
+  reg  d2_11; // @[DCache.scala 56:26]
+  reg  d2_12; // @[DCache.scala 56:26]
+  reg  d2_13; // @[DCache.scala 56:26]
+  reg  d2_14; // @[DCache.scala 56:26]
+  reg  d2_15; // @[DCache.scala 56:26]
+  reg  d2_16; // @[DCache.scala 56:26]
+  reg  d2_17; // @[DCache.scala 56:26]
+  reg  d2_18; // @[DCache.scala 56:26]
+  reg  d2_19; // @[DCache.scala 56:26]
+  reg  d2_20; // @[DCache.scala 56:26]
+  reg  d2_21; // @[DCache.scala 56:26]
+  reg  d2_22; // @[DCache.scala 56:26]
+  reg  d2_23; // @[DCache.scala 56:26]
+  reg  d2_24; // @[DCache.scala 56:26]
+  reg  d2_25; // @[DCache.scala 56:26]
+  reg  d2_26; // @[DCache.scala 56:26]
+  reg  d2_27; // @[DCache.scala 56:26]
+  reg  d2_28; // @[DCache.scala 56:26]
+  reg  d2_29; // @[DCache.scala 56:26]
+  reg  d2_30; // @[DCache.scala 56:26]
+  reg  d2_31; // @[DCache.scala 56:26]
+  reg  age2_0; // @[DCache.scala 57:26]
+  reg  age2_1; // @[DCache.scala 57:26]
+  reg  age2_2; // @[DCache.scala 57:26]
+  reg  age2_3; // @[DCache.scala 57:26]
+  reg  age2_4; // @[DCache.scala 57:26]
+  reg  age2_5; // @[DCache.scala 57:26]
+  reg  age2_6; // @[DCache.scala 57:26]
+  reg  age2_7; // @[DCache.scala 57:26]
+  reg  age2_8; // @[DCache.scala 57:26]
+  reg  age2_9; // @[DCache.scala 57:26]
+  reg  age2_10; // @[DCache.scala 57:26]
+  reg  age2_11; // @[DCache.scala 57:26]
+  reg  age2_12; // @[DCache.scala 57:26]
+  reg  age2_13; // @[DCache.scala 57:26]
+  reg  age2_14; // @[DCache.scala 57:26]
+  reg  age2_15; // @[DCache.scala 57:26]
+  reg  age2_16; // @[DCache.scala 57:26]
+  reg  age2_17; // @[DCache.scala 57:26]
+  reg  age2_18; // @[DCache.scala 57:26]
+  reg  age2_19; // @[DCache.scala 57:26]
+  reg  age2_20; // @[DCache.scala 57:26]
+  reg  age2_21; // @[DCache.scala 57:26]
+  reg  age2_22; // @[DCache.scala 57:26]
+  reg  age2_23; // @[DCache.scala 57:26]
+  reg  age2_24; // @[DCache.scala 57:26]
+  reg  age2_25; // @[DCache.scala 57:26]
+  reg  age2_26; // @[DCache.scala 57:26]
+  reg  age2_27; // @[DCache.scala 57:26]
+  reg  age2_28; // @[DCache.scala 57:26]
+  reg  age2_29; // @[DCache.scala 57:26]
+  reg  age2_30; // @[DCache.scala 57:26]
+  reg  age2_31; // @[DCache.scala 57:26]
+  reg [52:0] tag2_0; // @[DCache.scala 58:26]
+  reg [52:0] tag2_1; // @[DCache.scala 58:26]
+  reg [52:0] tag2_2; // @[DCache.scala 58:26]
+  reg [52:0] tag2_3; // @[DCache.scala 58:26]
+  reg [52:0] tag2_4; // @[DCache.scala 58:26]
+  reg [52:0] tag2_5; // @[DCache.scala 58:26]
+  reg [52:0] tag2_6; // @[DCache.scala 58:26]
+  reg [52:0] tag2_7; // @[DCache.scala 58:26]
+  reg [52:0] tag2_8; // @[DCache.scala 58:26]
+  reg [52:0] tag2_9; // @[DCache.scala 58:26]
+  reg [52:0] tag2_10; // @[DCache.scala 58:26]
+  reg [52:0] tag2_11; // @[DCache.scala 58:26]
+  reg [52:0] tag2_12; // @[DCache.scala 58:26]
+  reg [52:0] tag2_13; // @[DCache.scala 58:26]
+  reg [52:0] tag2_14; // @[DCache.scala 58:26]
+  reg [52:0] tag2_15; // @[DCache.scala 58:26]
+  reg [52:0] tag2_16; // @[DCache.scala 58:26]
+  reg [52:0] tag2_17; // @[DCache.scala 58:26]
+  reg [52:0] tag2_18; // @[DCache.scala 58:26]
+  reg [52:0] tag2_19; // @[DCache.scala 58:26]
+  reg [52:0] tag2_20; // @[DCache.scala 58:26]
+  reg [52:0] tag2_21; // @[DCache.scala 58:26]
+  reg [52:0] tag2_22; // @[DCache.scala 58:26]
+  reg [52:0] tag2_23; // @[DCache.scala 58:26]
+  reg [52:0] tag2_24; // @[DCache.scala 58:26]
+  reg [52:0] tag2_25; // @[DCache.scala 58:26]
+  reg [52:0] tag2_26; // @[DCache.scala 58:26]
+  reg [52:0] tag2_27; // @[DCache.scala 58:26]
+  reg [52:0] tag2_28; // @[DCache.scala 58:26]
+  reg [52:0] tag2_29; // @[DCache.scala 58:26]
+  reg [52:0] tag2_30; // @[DCache.scala 58:26]
+  reg [52:0] tag2_31; // @[DCache.scala 58:26]
+  reg [511:0] block2_0; // @[DCache.scala 59:26]
+  reg [511:0] block2_1; // @[DCache.scala 59:26]
+  reg [511:0] block2_2; // @[DCache.scala 59:26]
+  reg [511:0] block2_3; // @[DCache.scala 59:26]
+  reg [511:0] block2_4; // @[DCache.scala 59:26]
+  reg [511:0] block2_5; // @[DCache.scala 59:26]
+  reg [511:0] block2_6; // @[DCache.scala 59:26]
+  reg [511:0] block2_7; // @[DCache.scala 59:26]
+  reg [511:0] block2_8; // @[DCache.scala 59:26]
+  reg [511:0] block2_9; // @[DCache.scala 59:26]
+  reg [511:0] block2_10; // @[DCache.scala 59:26]
+  reg [511:0] block2_11; // @[DCache.scala 59:26]
+  reg [511:0] block2_12; // @[DCache.scala 59:26]
+  reg [511:0] block2_13; // @[DCache.scala 59:26]
+  reg [511:0] block2_14; // @[DCache.scala 59:26]
+  reg [511:0] block2_15; // @[DCache.scala 59:26]
+  reg [511:0] block2_16; // @[DCache.scala 59:26]
+  reg [511:0] block2_17; // @[DCache.scala 59:26]
+  reg [511:0] block2_18; // @[DCache.scala 59:26]
+  reg [511:0] block2_19; // @[DCache.scala 59:26]
+  reg [511:0] block2_20; // @[DCache.scala 59:26]
+  reg [511:0] block2_21; // @[DCache.scala 59:26]
+  reg [511:0] block2_22; // @[DCache.scala 59:26]
+  reg [511:0] block2_23; // @[DCache.scala 59:26]
+  reg [511:0] block2_24; // @[DCache.scala 59:26]
+  reg [511:0] block2_25; // @[DCache.scala 59:26]
+  reg [511:0] block2_26; // @[DCache.scala 59:26]
+  reg [511:0] block2_27; // @[DCache.scala 59:26]
+  reg [511:0] block2_28; // @[DCache.scala 59:26]
+  reg [511:0] block2_29; // @[DCache.scala 59:26]
+  reg [511:0] block2_30; // @[DCache.scala 59:26]
+  reg [511:0] block2_31; // @[DCache.scala 59:26]
+  wire [52:0] _GEN_5 = 5'h1 == index_addr ? tag1_1 : tag1_0; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_6 = 5'h2 == index_addr ? tag1_2 : _GEN_5; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_7 = 5'h3 == index_addr ? tag1_3 : _GEN_6; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_8 = 5'h4 == index_addr ? tag1_4 : _GEN_7; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_9 = 5'h5 == index_addr ? tag1_5 : _GEN_8; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_10 = 5'h6 == index_addr ? tag1_6 : _GEN_9; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_11 = 5'h7 == index_addr ? tag1_7 : _GEN_10; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_12 = 5'h8 == index_addr ? tag1_8 : _GEN_11; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_13 = 5'h9 == index_addr ? tag1_9 : _GEN_12; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_14 = 5'ha == index_addr ? tag1_10 : _GEN_13; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_15 = 5'hb == index_addr ? tag1_11 : _GEN_14; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_16 = 5'hc == index_addr ? tag1_12 : _GEN_15; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_17 = 5'hd == index_addr ? tag1_13 : _GEN_16; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_18 = 5'he == index_addr ? tag1_14 : _GEN_17; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_19 = 5'hf == index_addr ? tag1_15 : _GEN_18; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_20 = 5'h10 == index_addr ? tag1_16 : _GEN_19; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_21 = 5'h11 == index_addr ? tag1_17 : _GEN_20; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_22 = 5'h12 == index_addr ? tag1_18 : _GEN_21; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_23 = 5'h13 == index_addr ? tag1_19 : _GEN_22; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_24 = 5'h14 == index_addr ? tag1_20 : _GEN_23; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_25 = 5'h15 == index_addr ? tag1_21 : _GEN_24; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_26 = 5'h16 == index_addr ? tag1_22 : _GEN_25; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_27 = 5'h17 == index_addr ? tag1_23 : _GEN_26; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_28 = 5'h18 == index_addr ? tag1_24 : _GEN_27; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_29 = 5'h19 == index_addr ? tag1_25 : _GEN_28; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_30 = 5'h1a == index_addr ? tag1_26 : _GEN_29; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_31 = 5'h1b == index_addr ? tag1_27 : _GEN_30; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_32 = 5'h1c == index_addr ? tag1_28 : _GEN_31; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_33 = 5'h1d == index_addr ? tag1_29 : _GEN_32; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_34 = 5'h1e == index_addr ? tag1_30 : _GEN_33; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire [52:0] _GEN_35 = 5'h1f == index_addr ? tag1_31 : _GEN_34; // @[DCache.scala 61:28 DCache.scala 61:28]
+  wire  _GEN_37 = 5'h1 == index_addr ? v1_1 : v1_0; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_38 = 5'h2 == index_addr ? v1_2 : _GEN_37; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_39 = 5'h3 == index_addr ? v1_3 : _GEN_38; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_40 = 5'h4 == index_addr ? v1_4 : _GEN_39; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_41 = 5'h5 == index_addr ? v1_5 : _GEN_40; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_42 = 5'h6 == index_addr ? v1_6 : _GEN_41; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_43 = 5'h7 == index_addr ? v1_7 : _GEN_42; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_44 = 5'h8 == index_addr ? v1_8 : _GEN_43; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_45 = 5'h9 == index_addr ? v1_9 : _GEN_44; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_46 = 5'ha == index_addr ? v1_10 : _GEN_45; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_47 = 5'hb == index_addr ? v1_11 : _GEN_46; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_48 = 5'hc == index_addr ? v1_12 : _GEN_47; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_49 = 5'hd == index_addr ? v1_13 : _GEN_48; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_50 = 5'he == index_addr ? v1_14 : _GEN_49; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_51 = 5'hf == index_addr ? v1_15 : _GEN_50; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_52 = 5'h10 == index_addr ? v1_16 : _GEN_51; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_53 = 5'h11 == index_addr ? v1_17 : _GEN_52; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_54 = 5'h12 == index_addr ? v1_18 : _GEN_53; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_55 = 5'h13 == index_addr ? v1_19 : _GEN_54; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_56 = 5'h14 == index_addr ? v1_20 : _GEN_55; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_57 = 5'h15 == index_addr ? v1_21 : _GEN_56; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_58 = 5'h16 == index_addr ? v1_22 : _GEN_57; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_59 = 5'h17 == index_addr ? v1_23 : _GEN_58; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_60 = 5'h18 == index_addr ? v1_24 : _GEN_59; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_61 = 5'h19 == index_addr ? v1_25 : _GEN_60; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_62 = 5'h1a == index_addr ? v1_26 : _GEN_61; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_63 = 5'h1b == index_addr ? v1_27 : _GEN_62; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_64 = 5'h1c == index_addr ? v1_28 : _GEN_63; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_65 = 5'h1d == index_addr ? v1_29 : _GEN_64; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_66 = 5'h1e == index_addr ? v1_30 : _GEN_65; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  _GEN_67 = 5'h1f == index_addr ? v1_31 : _GEN_66; // @[DCache.scala 61:67 DCache.scala 61:67]
+  wire  hit1 = tag_addr == _GEN_35 & _GEN_67; // @[DCache.scala 61:49]
+  wire [52:0] _GEN_69 = 5'h1 == index_addr ? tag2_1 : tag2_0; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_70 = 5'h2 == index_addr ? tag2_2 : _GEN_69; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_71 = 5'h3 == index_addr ? tag2_3 : _GEN_70; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_72 = 5'h4 == index_addr ? tag2_4 : _GEN_71; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_73 = 5'h5 == index_addr ? tag2_5 : _GEN_72; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_74 = 5'h6 == index_addr ? tag2_6 : _GEN_73; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_75 = 5'h7 == index_addr ? tag2_7 : _GEN_74; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_76 = 5'h8 == index_addr ? tag2_8 : _GEN_75; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_77 = 5'h9 == index_addr ? tag2_9 : _GEN_76; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_78 = 5'ha == index_addr ? tag2_10 : _GEN_77; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_79 = 5'hb == index_addr ? tag2_11 : _GEN_78; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_80 = 5'hc == index_addr ? tag2_12 : _GEN_79; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_81 = 5'hd == index_addr ? tag2_13 : _GEN_80; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_82 = 5'he == index_addr ? tag2_14 : _GEN_81; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_83 = 5'hf == index_addr ? tag2_15 : _GEN_82; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_84 = 5'h10 == index_addr ? tag2_16 : _GEN_83; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_85 = 5'h11 == index_addr ? tag2_17 : _GEN_84; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_86 = 5'h12 == index_addr ? tag2_18 : _GEN_85; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_87 = 5'h13 == index_addr ? tag2_19 : _GEN_86; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_88 = 5'h14 == index_addr ? tag2_20 : _GEN_87; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_89 = 5'h15 == index_addr ? tag2_21 : _GEN_88; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_90 = 5'h16 == index_addr ? tag2_22 : _GEN_89; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_91 = 5'h17 == index_addr ? tag2_23 : _GEN_90; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_92 = 5'h18 == index_addr ? tag2_24 : _GEN_91; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_93 = 5'h19 == index_addr ? tag2_25 : _GEN_92; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_94 = 5'h1a == index_addr ? tag2_26 : _GEN_93; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_95 = 5'h1b == index_addr ? tag2_27 : _GEN_94; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_96 = 5'h1c == index_addr ? tag2_28 : _GEN_95; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_97 = 5'h1d == index_addr ? tag2_29 : _GEN_96; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_98 = 5'h1e == index_addr ? tag2_30 : _GEN_97; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire [52:0] _GEN_99 = 5'h1f == index_addr ? tag2_31 : _GEN_98; // @[DCache.scala 62:28 DCache.scala 62:28]
+  wire  _GEN_101 = 5'h1 == index_addr ? v2_1 : v2_0; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_102 = 5'h2 == index_addr ? v2_2 : _GEN_101; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_103 = 5'h3 == index_addr ? v2_3 : _GEN_102; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_104 = 5'h4 == index_addr ? v2_4 : _GEN_103; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_105 = 5'h5 == index_addr ? v2_5 : _GEN_104; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_106 = 5'h6 == index_addr ? v2_6 : _GEN_105; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_107 = 5'h7 == index_addr ? v2_7 : _GEN_106; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_108 = 5'h8 == index_addr ? v2_8 : _GEN_107; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_109 = 5'h9 == index_addr ? v2_9 : _GEN_108; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_110 = 5'ha == index_addr ? v2_10 : _GEN_109; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_111 = 5'hb == index_addr ? v2_11 : _GEN_110; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_112 = 5'hc == index_addr ? v2_12 : _GEN_111; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_113 = 5'hd == index_addr ? v2_13 : _GEN_112; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_114 = 5'he == index_addr ? v2_14 : _GEN_113; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_115 = 5'hf == index_addr ? v2_15 : _GEN_114; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_116 = 5'h10 == index_addr ? v2_16 : _GEN_115; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_117 = 5'h11 == index_addr ? v2_17 : _GEN_116; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_118 = 5'h12 == index_addr ? v2_18 : _GEN_117; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_119 = 5'h13 == index_addr ? v2_19 : _GEN_118; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_120 = 5'h14 == index_addr ? v2_20 : _GEN_119; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_121 = 5'h15 == index_addr ? v2_21 : _GEN_120; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_122 = 5'h16 == index_addr ? v2_22 : _GEN_121; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_123 = 5'h17 == index_addr ? v2_23 : _GEN_122; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_124 = 5'h18 == index_addr ? v2_24 : _GEN_123; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_125 = 5'h19 == index_addr ? v2_25 : _GEN_124; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_126 = 5'h1a == index_addr ? v2_26 : _GEN_125; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_127 = 5'h1b == index_addr ? v2_27 : _GEN_126; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_128 = 5'h1c == index_addr ? v2_28 : _GEN_127; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_129 = 5'h1d == index_addr ? v2_29 : _GEN_128; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_130 = 5'h1e == index_addr ? v2_30 : _GEN_129; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  _GEN_131 = 5'h1f == index_addr ? v2_31 : _GEN_130; // @[DCache.scala 62:67 DCache.scala 62:67]
+  wire  hit2 = tag_addr == _GEN_99 & _GEN_131; // @[DCache.scala 62:49]
+  wire [8:0] _rdata1_T = {offset_addr, 3'h0}; // @[DCache.scala 63:55]
+  wire [511:0] _GEN_133 = 5'h1 == index_addr ? block1_1 : block1_0; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_134 = 5'h2 == index_addr ? block1_2 : _GEN_133; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_135 = 5'h3 == index_addr ? block1_3 : _GEN_134; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_136 = 5'h4 == index_addr ? block1_4 : _GEN_135; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_137 = 5'h5 == index_addr ? block1_5 : _GEN_136; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_138 = 5'h6 == index_addr ? block1_6 : _GEN_137; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_139 = 5'h7 == index_addr ? block1_7 : _GEN_138; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_140 = 5'h8 == index_addr ? block1_8 : _GEN_139; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_141 = 5'h9 == index_addr ? block1_9 : _GEN_140; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_142 = 5'ha == index_addr ? block1_10 : _GEN_141; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_143 = 5'hb == index_addr ? block1_11 : _GEN_142; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_144 = 5'hc == index_addr ? block1_12 : _GEN_143; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_145 = 5'hd == index_addr ? block1_13 : _GEN_144; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_146 = 5'he == index_addr ? block1_14 : _GEN_145; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_147 = 5'hf == index_addr ? block1_15 : _GEN_146; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_148 = 5'h10 == index_addr ? block1_16 : _GEN_147; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_149 = 5'h11 == index_addr ? block1_17 : _GEN_148; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_150 = 5'h12 == index_addr ? block1_18 : _GEN_149; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_151 = 5'h13 == index_addr ? block1_19 : _GEN_150; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_152 = 5'h14 == index_addr ? block1_20 : _GEN_151; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_153 = 5'h15 == index_addr ? block1_21 : _GEN_152; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_154 = 5'h16 == index_addr ? block1_22 : _GEN_153; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_155 = 5'h17 == index_addr ? block1_23 : _GEN_154; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_156 = 5'h18 == index_addr ? block1_24 : _GEN_155; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_157 = 5'h19 == index_addr ? block1_25 : _GEN_156; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_158 = 5'h1a == index_addr ? block1_26 : _GEN_157; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_159 = 5'h1b == index_addr ? block1_27 : _GEN_158; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_160 = 5'h1c == index_addr ? block1_28 : _GEN_159; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_161 = 5'h1d == index_addr ? block1_29 : _GEN_160; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_162 = 5'h1e == index_addr ? block1_30 : _GEN_161; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _GEN_163 = 5'h1f == index_addr ? block1_31 : _GEN_162; // @[DCache.scala 63:39 DCache.scala 63:39]
+  wire [511:0] _rdata1_T_1 = _GEN_163 >> _rdata1_T; // @[DCache.scala 63:39]
+  wire [63:0] rdata1 = _rdata1_T_1[63:0]; // @[DCache.scala 63:61]
+  wire [511:0] _GEN_165 = 5'h1 == index_addr ? block2_1 : block2_0; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_166 = 5'h2 == index_addr ? block2_2 : _GEN_165; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_167 = 5'h3 == index_addr ? block2_3 : _GEN_166; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_168 = 5'h4 == index_addr ? block2_4 : _GEN_167; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_169 = 5'h5 == index_addr ? block2_5 : _GEN_168; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_170 = 5'h6 == index_addr ? block2_6 : _GEN_169; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_171 = 5'h7 == index_addr ? block2_7 : _GEN_170; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_172 = 5'h8 == index_addr ? block2_8 : _GEN_171; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_173 = 5'h9 == index_addr ? block2_9 : _GEN_172; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_174 = 5'ha == index_addr ? block2_10 : _GEN_173; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_175 = 5'hb == index_addr ? block2_11 : _GEN_174; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_176 = 5'hc == index_addr ? block2_12 : _GEN_175; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_177 = 5'hd == index_addr ? block2_13 : _GEN_176; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_178 = 5'he == index_addr ? block2_14 : _GEN_177; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_179 = 5'hf == index_addr ? block2_15 : _GEN_178; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_180 = 5'h10 == index_addr ? block2_16 : _GEN_179; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_181 = 5'h11 == index_addr ? block2_17 : _GEN_180; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_182 = 5'h12 == index_addr ? block2_18 : _GEN_181; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_183 = 5'h13 == index_addr ? block2_19 : _GEN_182; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_184 = 5'h14 == index_addr ? block2_20 : _GEN_183; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_185 = 5'h15 == index_addr ? block2_21 : _GEN_184; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_186 = 5'h16 == index_addr ? block2_22 : _GEN_185; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_187 = 5'h17 == index_addr ? block2_23 : _GEN_186; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_188 = 5'h18 == index_addr ? block2_24 : _GEN_187; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_189 = 5'h19 == index_addr ? block2_25 : _GEN_188; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_190 = 5'h1a == index_addr ? block2_26 : _GEN_189; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_191 = 5'h1b == index_addr ? block2_27 : _GEN_190; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_192 = 5'h1c == index_addr ? block2_28 : _GEN_191; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_193 = 5'h1d == index_addr ? block2_29 : _GEN_192; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_194 = 5'h1e == index_addr ? block2_30 : _GEN_193; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _GEN_195 = 5'h1f == index_addr ? block2_31 : _GEN_194; // @[DCache.scala 64:39 DCache.scala 64:39]
+  wire [511:0] _rdata2_T_1 = _GEN_195 >> _rdata1_T; // @[DCache.scala 64:39]
+  wire [63:0] rdata2 = _rdata2_T_1[63:0]; // @[DCache.scala 64:61]
+  reg [1:0] state; // @[DCache.scala 67:24]
+  wire  hit = hit1 | hit2; // @[DCache.scala 69:28]
+  wire [63:0] _rdata_T = hit1 ? rdata1 : 64'h0; // @[DCache.scala 70:44]
+  reg  not_en_yet; // @[DCache.scala 72:30]
+  wire  _not_en_yet_T = io_dmem_en ? 1'h0 : not_en_yet; // @[DCache.scala 73:27]
+  wire  _age1_T = hit1 ^ hit2; // @[DCache.scala 79:35]
+  wire  _GEN_197 = 5'h1 == index_addr ? age1_1 : age1_0; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_198 = 5'h2 == index_addr ? age1_2 : _GEN_197; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_199 = 5'h3 == index_addr ? age1_3 : _GEN_198; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_200 = 5'h4 == index_addr ? age1_4 : _GEN_199; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_201 = 5'h5 == index_addr ? age1_5 : _GEN_200; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_202 = 5'h6 == index_addr ? age1_6 : _GEN_201; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_203 = 5'h7 == index_addr ? age1_7 : _GEN_202; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_204 = 5'h8 == index_addr ? age1_8 : _GEN_203; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_205 = 5'h9 == index_addr ? age1_9 : _GEN_204; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_206 = 5'ha == index_addr ? age1_10 : _GEN_205; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_207 = 5'hb == index_addr ? age1_11 : _GEN_206; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_208 = 5'hc == index_addr ? age1_12 : _GEN_207; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_209 = 5'hd == index_addr ? age1_13 : _GEN_208; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_210 = 5'he == index_addr ? age1_14 : _GEN_209; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_211 = 5'hf == index_addr ? age1_15 : _GEN_210; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_212 = 5'h10 == index_addr ? age1_16 : _GEN_211; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_213 = 5'h11 == index_addr ? age1_17 : _GEN_212; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_214 = 5'h12 == index_addr ? age1_18 : _GEN_213; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_215 = 5'h13 == index_addr ? age1_19 : _GEN_214; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_216 = 5'h14 == index_addr ? age1_20 : _GEN_215; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_217 = 5'h15 == index_addr ? age1_21 : _GEN_216; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_218 = 5'h16 == index_addr ? age1_22 : _GEN_217; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_219 = 5'h17 == index_addr ? age1_23 : _GEN_218; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_220 = 5'h18 == index_addr ? age1_24 : _GEN_219; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_221 = 5'h19 == index_addr ? age1_25 : _GEN_220; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_222 = 5'h1a == index_addr ? age1_26 : _GEN_221; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_223 = 5'h1b == index_addr ? age1_27 : _GEN_222; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_224 = 5'h1c == index_addr ? age1_28 : _GEN_223; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_225 = 5'h1d == index_addr ? age1_29 : _GEN_224; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_226 = 5'h1e == index_addr ? age1_30 : _GEN_225; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_227 = 5'h1f == index_addr ? age1_31 : _GEN_226; // @[DCache.scala 79:28 DCache.scala 79:28]
+  wire  _GEN_261 = 5'h1 == index_addr ? age2_1 : age2_0; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_262 = 5'h2 == index_addr ? age2_2 : _GEN_261; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_263 = 5'h3 == index_addr ? age2_3 : _GEN_262; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_264 = 5'h4 == index_addr ? age2_4 : _GEN_263; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_265 = 5'h5 == index_addr ? age2_5 : _GEN_264; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_266 = 5'h6 == index_addr ? age2_6 : _GEN_265; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_267 = 5'h7 == index_addr ? age2_7 : _GEN_266; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_268 = 5'h8 == index_addr ? age2_8 : _GEN_267; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_269 = 5'h9 == index_addr ? age2_9 : _GEN_268; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_270 = 5'ha == index_addr ? age2_10 : _GEN_269; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_271 = 5'hb == index_addr ? age2_11 : _GEN_270; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_272 = 5'hc == index_addr ? age2_12 : _GEN_271; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_273 = 5'hd == index_addr ? age2_13 : _GEN_272; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_274 = 5'he == index_addr ? age2_14 : _GEN_273; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_275 = 5'hf == index_addr ? age2_15 : _GEN_274; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_276 = 5'h10 == index_addr ? age2_16 : _GEN_275; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_277 = 5'h11 == index_addr ? age2_17 : _GEN_276; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_278 = 5'h12 == index_addr ? age2_18 : _GEN_277; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_279 = 5'h13 == index_addr ? age2_19 : _GEN_278; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_280 = 5'h14 == index_addr ? age2_20 : _GEN_279; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_281 = 5'h15 == index_addr ? age2_21 : _GEN_280; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_282 = 5'h16 == index_addr ? age2_22 : _GEN_281; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_283 = 5'h17 == index_addr ? age2_23 : _GEN_282; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_284 = 5'h18 == index_addr ? age2_24 : _GEN_283; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_285 = 5'h19 == index_addr ? age2_25 : _GEN_284; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_286 = 5'h1a == index_addr ? age2_26 : _GEN_285; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_287 = 5'h1b == index_addr ? age2_27 : _GEN_286; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_288 = 5'h1c == index_addr ? age2_28 : _GEN_287; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_289 = 5'h1d == index_addr ? age2_29 : _GEN_288; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_290 = 5'h1e == index_addr ? age2_30 : _GEN_289; // @[DCache.scala 80:28 DCache.scala 80:28]
+  wire  _GEN_291 = 5'h1f == index_addr ? age2_31 : _GEN_290; // @[DCache.scala 80:28 DCache.scala 80:28]
   wire [1:0] age = {_GEN_291,_GEN_227}; // @[Cat.scala 30:58]
-  wire  updateway2 = age == 2'h1; // @[DCache.scala 83:27]
-  wire  updateway1 = ~updateway2; // @[DCache.scala 84:23]
-  wire  miss = ~hit; // @[DCache.scala 85:23]
-  wire  _GEN_325 = 5'h1 == index_addr ? d1_1 : d1_0; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_326 = 5'h2 == index_addr ? d1_2 : _GEN_325; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_327 = 5'h3 == index_addr ? d1_3 : _GEN_326; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_328 = 5'h4 == index_addr ? d1_4 : _GEN_327; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_329 = 5'h5 == index_addr ? d1_5 : _GEN_328; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_330 = 5'h6 == index_addr ? d1_6 : _GEN_329; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_331 = 5'h7 == index_addr ? d1_7 : _GEN_330; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_332 = 5'h8 == index_addr ? d1_8 : _GEN_331; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_333 = 5'h9 == index_addr ? d1_9 : _GEN_332; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_334 = 5'ha == index_addr ? d1_10 : _GEN_333; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_335 = 5'hb == index_addr ? d1_11 : _GEN_334; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_336 = 5'hc == index_addr ? d1_12 : _GEN_335; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_337 = 5'hd == index_addr ? d1_13 : _GEN_336; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_338 = 5'he == index_addr ? d1_14 : _GEN_337; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_339 = 5'hf == index_addr ? d1_15 : _GEN_338; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_340 = 5'h10 == index_addr ? d1_16 : _GEN_339; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_341 = 5'h11 == index_addr ? d1_17 : _GEN_340; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_342 = 5'h12 == index_addr ? d1_18 : _GEN_341; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_343 = 5'h13 == index_addr ? d1_19 : _GEN_342; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_344 = 5'h14 == index_addr ? d1_20 : _GEN_343; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_345 = 5'h15 == index_addr ? d1_21 : _GEN_344; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_346 = 5'h16 == index_addr ? d1_22 : _GEN_345; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_347 = 5'h17 == index_addr ? d1_23 : _GEN_346; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_348 = 5'h18 == index_addr ? d1_24 : _GEN_347; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_349 = 5'h19 == index_addr ? d1_25 : _GEN_348; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_350 = 5'h1a == index_addr ? d1_26 : _GEN_349; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_351 = 5'h1b == index_addr ? d1_27 : _GEN_350; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_352 = 5'h1c == index_addr ? d1_28 : _GEN_351; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_353 = 5'h1d == index_addr ? d1_29 : _GEN_352; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_354 = 5'h1e == index_addr ? d1_30 : _GEN_353; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_355 = 5'h1f == index_addr ? d1_31 : _GEN_354; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_357 = 5'h1 == index_addr ? d2_1 : d2_0; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_358 = 5'h2 == index_addr ? d2_2 : _GEN_357; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_359 = 5'h3 == index_addr ? d2_3 : _GEN_358; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_360 = 5'h4 == index_addr ? d2_4 : _GEN_359; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_361 = 5'h5 == index_addr ? d2_5 : _GEN_360; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_362 = 5'h6 == index_addr ? d2_6 : _GEN_361; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_363 = 5'h7 == index_addr ? d2_7 : _GEN_362; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_364 = 5'h8 == index_addr ? d2_8 : _GEN_363; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_365 = 5'h9 == index_addr ? d2_9 : _GEN_364; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_366 = 5'ha == index_addr ? d2_10 : _GEN_365; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_367 = 5'hb == index_addr ? d2_11 : _GEN_366; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_368 = 5'hc == index_addr ? d2_12 : _GEN_367; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_369 = 5'hd == index_addr ? d2_13 : _GEN_368; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_370 = 5'he == index_addr ? d2_14 : _GEN_369; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_371 = 5'hf == index_addr ? d2_15 : _GEN_370; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_372 = 5'h10 == index_addr ? d2_16 : _GEN_371; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_373 = 5'h11 == index_addr ? d2_17 : _GEN_372; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_374 = 5'h12 == index_addr ? d2_18 : _GEN_373; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_375 = 5'h13 == index_addr ? d2_19 : _GEN_374; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_376 = 5'h14 == index_addr ? d2_20 : _GEN_375; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_377 = 5'h15 == index_addr ? d2_21 : _GEN_376; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_378 = 5'h16 == index_addr ? d2_22 : _GEN_377; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_379 = 5'h17 == index_addr ? d2_23 : _GEN_378; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_380 = 5'h18 == index_addr ? d2_24 : _GEN_379; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_381 = 5'h19 == index_addr ? d2_25 : _GEN_380; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_382 = 5'h1a == index_addr ? d2_26 : _GEN_381; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_383 = 5'h1b == index_addr ? d2_27 : _GEN_382; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_384 = 5'h1c == index_addr ? d2_28 : _GEN_383; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_385 = 5'h1d == index_addr ? d2_29 : _GEN_384; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_386 = 5'h1e == index_addr ? d2_30 : _GEN_385; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  _GEN_387 = 5'h1f == index_addr ? d2_31 : _GEN_386; // @[DCache.scala 86:26 DCache.scala 86:26]
-  wire  dirty = updateway1 ? _GEN_355 : _GEN_387; // @[DCache.scala 86:26]
+  wire  updateway2 = age == 2'h1; // @[DCache.scala 84:27]
+  wire  updateway1 = ~updateway2; // @[DCache.scala 85:23]
+  wire  miss = ~hit; // @[DCache.scala 86:23]
+  wire  _GEN_325 = 5'h1 == index_addr ? d1_1 : d1_0; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_326 = 5'h2 == index_addr ? d1_2 : _GEN_325; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_327 = 5'h3 == index_addr ? d1_3 : _GEN_326; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_328 = 5'h4 == index_addr ? d1_4 : _GEN_327; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_329 = 5'h5 == index_addr ? d1_5 : _GEN_328; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_330 = 5'h6 == index_addr ? d1_6 : _GEN_329; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_331 = 5'h7 == index_addr ? d1_7 : _GEN_330; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_332 = 5'h8 == index_addr ? d1_8 : _GEN_331; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_333 = 5'h9 == index_addr ? d1_9 : _GEN_332; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_334 = 5'ha == index_addr ? d1_10 : _GEN_333; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_335 = 5'hb == index_addr ? d1_11 : _GEN_334; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_336 = 5'hc == index_addr ? d1_12 : _GEN_335; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_337 = 5'hd == index_addr ? d1_13 : _GEN_336; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_338 = 5'he == index_addr ? d1_14 : _GEN_337; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_339 = 5'hf == index_addr ? d1_15 : _GEN_338; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_340 = 5'h10 == index_addr ? d1_16 : _GEN_339; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_341 = 5'h11 == index_addr ? d1_17 : _GEN_340; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_342 = 5'h12 == index_addr ? d1_18 : _GEN_341; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_343 = 5'h13 == index_addr ? d1_19 : _GEN_342; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_344 = 5'h14 == index_addr ? d1_20 : _GEN_343; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_345 = 5'h15 == index_addr ? d1_21 : _GEN_344; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_346 = 5'h16 == index_addr ? d1_22 : _GEN_345; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_347 = 5'h17 == index_addr ? d1_23 : _GEN_346; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_348 = 5'h18 == index_addr ? d1_24 : _GEN_347; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_349 = 5'h19 == index_addr ? d1_25 : _GEN_348; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_350 = 5'h1a == index_addr ? d1_26 : _GEN_349; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_351 = 5'h1b == index_addr ? d1_27 : _GEN_350; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_352 = 5'h1c == index_addr ? d1_28 : _GEN_351; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_353 = 5'h1d == index_addr ? d1_29 : _GEN_352; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_354 = 5'h1e == index_addr ? d1_30 : _GEN_353; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_355 = 5'h1f == index_addr ? d1_31 : _GEN_354; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_357 = 5'h1 == index_addr ? d2_1 : d2_0; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_358 = 5'h2 == index_addr ? d2_2 : _GEN_357; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_359 = 5'h3 == index_addr ? d2_3 : _GEN_358; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_360 = 5'h4 == index_addr ? d2_4 : _GEN_359; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_361 = 5'h5 == index_addr ? d2_5 : _GEN_360; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_362 = 5'h6 == index_addr ? d2_6 : _GEN_361; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_363 = 5'h7 == index_addr ? d2_7 : _GEN_362; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_364 = 5'h8 == index_addr ? d2_8 : _GEN_363; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_365 = 5'h9 == index_addr ? d2_9 : _GEN_364; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_366 = 5'ha == index_addr ? d2_10 : _GEN_365; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_367 = 5'hb == index_addr ? d2_11 : _GEN_366; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_368 = 5'hc == index_addr ? d2_12 : _GEN_367; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_369 = 5'hd == index_addr ? d2_13 : _GEN_368; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_370 = 5'he == index_addr ? d2_14 : _GEN_369; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_371 = 5'hf == index_addr ? d2_15 : _GEN_370; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_372 = 5'h10 == index_addr ? d2_16 : _GEN_371; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_373 = 5'h11 == index_addr ? d2_17 : _GEN_372; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_374 = 5'h12 == index_addr ? d2_18 : _GEN_373; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_375 = 5'h13 == index_addr ? d2_19 : _GEN_374; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_376 = 5'h14 == index_addr ? d2_20 : _GEN_375; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_377 = 5'h15 == index_addr ? d2_21 : _GEN_376; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_378 = 5'h16 == index_addr ? d2_22 : _GEN_377; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_379 = 5'h17 == index_addr ? d2_23 : _GEN_378; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_380 = 5'h18 == index_addr ? d2_24 : _GEN_379; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_381 = 5'h19 == index_addr ? d2_25 : _GEN_380; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_382 = 5'h1a == index_addr ? d2_26 : _GEN_381; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_383 = 5'h1b == index_addr ? d2_27 : _GEN_382; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_384 = 5'h1c == index_addr ? d2_28 : _GEN_383; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_385 = 5'h1d == index_addr ? d2_29 : _GEN_384; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_386 = 5'h1e == index_addr ? d2_30 : _GEN_385; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  _GEN_387 = 5'h1f == index_addr ? d2_31 : _GEN_386; // @[DCache.scala 87:26 DCache.scala 87:26]
+  wire  dirty = updateway1 ? _GEN_355 : _GEN_387; // @[DCache.scala 87:26]
   wire  _T = 2'h0 == state; // @[Conditional.scala 37:30]
   wire  _T_3 = 2'h1 == state; // @[Conditional.scala 37:30]
   wire  _T_4 = 2'h2 == state; // @[Conditional.scala 37:30]
-  wire [1:0] _GEN_390 = io_axi_rvalid ? 2'h0 : state; // @[DCache.scala 97:33 DCache.scala 97:40 DCache.scala 66:24]
-  wire  update = state == 2'h2 & io_axi_rvalid; // @[DCache.scala 103:39]
-  wire  way1write = hit1 & op; // @[DCache.scala 104:26]
-  wire  way2write = hit2 & op; // @[DCache.scala 105:26]
-  wire  _d1_T = update & updateway1; // @[DCache.scala 106:34]
-  wire  _d2_T = update & updateway2; // @[DCache.scala 107:34]
+  wire [1:0] _GEN_390 = io_axi_rvalid ? 2'h0 : state; // @[DCache.scala 98:33 DCache.scala 98:40 DCache.scala 67:24]
+  wire  update = state == 2'h2 & io_axi_rvalid; // @[DCache.scala 104:39]
+  wire  way1write = hit1 & op; // @[DCache.scala 105:26]
+  wire  way2write = hit2 & op; // @[DCache.scala 106:26]
+  wire  _d1_T = update & updateway1; // @[DCache.scala 107:34]
+  wire  _d2_T = update & updateway2; // @[DCache.scala 108:34]
   wire [7:0] mask64_hi_hi_hi_lo = wm[7] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [7:0] mask64_hi_hi_lo = wm[6] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [7:0] mask64_hi_lo_hi = wm[5] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
@@ -8440,28 +8441,28 @@ module DCache(
   wire [7:0] mask64_lo_lo_lo = wm[0] ? 8'hff : 8'h0; // @[Bitwise.scala 72:12]
   wire [511:0] mask64 = {448'h0,mask64_hi_hi_hi_lo,mask64_hi_hi_lo,mask64_hi_lo_hi,mask64_hi_lo_lo,mask64_lo_hi_hi,
     mask64_lo_hi_lo,mask64_lo_lo_hi,mask64_lo_lo_lo}; // @[Cat.scala 30:58]
-  wire [8:0] _blockmask_T_1 = {offset_addr[5:3], 6'h0}; // @[DCache.scala 112:52]
-  wire [1022:0] _GEN_650 = {{511'd0}, mask64}; // @[DCache.scala 112:29]
-  wire [1022:0] _blockmask_T_2 = _GEN_650 << _blockmask_T_1; // @[DCache.scala 112:29]
-  wire [511:0] blockmask = _blockmask_T_2[511:0]; // @[DCache.scala 112:58]
-  wire [574:0] _GEN_651 = {{511'd0}, wdata}; // @[DCache.scala 113:29]
-  wire [574:0] _blockwdata_T_2 = _GEN_651 << _blockmask_T_1; // @[DCache.scala 113:29]
-  wire [511:0] blockwdata = _blockwdata_T_2[511:0]; // @[DCache.scala 113:58]
-  wire [511:0] _block1_after_write_T = ~blockmask; // @[DCache.scala 114:53]
-  wire [511:0] _block1_after_write_T_1 = _GEN_163 & _block1_after_write_T; // @[DCache.scala 114:50]
-  wire [511:0] _block1_after_write_T_2 = blockmask & blockwdata; // @[DCache.scala 114:79]
-  wire [511:0] block1_after_write = _block1_after_write_T_1 | _block1_after_write_T_2; // @[DCache.scala 114:66]
-  wire [511:0] _block2_after_write_T_1 = _GEN_195 & _block1_after_write_T; // @[DCache.scala 115:50]
-  wire [511:0] block2_after_write = _block2_after_write_T_1 | _block1_after_write_T_2; // @[DCache.scala 115:66]
-  wire [52:0] io_axi_waddr_hi_hi = updateway1 ? _GEN_35 : _GEN_99; // @[DCache.scala 129:31]
+  wire [8:0] _blockmask_T_1 = {offset_addr[5:3], 6'h0}; // @[DCache.scala 113:52]
+  wire [1022:0] _GEN_650 = {{511'd0}, mask64}; // @[DCache.scala 113:29]
+  wire [1022:0] _blockmask_T_2 = _GEN_650 << _blockmask_T_1; // @[DCache.scala 113:29]
+  wire [511:0] blockmask = _blockmask_T_2[511:0]; // @[DCache.scala 113:58]
+  wire [574:0] _GEN_651 = {{511'd0}, wdata}; // @[DCache.scala 114:29]
+  wire [574:0] _blockwdata_T_2 = _GEN_651 << _blockmask_T_1; // @[DCache.scala 114:29]
+  wire [511:0] blockwdata = _blockwdata_T_2[511:0]; // @[DCache.scala 114:58]
+  wire [511:0] _block1_after_write_T = ~blockmask; // @[DCache.scala 115:53]
+  wire [511:0] _block1_after_write_T_1 = _GEN_163 & _block1_after_write_T; // @[DCache.scala 115:50]
+  wire [511:0] _block1_after_write_T_2 = blockmask & blockwdata; // @[DCache.scala 115:79]
+  wire [511:0] block1_after_write = _block1_after_write_T_1 | _block1_after_write_T_2; // @[DCache.scala 115:66]
+  wire [511:0] _block2_after_write_T_1 = _GEN_195 & _block1_after_write_T; // @[DCache.scala 116:50]
+  wire [511:0] block2_after_write = _block2_after_write_T_1 | _block1_after_write_T_2; // @[DCache.scala 116:66]
+  wire [52:0] io_axi_waddr_hi_hi = updateway1 ? _GEN_35 : _GEN_99; // @[DCache.scala 130:31]
   wire [57:0] io_axi_waddr_hi = {io_axi_waddr_hi_hi,index_addr}; // @[Cat.scala 30:58]
-  assign io_dmem_ok = (hit | not_en_yet) & state == 2'h0; // @[DCache.scala 75:44]
-  assign io_dmem_rdata = hit2 ? rdata2 : _rdata_T; // @[DCache.scala 69:26]
-  assign io_axi_req = state == 2'h2; // @[DCache.scala 126:30]
-  assign io_axi_raddr = addr & 64'hffffffffffffffc0; // @[DCache.scala 127:29]
-  assign io_axi_weq = state == 2'h1; // @[DCache.scala 128:30]
+  assign io_dmem_ok = (hit | not_en_yet) & state == 2'h0; // @[DCache.scala 76:44]
+  assign io_dmem_rdata = hit2 ? rdata2 : _rdata_T; // @[DCache.scala 70:26]
+  assign io_axi_req = state == 2'h2; // @[DCache.scala 127:30]
+  assign io_axi_raddr = addr & 64'hffffffffffffffc0; // @[DCache.scala 128:29]
+  assign io_axi_weq = state == 2'h1; // @[DCache.scala 129:30]
   assign io_axi_waddr = {io_axi_waddr_hi,6'h0}; // @[Cat.scala 30:58]
-  assign io_axi_wdata = updateway1 ? _GEN_163 : _GEN_195; // @[DCache.scala 130:27]
+  assign io_axi_wdata = updateway1 ? _GEN_163 : _GEN_195; // @[DCache.scala 131:27]
   always @(posedge clock) begin
     if (reset) begin // @[Reg.scala 27:20]
       op <= 1'h0; // @[Reg.scala 27:20]
@@ -8471,7 +8472,7 @@ module DCache(
     if (reset) begin // @[Reg.scala 27:20]
       addr <= 64'h0; // @[Reg.scala 27:20]
     end else if (_op_T) begin // @[Reg.scala 28:19]
-      addr <= io_dmem_addr; // @[Reg.scala 28:23]
+      addr <= _addr_T; // @[Reg.scala 28:23]
     end
     if (reset) begin // @[Reg.scala 27:20]
       wdata <= 64'h0; // @[Reg.scala 27:20]
@@ -8483,3024 +8484,3024 @@ module DCache(
     end else if (_op_T) begin // @[Reg.scala 28:19]
       wm <= io_dmem_wmask; // @[Reg.scala 28:23]
     end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_0 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 120:26]
-      v1_0 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_1 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 120:26]
-      v1_1 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_2 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 120:26]
-      v1_2 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_3 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 120:26]
-      v1_3 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_4 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 120:26]
-      v1_4 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_5 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 120:26]
-      v1_5 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_6 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 120:26]
-      v1_6 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_7 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 120:26]
-      v1_7 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_8 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 120:26]
-      v1_8 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_9 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 120:26]
-      v1_9 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_10 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 120:26]
-      v1_10 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_11 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 120:26]
-      v1_11 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_12 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 120:26]
-      v1_12 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_13 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 120:26]
-      v1_13 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_14 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 120:26]
-      v1_14 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_15 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 120:26]
-      v1_15 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_16 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 120:26]
-      v1_16 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_17 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 120:26]
-      v1_17 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_18 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 120:26]
-      v1_18 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_19 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 120:26]
-      v1_19 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_20 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 120:26]
-      v1_20 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_21 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 120:26]
-      v1_21 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_22 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 120:26]
-      v1_22 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_23 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 120:26]
-      v1_23 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_24 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 120:26]
-      v1_24 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_25 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 120:26]
-      v1_25 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_26 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 120:26]
-      v1_26 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_27 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 120:26]
-      v1_27 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_28 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 120:26]
-      v1_28 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_29 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 120:26]
-      v1_29 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_30 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 120:26]
-      v1_30 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
-    end
-    if (reset) begin // @[DCache.scala 49:26]
-      v1_31 <= 1'h0; // @[DCache.scala 49:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 120:26]
-      v1_31 <= _d1_T | _GEN_67; // @[DCache.scala 120:26]
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_0 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 121:26]
+      v1_0 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
     end
     if (reset) begin // @[DCache.scala 50:26]
-      d1_0 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+      v1_1 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 121:26]
+      v1_1 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_2 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 121:26]
+      v1_2 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_3 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 121:26]
+      v1_3 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_4 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 121:26]
+      v1_4 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_5 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 121:26]
+      v1_5 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_6 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 121:26]
+      v1_6 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_7 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 121:26]
+      v1_7 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_8 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 121:26]
+      v1_8 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_9 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 121:26]
+      v1_9 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_10 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 121:26]
+      v1_10 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_11 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 121:26]
+      v1_11 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_12 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 121:26]
+      v1_12 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_13 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 121:26]
+      v1_13 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_14 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 121:26]
+      v1_14 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_15 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 121:26]
+      v1_15 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_16 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 121:26]
+      v1_16 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_17 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 121:26]
+      v1_17 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_18 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 121:26]
+      v1_18 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_19 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 121:26]
+      v1_19 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_20 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 121:26]
+      v1_20 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_21 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 121:26]
+      v1_21 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_22 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 121:26]
+      v1_22 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_23 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 121:26]
+      v1_23 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_24 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 121:26]
+      v1_24 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_25 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 121:26]
+      v1_25 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_26 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 121:26]
+      v1_26 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_27 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 121:26]
+      v1_27 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_28 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 121:26]
+      v1_28 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_29 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 121:26]
+      v1_29 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_30 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 121:26]
+      v1_30 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 50:26]
+      v1_31 <= 1'h0; // @[DCache.scala 50:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 121:26]
+      v1_31 <= _d1_T | _GEN_67; // @[DCache.scala 121:26]
+    end
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_0 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_0 <= 1'h0;
       end else begin
         d1_0 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_1 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_1 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_1 <= 1'h0;
       end else begin
         d1_1 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_2 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_2 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_2 <= 1'h0;
       end else begin
         d1_2 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_3 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_3 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_3 <= 1'h0;
       end else begin
         d1_3 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_4 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_4 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_4 <= 1'h0;
       end else begin
         d1_4 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_5 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_5 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_5 <= 1'h0;
       end else begin
         d1_5 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_6 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_6 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_6 <= 1'h0;
       end else begin
         d1_6 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_7 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_7 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_7 <= 1'h0;
       end else begin
         d1_7 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_8 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_8 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_8 <= 1'h0;
       end else begin
         d1_8 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_9 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_9 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_9 <= 1'h0;
       end else begin
         d1_9 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_10 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_10 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_10 <= 1'h0;
       end else begin
         d1_10 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_11 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_11 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_11 <= 1'h0;
       end else begin
         d1_11 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_12 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_12 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_12 <= 1'h0;
       end else begin
         d1_12 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_13 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_13 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_13 <= 1'h0;
       end else begin
         d1_13 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_14 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_14 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_14 <= 1'h0;
       end else begin
         d1_14 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_15 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_15 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_15 <= 1'h0;
       end else begin
         d1_15 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_16 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_16 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_16 <= 1'h0;
       end else begin
         d1_16 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_17 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_17 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_17 <= 1'h0;
       end else begin
         d1_17 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_18 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_18 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_18 <= 1'h0;
       end else begin
         d1_18 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_19 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_19 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_19 <= 1'h0;
       end else begin
         d1_19 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_20 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_20 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_20 <= 1'h0;
       end else begin
         d1_20 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_21 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_21 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_21 <= 1'h0;
       end else begin
         d1_21 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_22 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_22 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_22 <= 1'h0;
       end else begin
         d1_22 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_23 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_23 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_23 <= 1'h0;
       end else begin
         d1_23 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_24 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_24 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_24 <= 1'h0;
       end else begin
         d1_24 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_25 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_25 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_25 <= 1'h0;
       end else begin
         d1_25 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_26 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_26 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_26 <= 1'h0;
       end else begin
         d1_26 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_27 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_27 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_27 <= 1'h0;
       end else begin
         d1_27 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_28 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_28 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_28 <= 1'h0;
       end else begin
         d1_28 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_29 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_29 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_29 <= 1'h0;
       end else begin
         d1_29 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_30 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_30 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_30 <= 1'h0;
       end else begin
         d1_30 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 50:26]
-      d1_31 <= 1'h0; // @[DCache.scala 50:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 106:20]
-      if (update & updateway1) begin // @[DCache.scala 106:26]
+    if (reset) begin // @[DCache.scala 51:26]
+      d1_31 <= 1'h0; // @[DCache.scala 51:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 107:20]
+      if (update & updateway1) begin // @[DCache.scala 107:26]
         d1_31 <= 1'h0;
       end else begin
         d1_31 <= way1write | _GEN_355;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_0 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_0 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_0 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_0 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_0 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_0 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_1 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_1 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_1 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_1 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_1 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_1 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_2 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_2 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_2 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_2 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_2 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_2 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_3 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_3 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_3 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_3 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_3 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_3 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_4 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_4 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_4 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_4 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_4 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_4 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_5 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_5 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_5 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_5 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_5 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_5 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_6 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_6 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_6 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_6 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_6 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_6 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_7 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_7 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_7 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_7 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_7 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_7 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_8 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_8 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_8 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_8 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_8 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_8 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_9 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_9 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_9 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_9 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_9 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_9 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_10 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_10 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_10 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_10 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_10 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_10 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_11 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_11 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_11 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_11 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_11 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_11 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_12 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_12 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_12 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_12 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_12 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_12 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_13 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_13 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_13 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_13 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_13 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_13 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_14 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_14 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_14 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_14 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_14 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_14 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_15 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_15 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_15 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_15 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_15 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_15 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_16 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_16 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_16 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_16 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_16 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_16 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_17 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_17 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_17 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_17 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_17 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_17 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_18 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_18 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_18 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_18 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_18 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_18 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_19 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_19 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_19 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_19 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_19 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_19 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_20 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_20 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_20 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_20 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_20 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_20 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_21 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_21 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_21 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_21 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_21 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_21 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_22 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_22 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_22 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_22 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_22 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_22 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_23 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_23 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_23 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_23 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_23 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_23 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_24 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_24 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_24 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_24 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_24 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_24 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_25 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_25 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_25 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_25 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_25 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_25 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_26 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_26 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_26 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_26 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_26 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_26 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_27 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_27 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_27 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_27 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_27 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_27 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_28 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_28 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_28 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_28 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_28 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_28 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_29 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_29 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_29 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_29 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_29 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_29 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_30 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_30 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_30 <= hit1;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 78:28]
-        age1_30 <= age1_31; // @[DCache.scala 78:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
+        age1_30 <= age1_31; // @[DCache.scala 79:28]
       end else begin
         age1_30 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 51:26]
-      age1_31 <= 1'h0; // @[DCache.scala 51:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 78:22]
-      if (hit1 ^ hit2) begin // @[DCache.scala 78:28]
+    if (reset) begin // @[DCache.scala 52:26]
+      age1_31 <= 1'h0; // @[DCache.scala 52:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 79:22]
+      if (hit1 ^ hit2) begin // @[DCache.scala 79:28]
         age1_31 <= hit1;
-      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 78:28]
+      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 79:28]
         age1_31 <= _GEN_226;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_0 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_0 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_0 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_0 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_0 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_0 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_1 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_1 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_1 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_1 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_1 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_1 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_2 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_2 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_2 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_2 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_2 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_2 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_3 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_3 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_3 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_3 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_3 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_3 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_4 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_4 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_4 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_4 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_4 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_4 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_5 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_5 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_5 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_5 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_5 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_5 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_6 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_6 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_6 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_6 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_6 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_6 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_7 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_7 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_7 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_7 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_7 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_7 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_8 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_8 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_8 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_8 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_8 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_8 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_9 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_9 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_9 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_9 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_9 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_9 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_10 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_10 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_10 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_10 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_10 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_10 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_11 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_11 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_11 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_11 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_11 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_11 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_12 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_12 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_12 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_12 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_12 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_12 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_13 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_13 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_13 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_13 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_13 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_13 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_14 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_14 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_14 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_14 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_14 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_14 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_15 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_15 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_15 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_15 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_15 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_15 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_16 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_16 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_16 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_16 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_16 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_16 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_17 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_17 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_17 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_17 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_17 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_17 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_18 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_18 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_18 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_18 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_18 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_18 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_19 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_19 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_19 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_19 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_19 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_19 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_20 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_20 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_20 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_20 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_20 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_20 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_21 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_21 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_21 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_21 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_21 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_21 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_22 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_22 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_22 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_22 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_22 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_22 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_23 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_23 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_23 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_23 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_23 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_23 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_24 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_24 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_24 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_24 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_24 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_24 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_25 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_25 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_25 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_25 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_25 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_25 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_26 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_26 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_26 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_26 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_26 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_26 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_27 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_27 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_27 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_27 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_27 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_27 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_28 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_28 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_28 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_28 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_28 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_28 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_29 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_29 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_29 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_29 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_29 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_29 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_30 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_30 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_30 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 60:28]
-        tag1_30 <= tag1_31; // @[DCache.scala 60:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
+        tag1_30 <= tag1_31; // @[DCache.scala 61:28]
       end else begin
         tag1_30 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 52:26]
-      tag1_31 <= 53'h0; // @[DCache.scala 52:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 119:26]
-      if (_d1_T) begin // @[DCache.scala 119:32]
+    if (reset) begin // @[DCache.scala 53:26]
+      tag1_31 <= 53'h0; // @[DCache.scala 53:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 120:26]
+      if (_d1_T) begin // @[DCache.scala 120:32]
         tag1_31 <= tag_addr;
-      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 60:28]
+      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 61:28]
         tag1_31 <= _GEN_34;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_0 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_0 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_0 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_0 <= block1_after_write;
       end else begin
         block1_0 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_1 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_1 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_1 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_1 <= block1_after_write;
       end else begin
         block1_1 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_2 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_2 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_2 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_2 <= block1_after_write;
       end else begin
         block1_2 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_3 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_3 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_3 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_3 <= block1_after_write;
       end else begin
         block1_3 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_4 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_4 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_4 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_4 <= block1_after_write;
       end else begin
         block1_4 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_5 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_5 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_5 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_5 <= block1_after_write;
       end else begin
         block1_5 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_6 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_6 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_6 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_6 <= block1_after_write;
       end else begin
         block1_6 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_7 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_7 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_7 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_7 <= block1_after_write;
       end else begin
         block1_7 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_8 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_8 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_8 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_8 <= block1_after_write;
       end else begin
         block1_8 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_9 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_9 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_9 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_9 <= block1_after_write;
       end else begin
         block1_9 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_10 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_10 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_10 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_10 <= block1_after_write;
       end else begin
         block1_10 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_11 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_11 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_11 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_11 <= block1_after_write;
       end else begin
         block1_11 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_12 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_12 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_12 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_12 <= block1_after_write;
       end else begin
         block1_12 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_13 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_13 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_13 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_13 <= block1_after_write;
       end else begin
         block1_13 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_14 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_14 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_14 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_14 <= block1_after_write;
       end else begin
         block1_14 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_15 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_15 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_15 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_15 <= block1_after_write;
       end else begin
         block1_15 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_16 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_16 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_16 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_16 <= block1_after_write;
       end else begin
         block1_16 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_17 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_17 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_17 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_17 <= block1_after_write;
       end else begin
         block1_17 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_18 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_18 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_18 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_18 <= block1_after_write;
       end else begin
         block1_18 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_19 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_19 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_19 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_19 <= block1_after_write;
       end else begin
         block1_19 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_20 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_20 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_20 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_20 <= block1_after_write;
       end else begin
         block1_20 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_21 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_21 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_21 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_21 <= block1_after_write;
       end else begin
         block1_21 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_22 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_22 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_22 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_22 <= block1_after_write;
       end else begin
         block1_22 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_23 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_23 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_23 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_23 <= block1_after_write;
       end else begin
         block1_23 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_24 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_24 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_24 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_24 <= block1_after_write;
       end else begin
         block1_24 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_25 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_25 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_25 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_25 <= block1_after_write;
       end else begin
         block1_25 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_26 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_26 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_26 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_26 <= block1_after_write;
       end else begin
         block1_26 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_27 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_27 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_27 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_27 <= block1_after_write;
       end else begin
         block1_27 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_28 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_28 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_28 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_28 <= block1_after_write;
       end else begin
         block1_28 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_29 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_29 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_29 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_29 <= block1_after_write;
       end else begin
         block1_29 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_30 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_30 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_30 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_30 <= block1_after_write;
       end else begin
         block1_30 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 53:26]
-      block1_31 <= 512'h0; // @[DCache.scala 53:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 118:26]
-      if (_d1_T) begin // @[DCache.scala 118:32]
+    if (reset) begin // @[DCache.scala 54:26]
+      block1_31 <= 512'h0; // @[DCache.scala 54:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 119:26]
+      if (_d1_T) begin // @[DCache.scala 119:32]
         block1_31 <= io_axi_rdata;
-      end else if (way1write) begin // @[DCache.scala 118:72]
+      end else if (way1write) begin // @[DCache.scala 119:72]
         block1_31 <= block1_after_write;
       end else begin
         block1_31 <= _GEN_163;
       end
     end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_0 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 123:26]
-      v2_0 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_1 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 123:26]
-      v2_1 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_2 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 123:26]
-      v2_2 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_3 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 123:26]
-      v2_3 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_4 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 123:26]
-      v2_4 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_5 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 123:26]
-      v2_5 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_6 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 123:26]
-      v2_6 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_7 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 123:26]
-      v2_7 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_8 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 123:26]
-      v2_8 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_9 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 123:26]
-      v2_9 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_10 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 123:26]
-      v2_10 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_11 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 123:26]
-      v2_11 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_12 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 123:26]
-      v2_12 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_13 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 123:26]
-      v2_13 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_14 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 123:26]
-      v2_14 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_15 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 123:26]
-      v2_15 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_16 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 123:26]
-      v2_16 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_17 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 123:26]
-      v2_17 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_18 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 123:26]
-      v2_18 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_19 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 123:26]
-      v2_19 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_20 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 123:26]
-      v2_20 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_21 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 123:26]
-      v2_21 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_22 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 123:26]
-      v2_22 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_23 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 123:26]
-      v2_23 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_24 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 123:26]
-      v2_24 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_25 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 123:26]
-      v2_25 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_26 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 123:26]
-      v2_26 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_27 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 123:26]
-      v2_27 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_28 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 123:26]
-      v2_28 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_29 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 123:26]
-      v2_29 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_30 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 123:26]
-      v2_30 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
-    end
-    if (reset) begin // @[DCache.scala 54:26]
-      v2_31 <= 1'h0; // @[DCache.scala 54:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 123:26]
-      v2_31 <= _d2_T | _GEN_131; // @[DCache.scala 123:26]
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_0 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 124:26]
+      v2_0 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
     end
     if (reset) begin // @[DCache.scala 55:26]
-      d2_0 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+      v2_1 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 124:26]
+      v2_1 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_2 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 124:26]
+      v2_2 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_3 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 124:26]
+      v2_3 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_4 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 124:26]
+      v2_4 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_5 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 124:26]
+      v2_5 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_6 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 124:26]
+      v2_6 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_7 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 124:26]
+      v2_7 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_8 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 124:26]
+      v2_8 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_9 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 124:26]
+      v2_9 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_10 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 124:26]
+      v2_10 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_11 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 124:26]
+      v2_11 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_12 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 124:26]
+      v2_12 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_13 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 124:26]
+      v2_13 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_14 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 124:26]
+      v2_14 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_15 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 124:26]
+      v2_15 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_16 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 124:26]
+      v2_16 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_17 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 124:26]
+      v2_17 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_18 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 124:26]
+      v2_18 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_19 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 124:26]
+      v2_19 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_20 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 124:26]
+      v2_20 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_21 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 124:26]
+      v2_21 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_22 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 124:26]
+      v2_22 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_23 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 124:26]
+      v2_23 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_24 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 124:26]
+      v2_24 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_25 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 124:26]
+      v2_25 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_26 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 124:26]
+      v2_26 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_27 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 124:26]
+      v2_27 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_28 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 124:26]
+      v2_28 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_29 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 124:26]
+      v2_29 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_30 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 124:26]
+      v2_30 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 55:26]
+      v2_31 <= 1'h0; // @[DCache.scala 55:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 124:26]
+      v2_31 <= _d2_T | _GEN_131; // @[DCache.scala 124:26]
+    end
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_0 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_0 <= 1'h0;
       end else begin
         d2_0 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_1 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_1 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_1 <= 1'h0;
       end else begin
         d2_1 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_2 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_2 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_2 <= 1'h0;
       end else begin
         d2_2 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_3 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_3 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_3 <= 1'h0;
       end else begin
         d2_3 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_4 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_4 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_4 <= 1'h0;
       end else begin
         d2_4 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_5 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_5 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_5 <= 1'h0;
       end else begin
         d2_5 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_6 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_6 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_6 <= 1'h0;
       end else begin
         d2_6 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_7 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_7 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_7 <= 1'h0;
       end else begin
         d2_7 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_8 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_8 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_8 <= 1'h0;
       end else begin
         d2_8 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_9 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_9 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_9 <= 1'h0;
       end else begin
         d2_9 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_10 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_10 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_10 <= 1'h0;
       end else begin
         d2_10 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_11 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_11 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_11 <= 1'h0;
       end else begin
         d2_11 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_12 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_12 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_12 <= 1'h0;
       end else begin
         d2_12 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_13 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_13 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_13 <= 1'h0;
       end else begin
         d2_13 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_14 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_14 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_14 <= 1'h0;
       end else begin
         d2_14 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_15 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_15 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_15 <= 1'h0;
       end else begin
         d2_15 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_16 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_16 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_16 <= 1'h0;
       end else begin
         d2_16 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_17 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_17 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_17 <= 1'h0;
       end else begin
         d2_17 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_18 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_18 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_18 <= 1'h0;
       end else begin
         d2_18 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_19 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_19 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_19 <= 1'h0;
       end else begin
         d2_19 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_20 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_20 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_20 <= 1'h0;
       end else begin
         d2_20 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_21 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_21 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_21 <= 1'h0;
       end else begin
         d2_21 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_22 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_22 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_22 <= 1'h0;
       end else begin
         d2_22 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_23 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_23 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_23 <= 1'h0;
       end else begin
         d2_23 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_24 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_24 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_24 <= 1'h0;
       end else begin
         d2_24 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_25 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_25 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_25 <= 1'h0;
       end else begin
         d2_25 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_26 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_26 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_26 <= 1'h0;
       end else begin
         d2_26 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_27 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_27 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_27 <= 1'h0;
       end else begin
         d2_27 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_28 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_28 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_28 <= 1'h0;
       end else begin
         d2_28 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_29 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_29 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_29 <= 1'h0;
       end else begin
         d2_29 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_30 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_30 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_30 <= 1'h0;
       end else begin
         d2_30 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 55:26]
-      d2_31 <= 1'h0; // @[DCache.scala 55:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 107:20]
-      if (update & updateway2) begin // @[DCache.scala 107:26]
+    if (reset) begin // @[DCache.scala 56:26]
+      d2_31 <= 1'h0; // @[DCache.scala 56:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 108:20]
+      if (update & updateway2) begin // @[DCache.scala 108:26]
         d2_31 <= 1'h0;
       end else begin
         d2_31 <= way2write | _GEN_387;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_0 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_0 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_0 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_0 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_0 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_0 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_1 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_1 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_1 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_1 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_1 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_1 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_2 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_2 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_2 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_2 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_2 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_2 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_3 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_3 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_3 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_3 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_3 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_3 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_4 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_4 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_4 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_4 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_4 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_4 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_5 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_5 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_5 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_5 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_5 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_5 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_6 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_6 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_6 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_6 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_6 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_6 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_7 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_7 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_7 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_7 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_7 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_7 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_8 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_8 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_8 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_8 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_8 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_8 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_9 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_9 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_9 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_9 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_9 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_9 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_10 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_10 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_10 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_10 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_10 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_10 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_11 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_11 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_11 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_11 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_11 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_11 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_12 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_12 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_12 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_12 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_12 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_12 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_13 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_13 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_13 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_13 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_13 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_13 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_14 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_14 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_14 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_14 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_14 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_14 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_15 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_15 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_15 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_15 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_15 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_15 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_16 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_16 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_16 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_16 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_16 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_16 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_17 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_17 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_17 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_17 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_17 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_17 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_18 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_18 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_18 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_18 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_18 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_18 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_19 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_19 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_19 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_19 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_19 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_19 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_20 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_20 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_20 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_20 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_20 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_20 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_21 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_21 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_21 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_21 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_21 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_21 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_22 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_22 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_22 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_22 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_22 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_22 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_23 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_23 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_23 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_23 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_23 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_23 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_24 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_24 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_24 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_24 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_24 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_24 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_25 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_25 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_25 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_25 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_25 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_25 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_26 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_26 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_26 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_26 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_26 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_26 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_27 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_27 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_27 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_27 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_27 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_27 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_28 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_28 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_28 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_28 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_28 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_28 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_29 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_29 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_29 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_29 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_29 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_29 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_30 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_30 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_30 <= hit2;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 79:28]
-        age2_30 <= age2_31; // @[DCache.scala 79:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 80:28]
+        age2_30 <= age2_31; // @[DCache.scala 80:28]
       end else begin
         age2_30 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 56:26]
-      age2_31 <= 1'h0; // @[DCache.scala 56:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 79:22]
-      if (_age1_T) begin // @[DCache.scala 79:28]
+    if (reset) begin // @[DCache.scala 57:26]
+      age2_31 <= 1'h0; // @[DCache.scala 57:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 80:22]
+      if (_age1_T) begin // @[DCache.scala 80:28]
         age2_31 <= hit2;
-      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 79:28]
+      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 80:28]
         age2_31 <= _GEN_290;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_0 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_0 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_0 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_0 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_0 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_0 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_1 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_1 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_1 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_1 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_1 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_1 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_2 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_2 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_2 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_2 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_2 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_2 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_3 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_3 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_3 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_3 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_3 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_3 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_4 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_4 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_4 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_4 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_4 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_4 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_5 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_5 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_5 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_5 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_5 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_5 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_6 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_6 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_6 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_6 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_6 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_6 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_7 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_7 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_7 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_7 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_7 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_7 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_8 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_8 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_8 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_8 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_8 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_8 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_9 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_9 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_9 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_9 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_9 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_9 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_10 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_10 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_10 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_10 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_10 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_10 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_11 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_11 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_11 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_11 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_11 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_11 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_12 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_12 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_12 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_12 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_12 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_12 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_13 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_13 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_13 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_13 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_13 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_13 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_14 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_14 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_14 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_14 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_14 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_14 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_15 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_15 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_15 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_15 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_15 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_15 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_16 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_16 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_16 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_16 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_16 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_16 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_17 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_17 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_17 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_17 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_17 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_17 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_18 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_18 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_18 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_18 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_18 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_18 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_19 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_19 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_19 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_19 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_19 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_19 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_20 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_20 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_20 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_20 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_20 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_20 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_21 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_21 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_21 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_21 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_21 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_21 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_22 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_22 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_22 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_22 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_22 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_22 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_23 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_23 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_23 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_23 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_23 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_23 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_24 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_24 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_24 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_24 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_24 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_24 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_25 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_25 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_25 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_25 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_25 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_25 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_26 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_26 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_26 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_26 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_26 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_26 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_27 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_27 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_27 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_27 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_27 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_27 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_28 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_28 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_28 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_28 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_28 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_28 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_29 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_29 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_29 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_29 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_29 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_29 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_30 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_30 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_30 <= tag_addr;
-      end else if (5'h1f == index_addr) begin // @[DCache.scala 61:28]
-        tag2_30 <= tag2_31; // @[DCache.scala 61:28]
+      end else if (5'h1f == index_addr) begin // @[DCache.scala 62:28]
+        tag2_30 <= tag2_31; // @[DCache.scala 62:28]
       end else begin
         tag2_30 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 57:26]
-      tag2_31 <= 53'h0; // @[DCache.scala 57:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 122:26]
-      if (_d2_T) begin // @[DCache.scala 122:32]
+    if (reset) begin // @[DCache.scala 58:26]
+      tag2_31 <= 53'h0; // @[DCache.scala 58:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 123:26]
+      if (_d2_T) begin // @[DCache.scala 123:32]
         tag2_31 <= tag_addr;
-      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 61:28]
+      end else if (!(5'h1f == index_addr)) begin // @[DCache.scala 62:28]
         tag2_31 <= _GEN_98;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_0 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h0 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_0 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h0 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_0 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_0 <= block2_after_write;
       end else begin
         block2_0 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_1 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_1 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_1 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_1 <= block2_after_write;
       end else begin
         block2_1 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_2 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h2 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_2 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h2 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_2 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_2 <= block2_after_write;
       end else begin
         block2_2 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_3 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h3 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_3 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h3 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_3 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_3 <= block2_after_write;
       end else begin
         block2_3 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_4 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h4 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_4 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h4 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_4 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_4 <= block2_after_write;
       end else begin
         block2_4 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_5 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h5 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_5 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h5 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_5 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_5 <= block2_after_write;
       end else begin
         block2_5 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_6 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h6 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_6 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h6 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_6 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_6 <= block2_after_write;
       end else begin
         block2_6 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_7 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h7 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_7 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h7 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_7 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_7 <= block2_after_write;
       end else begin
         block2_7 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_8 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h8 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_8 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h8 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_8 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_8 <= block2_after_write;
       end else begin
         block2_8 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_9 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h9 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_9 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h9 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_9 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_9 <= block2_after_write;
       end else begin
         block2_9 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_10 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'ha == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_10 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'ha == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_10 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_10 <= block2_after_write;
       end else begin
         block2_10 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_11 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'hb == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_11 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'hb == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_11 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_11 <= block2_after_write;
       end else begin
         block2_11 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_12 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'hc == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_12 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'hc == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_12 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_12 <= block2_after_write;
       end else begin
         block2_12 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_13 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'hd == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_13 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'hd == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_13 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_13 <= block2_after_write;
       end else begin
         block2_13 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_14 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'he == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_14 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'he == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_14 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_14 <= block2_after_write;
       end else begin
         block2_14 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_15 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'hf == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_15 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'hf == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_15 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_15 <= block2_after_write;
       end else begin
         block2_15 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_16 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h10 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_16 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h10 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_16 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_16 <= block2_after_write;
       end else begin
         block2_16 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_17 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h11 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_17 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h11 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_17 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_17 <= block2_after_write;
       end else begin
         block2_17 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_18 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h12 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_18 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h12 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_18 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_18 <= block2_after_write;
       end else begin
         block2_18 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_19 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h13 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_19 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h13 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_19 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_19 <= block2_after_write;
       end else begin
         block2_19 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_20 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h14 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_20 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h14 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_20 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_20 <= block2_after_write;
       end else begin
         block2_20 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_21 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h15 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_21 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h15 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_21 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_21 <= block2_after_write;
       end else begin
         block2_21 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_22 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h16 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_22 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h16 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_22 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_22 <= block2_after_write;
       end else begin
         block2_22 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_23 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h17 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_23 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h17 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_23 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_23 <= block2_after_write;
       end else begin
         block2_23 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_24 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h18 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_24 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h18 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_24 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_24 <= block2_after_write;
       end else begin
         block2_24 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_25 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h19 == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_25 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h19 == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_25 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_25 <= block2_after_write;
       end else begin
         block2_25 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_26 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1a == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_26 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1a == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_26 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_26 <= block2_after_write;
       end else begin
         block2_26 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_27 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1b == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_27 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1b == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_27 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_27 <= block2_after_write;
       end else begin
         block2_27 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_28 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1c == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_28 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1c == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_28 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_28 <= block2_after_write;
       end else begin
         block2_28 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_29 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1d == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_29 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1d == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_29 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_29 <= block2_after_write;
       end else begin
         block2_29 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_30 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1e == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_30 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1e == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_30 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_30 <= block2_after_write;
       end else begin
         block2_30 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 58:26]
-      block2_31 <= 512'h0; // @[DCache.scala 58:26]
-    end else if (5'h1f == index_addr) begin // @[DCache.scala 121:26]
-      if (_d2_T) begin // @[DCache.scala 121:32]
+    if (reset) begin // @[DCache.scala 59:26]
+      block2_31 <= 512'h0; // @[DCache.scala 59:26]
+    end else if (5'h1f == index_addr) begin // @[DCache.scala 122:26]
+      if (_d2_T) begin // @[DCache.scala 122:32]
         block2_31 <= io_axi_rdata;
-      end else if (way2write) begin // @[DCache.scala 121:72]
+      end else if (way2write) begin // @[DCache.scala 122:72]
         block2_31 <= block2_after_write;
       end else begin
         block2_31 <= _GEN_195;
       end
     end
-    if (reset) begin // @[DCache.scala 66:24]
-      state <= 2'h0; // @[DCache.scala 66:24]
+    if (reset) begin // @[DCache.scala 67:24]
+      state <= 2'h0; // @[DCache.scala 67:24]
     end else if (_T) begin // @[Conditional.scala 40:58]
-      if (miss & ~not_en_yet) begin // @[DCache.scala 90:39]
-        if (dirty) begin // @[DCache.scala 90:52]
+      if (miss & ~not_en_yet) begin // @[DCache.scala 91:39]
+        if (dirty) begin // @[DCache.scala 91:52]
           state <= 2'h1;
         end else begin
           state <= 2'h2;
         end
       end
     end else if (_T_3) begin // @[Conditional.scala 39:67]
-      if (io_axi_wdone) begin // @[DCache.scala 94:32]
-        state <= 2'h2; // @[DCache.scala 94:39]
+      if (io_axi_wdone) begin // @[DCache.scala 95:32]
+        state <= 2'h2; // @[DCache.scala 95:39]
       end
     end else if (_T_4) begin // @[Conditional.scala 39:67]
       state <= _GEN_390;
     end
-    not_en_yet <= reset | _not_en_yet_T; // @[DCache.scala 71:30 DCache.scala 71:30 DCache.scala 72:21]
+    not_en_yet <= reset | _not_en_yet_T; // @[DCache.scala 72:30 DCache.scala 72:30 DCache.scala 73:21]
   end
 // Register and memory initialization
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -12720,25 +12721,25 @@ module IMMIO(
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
 `endif // RANDOMIZE_REG_INIT
-  wire  sel = ~io_mem0_ok ? 1'h0 : 1'h1; // @[MMIO.scala 71:22 MMIO.scala 71:27]
+  wire  sel = ~io_mem0_ok ? 1'h0 : 1'h1; // @[MMIO.scala 15:22 MMIO.scala 15:27]
   reg  sel_r; // @[Reg.scala 27:20]
   wire  out_ok = sel_r ? io_mem1_ok : ~sel_r & io_mem0_ok; // @[Mux.scala 80:57]
-  wire  _io_mem0_en_T = ~sel; // @[MMIO.scala 81:32]
+  wire  _io_mem0_en_T = ~sel; // @[MMIO.scala 25:32]
   wire [31:0] _out_data_T_1 = ~sel_r ? io_mem0_data : 32'h0; // @[Mux.scala 80:57]
   wire [31:0] _out_data_T_3 = sel_r ? io_mem1_data : _out_data_T_1; // @[Mux.scala 80:57]
   wire [63:0] out_data = {{32'd0}, _out_data_T_3};
-  assign io_imem_data = out_data[31:0]; // @[MMIO.scala 96:18]
+  assign io_imem_data = out_data[31:0]; // @[MMIO.scala 40:18]
   assign io_imem_ok = sel_r ? io_mem1_ok : ~sel_r & io_mem0_ok; // @[Mux.scala 80:57]
-  assign io_mem0_addr = _io_mem0_en_T ? io_imem_addr : 64'h0; // @[MMIO.scala 82:27]
-  assign io_mem0_en = ~sel & io_imem_en; // @[MMIO.scala 81:27]
-  assign io_mem1_addr = sel ? io_imem_addr : 64'h0; // @[MMIO.scala 84:27]
-  assign io_mem1_en = sel & io_imem_en; // @[MMIO.scala 83:27]
+  assign io_mem0_addr = _io_mem0_en_T ? io_imem_addr : 64'h0; // @[MMIO.scala 26:27]
+  assign io_mem0_en = ~sel & io_imem_en; // @[MMIO.scala 25:27]
+  assign io_mem1_addr = sel ? io_imem_addr : 64'h0; // @[MMIO.scala 28:27]
+  assign io_mem1_en = sel & io_imem_en; // @[MMIO.scala 27:27]
   always @(posedge clock) begin
     if (reset) begin // @[Reg.scala 27:20]
       sel_r <= 1'h0; // @[Reg.scala 27:20]
     end else if (out_ok) begin // @[Reg.scala 28:19]
-      if (~io_mem0_ok) begin // @[MMIO.scala 71:22]
-        sel_r <= 1'h0; // @[MMIO.scala 71:27]
+      if (~io_mem0_ok) begin // @[MMIO.scala 15:22]
+        sel_r <= 1'h0; // @[MMIO.scala 15:27]
       end else begin
         sel_r <= 1'h1;
       end

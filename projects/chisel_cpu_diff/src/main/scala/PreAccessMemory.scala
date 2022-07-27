@@ -23,7 +23,7 @@ class PreAccessMemory extends Module{
     val lu_offset = io.op1 + io.op2
     val lu_shift = lu_offset(2, 0) << 3
     val lu_ren = io.lu_code =/= 0.U
-    val lu_raddr = lu_offset & "hfffffffffffffff8".U
+    val lu_raddr = lu_offset
 
     //su
     val su_offset = io.op1 + io.imm

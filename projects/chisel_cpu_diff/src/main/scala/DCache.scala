@@ -29,6 +29,7 @@ class DCacheAxiIO extends Bundle with CacheParameters{
 // 同步dcache.当en的时候会把操作数都保存到寄存器内，并开始取值。
 // 若发生miss，dcache会通过axi取值，此时会输出的ok为false，这
 // 时即使输入的en为true也不会接受新的input请求
+// dcache输入的地址要求是8对齐.
 class DCache extends Module with CacheParameters{
     val io = IO(new Bundle{
         val dmem    = new DCacheIO
@@ -37,7 +38,7 @@ class DCache extends Module with CacheParameters{
     // input reg
     // 当en为ture且dcache不处于busy状态（也就是输出ok）时才可以改变
     val op      = RegEnable(io.dmem.op,    false.B,   io.dmem.en && io.dmem.ok)
-    val addr    = RegEnable(io.dmem.addr,  0.U(64.W), io.dmem.en && io.dmem.ok)
+    val addr    = RegEnable(io.dmem.addr & "hfffffffffffffff8".U,  0.U(64.W), io.dmem.en && io.dmem.ok) // 地址8对齐
     val wdata   = RegEnable(io.dmem.wdata, 0.U(64.W), io.dmem.en && io.dmem.ok)
     val wmask   = RegEnable(io.dmem.wmask, 0.U(8.W),  io.dmem.en && io.dmem.ok)
 
@@ -128,7 +129,6 @@ class DCache extends Module with CacheParameters{
     io.axi.weq      := state === write_back
     io.axi.waddr    := Cat(Mux(updateway1, tag1(index_addr), tag2(index_addr)), index_addr, 0.U(OffsetWidth.W)) 
     io.axi.wdata    := Mux(updateway1, block1(index_addr), block2(index_addr))
-  
 }
 
 
