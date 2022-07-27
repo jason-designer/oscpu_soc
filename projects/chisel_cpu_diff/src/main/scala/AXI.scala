@@ -78,26 +78,27 @@ class AXI extends Module with CacheParameters{
     val w_idle :: w_addr :: w_data :: w_resp :: w_done :: Nil = Enum(5)
     val rstate = RegInit(r_idle)
     val wstate = RegInit(w_idle)
-    val bypass = RegInit(false.B)
+    val r_bypass = RegInit(false.B)
+    val w_bypass = RegInit(false.B)
 
     // read state machine
     switch(rstate){
         is(r_idle){
             when(icacheio.req){
                 rstate := r_iaddr
-                bypass := false.B
+                r_bypass := false.B
             }
             .elsewhen(dcacheio.req){
                 rstate := r_daddr
-                bypass := false.B
+                r_bypass := false.B
             }
             .elsewhen(icacheBypassIO.req){
                 rstate := r_iaddr
-                bypass := true.B
+                r_bypass := true.B
             }
             .elsewhen(dcacheBypassIO.req){
                 rstate := r_daddr
-                bypass := true.B
+                r_bypass := true.B
             }
         }
         // 处理 imem req 
@@ -133,11 +134,11 @@ class AXI extends Module with CacheParameters{
         is(w_idle){
             when(dcacheio.weq){
                 wstate := w_addr
-                bypass := false.B
+                w_bypass := false.B
             }
             .elsewhen(dcacheBypassIO.weq){
                 wstate := w_addr
-                bypass := true.B
+                w_bypass := true.B
             }
         }
         is(w_addr){
@@ -174,30 +175,30 @@ class AXI extends Module with CacheParameters{
     // icacheio signals---------------------------------------
     // icacheio.req
     // icacheio.addr
-    icacheio.valid  := rstate === r_idone && bypass === false.B
+    icacheio.valid  := rstate === r_idone && r_bypass === false.B
     icacheio.data   := idata
     // dcacheio signals---------------------------------------
     // dcacheio.req
     // dcacheio.raddr
-    dcacheio.rvalid := rstate === r_ddone && bypass === false.B
+    dcacheio.rvalid := rstate === r_ddone && r_bypass === false.B
     dcacheio.rdata  := drdata
     dcacheio.wdone  := wstate === w_done && !out.b.valid
     // icacheBypassIO signals---------------------------------
     // icacheBypassIO.req
     // icacheBypassIO.addr
-    icacheBypassIO.valid  := rstate === r_idone && bypass === true.B
+    icacheBypassIO.valid  := rstate === r_idone && r_bypass === true.B
     icacheBypassIO.data   := idata(63, 0)
     // dcacheBypassIO signals---------------------------------
     // dcacheBypassIO.req
     // dcacheBypassIO.raddr
     // dcacheBypassIO.wmask
-    dcacheBypassIO.rvalid := rstate === r_ddone && bypass === true.B
+    dcacheBypassIO.rvalid := rstate === r_ddone && r_bypass === true.B
     dcacheBypassIO.rdata  := drdata(63, 0)
-    dcacheBypassIO.wdone  := wstate === w_done && !out.b.valid && bypass === true.B
+    dcacheBypassIO.wdone  := wstate === w_done && !out.b.valid && w_bypass === true.B
 
 
     /********************** AXI signals ***********************/
-    val sel = Cat(rstate === r_iaddr, rstate === r_daddr, bypass)
+    val sel = Cat(rstate === r_iaddr, rstate === r_daddr, r_bypass)
     // Read address channel signals --------------------------
     // out.ar.ready
     out.ar.valid        := rstate === r_iaddr || rstate === r_daddr
@@ -210,8 +211,8 @@ class AXI extends Module with CacheParameters{
     out.ar.bits.prot    := "b000".U
     out.ar.bits.id      := 0.U
     out.ar.bits.user    := 0.U
-    out.ar.bits.len     := Mux(bypass, 0.U, (AxiArLen - 1).U)
-    out.ar.bits.size    := Mux(bypass, "b011".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
+    out.ar.bits.len     := Mux(r_bypass, 0.U, (AxiArLen - 1).U)
+    out.ar.bits.size    := Mux(r_bypass, "b011".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
     out.ar.bits.burst   := "b01".U
     out.ar.bits.lock    := 0.U
     out.ar.bits.cache   := "b0010".U
@@ -229,21 +230,21 @@ class AXI extends Module with CacheParameters{
     // write address channel signals -------------------------
     // out.aw.ready
     out.aw.valid        := wstate === w_addr
-    out.aw.bits.addr    := Mux(bypass, dcacheBypassIO.waddr, dcacheio.waddr)
+    out.aw.bits.addr    := Mux(w_bypass, dcacheBypassIO.waddr, dcacheio.waddr)
     out.aw.bits.prot    := "b000".U
     out.aw.bits.id      := 0.U
     out.aw.bits.user    := 0.U
-    out.aw.bits.len     := Mux(bypass, 0.U, (AxiArLen - 1).U)
-    out.aw.bits.size    := Mux(bypass, "b010".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
+    out.aw.bits.len     := Mux(w_bypass, 0.U, (AxiArLen - 1).U)
+    out.aw.bits.size    := Mux(w_bypass, "b011".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
     out.aw.bits.burst   := "b01".U
     out.aw.bits.lock    := 0.U
     out.aw.bits.cache   := "b0010".U
     out.aw.bits.qos     := 0.U
     // write data channel signals ----------------------------
     out.w.valid         := wstate === w_data
-    out.w.bits.data     := Mux(bypass, dcacheBypassIO.wdata, (dcacheio.wdata >> (dwcnt << 6))(63, 0))
-    out.w.bits.strb     := Mux(bypass, dcacheBypassIO.wmask, "hff".U)
-    out.w.bits.last     := Mux(bypass, 0.U, dwcnt === (AxiArLen-1).U)
+    out.w.bits.data     := Mux(w_bypass, dcacheBypassIO.wdata, (dcacheio.wdata >> (dwcnt << 6))(63, 0))
+    out.w.bits.strb     := Mux(w_bypass, dcacheBypassIO.wmask, "hff".U)
+    out.w.bits.last     := Mux(w_bypass, dwcnt === 0.U, dwcnt === (AxiArLen-1).U)
     // resp channel signals ----------------------------------
     out.b.ready         := wstate === w_done
 }

@@ -71,7 +71,7 @@ class ICacheBypass extends Module{
     })
     // buffer reg
     val addr    = RegInit(0.U(32.W))
-    val data   = RegInit(0.U(64.W))
+    val data   = RegInit(0.U(32.W))
     // state machine define
     val idle :: fetch_data :: update :: Nil = Enum(3)
     val state = RegInit(idle)
@@ -136,13 +136,13 @@ class DCacheBypass extends Module{
         wdata   := io.dmem.wdata
         wmask   := io.dmem.wmask
     }
-    rdata := Mux(state === update, io.axi.rdata >> (addr(2, 0) << 3), rdata)
+    rdata := Mux(state === update, io.axi.rdata, rdata)
     // axi r output signal
     io.axi.req      := state === fetch_data
-    io.axi.raddr    := addr         // 若tranfer的size为4的话，地址要求4对齐
+    io.axi.raddr    := addr & "hfffffff8".U     // 若tranfer的size为4的话，地址要求4对齐
     // axi w output signal
     io.axi.weq      := state === write_data
-    io.axi.waddr    := addr         // 若tranfer的size为4的话，地址要求4对齐
+    io.axi.waddr    := addr & "hfffffff8".U     // 若tranfer的size为4的话，地址要求4对齐
     io.axi.wdata    := wdata
     io.axi.wmask    := wmask  
     // dcachebypass output signal

@@ -19,14 +19,22 @@ class SimTop extends Module {
 
   val immio = Module(new IMMIO)
   val icachebypass = Module(new ICacheBypass)
+  val dmmio = Module(new DMMIO)
+  val clintreg = Module(new ClintReg)
+  val dcachebypass = Module(new DCacheBypass)
 
   // val mem = Module(new RamSyn)
   core.io.imem  <> immio.io.imem
   immio.io.mem0 <> icache.io.imem
   immio.io.mem1 <> icachebypass.io.imem
 
-  core.io.dmem  <> dcache.io.dmem
+  core.io.dmem  <> dmmio.io.dmem
+  dmmio.io.mem0 <> dcache.io.dmem
+  dmmio.io.mem1 <> clintreg.io.mem
+  dmmio.io.mem2 <> dcachebypass.io.dmem
 
+  core.io.set_mtip    := clintreg.io.set_mtip
+  core.io.clear_mtip  := clintreg.io.clear_mtip
   // dcache.io.dmem.en := true.B
   // dcache.io.dmem.op := false.B
   // dcache.io.dmem.addr := "h80000000".U
@@ -36,16 +44,17 @@ class SimTop extends Module {
   icache.io.axi <> axi.io.icacheio
   dcache.io.axi <> axi.io.dcacheio
   icachebypass.io.axi <> axi.io.icacheBypassIO
+  dcachebypass.io.axi <> axi.io.dcacheBypassIO
 
   //
   // axi.io.icacheBypassIO.req := false.B
   // axi.io.icacheBypassIO.addr := 0.U
-  axi.io.dcacheBypassIO.req := false.B
-  axi.io.dcacheBypassIO.raddr := 0.U
-  axi.io.dcacheBypassIO.weq := false.B
-  axi.io.dcacheBypassIO.waddr := 0.U
-  axi.io.dcacheBypassIO.wdata := 0.U
-  axi.io.dcacheBypassIO.wmask := 0.U
+  // axi.io.dcacheBypassIO.req := false.B
+  // axi.io.dcacheBypassIO.raddr := 0.U
+  // axi.io.dcacheBypassIO.weq := false.B
+  // axi.io.dcacheBypassIO.waddr := 0.U
+  // axi.io.dcacheBypassIO.wdata := 0.U
+  // axi.io.dcacheBypassIO.wmask := 0.U
   //
 
 
