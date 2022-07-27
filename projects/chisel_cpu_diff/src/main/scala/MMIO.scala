@@ -73,7 +73,7 @@ class IMMIO extends Module {
     .otherwise{
         // set mmio address
         when(io.imem.addr < "h80000000".U){sel := 1.U}
-        .otherwise{sel := 0.U}
+        .otherwise{sel := 1.U}
     }
 
     val sel_r = RegEnable(sel, 0.U, out_ok)

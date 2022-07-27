@@ -58,12 +58,68 @@ class ICacheBypass extends Module{
     }
     // axi request signals
     io.axi.req  := state === miss
-    io.axi.addr := addr // 如果axi的size为4B的话，这里addr要求4整除
+    io.axi.addr := addr & "hfffffff8".U// 如果axi的size为4B的话，这里addr要求4整除
     // update cachebypass data
     block   := Mux(state === update, io.axi.data >> (addr(2, 0) << 3), block) 
-    tag     := Mux(state === update, addr, block)
-    v       := Mux(state === update, false.B, v)
+    tag     := Mux(state === update, addr, tag)
+    v       := Mux(state === update, true.B, v)
 }
+
+
+class DCacheBypass extends Module{
+    val io = IO(new Bundle{
+        val dmem    = new DCacheIO
+        val axi     = new DCacheBypassAxiIO
+    })
+    // buffer reg
+    val op      = RegInit(false.B)
+    val addr    = RegInit(0.U(32.W))
+    val wdata   = RegInit(0.U(64.W))
+    val wmask   = RegInit(0.U(8.W))
+    val rdata   = RegInit(0.U(64.W))
+    // state machine define
+    val idle :: fetch_data :: update :: write_data :: Nil = Enum(4)
+    val state = RegInit(idle)
+    // state machine
+    switch(state){
+        is(idle){
+            when(io.dmem.en && !io.dmem.op) {state := fetch_data}
+            .elsewhen(io.dmem.en && io.dmem.op) {state := write_data}
+        }
+        is(fetch_data){
+            when(io.axi.rvalid) {state := update}
+        }
+        is(update){
+            state := idle
+        }
+        is(write_data){
+            when(io.axi.wdone) {state := idle}
+        }
+    }
+    // update buffer
+    when(state === idle && io.dmem.en){
+        op      := io.dmem.op
+        addr    := io.dmem.addr
+        wdata   := io.dmem.wdata
+        wmask   := io.dmem.wmask
+    }
+    rdata := Mux(state === update, io.axi.rdata >> (addr(2, 0) << 3), rdata)
+    // axi r output signal
+    io.axi.req      := state === fetch_data
+    io.axi.raddr    := addr         // 若tranfer的size为4的话，地址要求4对齐
+    // axi w output signal
+    io.axi.weq      := state === write_data
+    io.axi.waddr    := addr         // 若tranfer的size为4的话，地址要求4对齐
+    io.axi.wdata    := wdata
+    io.axi.wmask    := wmask  
+    // dcachebypass output signal
+    io.dmem.rdata   := rdata
+    io.dmem.ok      := state === idle
+}
+
+
+
+
 
 
 

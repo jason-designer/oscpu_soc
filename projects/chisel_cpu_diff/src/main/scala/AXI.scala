@@ -211,7 +211,7 @@ class AXI extends Module with CacheParameters{
     out.ar.bits.id      := 0.U
     out.ar.bits.user    := 0.U
     out.ar.bits.len     := Mux(bypass, 0.U, (AxiArLen - 1).U)
-    out.ar.bits.size    := Mux(bypass, "b010".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
+    out.ar.bits.size    := Mux(bypass, "b011".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
     out.ar.bits.burst   := "b01".U
     out.ar.bits.lock    := 0.U
     out.ar.bits.cache   := "b0010".U

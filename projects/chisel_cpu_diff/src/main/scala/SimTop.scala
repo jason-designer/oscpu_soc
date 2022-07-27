@@ -17,8 +17,14 @@ class SimTop extends Module {
   val dcache = Module(new DCache)
   val axi = Module(new AXI)
 
+  val immio = Module(new IMMIO)
+  val icachebypass = Module(new ICacheBypass)
+
   // val mem = Module(new RamSyn)
-  core.io.imem  <> icache.io.imem
+  core.io.imem  <> immio.io.imem
+  immio.io.mem0 <> icache.io.imem
+  immio.io.mem1 <> icachebypass.io.imem
+
   core.io.dmem  <> dcache.io.dmem
 
   // dcache.io.dmem.en := true.B
@@ -29,9 +35,11 @@ class SimTop extends Module {
 
   icache.io.axi <> axi.io.icacheio
   dcache.io.axi <> axi.io.dcacheio
+  icachebypass.io.axi <> axi.io.icacheBypassIO
+
   //
-  axi.io.icacheBypassIO.req := false.B
-  axi.io.icacheBypassIO.addr := 0.U
+  // axi.io.icacheBypassIO.req := false.B
+  // axi.io.icacheBypassIO.addr := 0.U
   axi.io.dcacheBypassIO.req := false.B
   axi.io.dcacheBypassIO.raddr := 0.U
   axi.io.dcacheBypassIO.weq := false.B
@@ -40,7 +48,7 @@ class SimTop extends Module {
   axi.io.dcacheBypassIO.wmask := 0.U
   //
 
-  
+
   axi.io.out.ar <> io.memAXI_0.ar
   axi.io.out.r  <> io.memAXI_0.r
   axi.io.out.aw <> io.memAXI_0.aw
