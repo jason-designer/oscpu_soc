@@ -8,8 +8,9 @@ class DCacheIO extends Bundle{
     val en          = Input(Bool())
     val op          = Input(Bool())         // 0表示读操作，1表示写操作
     val addr        = Input(UInt(64.W)) 
-    val wdata       = Input(UInt(64.W))
-    val wmask       = Input(UInt(8.W))    
+    val wdata       = Input(UInt(64.W))     // 8字节对齐
+    val wmask       = Input(UInt(8.W))      // 8字节对齐
+    val transfer    = Input(UInt(32.W))     // 用于外设访问，部分外设需要指定transfer宽度
     val ok          = Output(Bool())
     val rdata       = Output(UInt(64.W))
 }

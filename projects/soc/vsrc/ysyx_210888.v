@@ -12431,7 +12431,7 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
-module ysyx_210888_SimTop(
+module ysyx_210888(
   input         clock,
   input         reset,
   input         io_interrupt,

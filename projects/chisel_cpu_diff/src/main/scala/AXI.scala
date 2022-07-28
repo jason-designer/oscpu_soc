@@ -109,7 +109,7 @@ class AXI extends Module with CacheParameters{
             when(out.r.valid) {rstate := r_idata}
         }
         is(r_idata){
-            when(out.r.valid === false.B || out.r.bits.last) {rstate := r_idone}
+            when(out.r.bits.last) {rstate := r_idone} // 当last的时候才下一步，此时当valid为true才记录数据
         }
         is(r_idone){
             rstate := r_idle
@@ -122,7 +122,7 @@ class AXI extends Module with CacheParameters{
             when(out.r.valid) {rstate := r_ddata}
         }
         is(r_ddata){
-            when(out.r.valid === false.B || out.r.bits.last) {rstate := r_ddone}
+            when(out.r.bits.last) {rstate := r_ddone}   // 当last的时候才下一步，此时当valid为true才记录数据
         }
         is(r_ddone){
             rstate := r_idle
@@ -145,7 +145,7 @@ class AXI extends Module with CacheParameters{
             when(out.aw.ready) {wstate := w_data}
         }
         is(w_data){
-            when(out.w.bits.last) {wstate := w_resp}
+            when(out.w.bits.last && out.w.ready) {wstate := w_resp}
         }
         is(w_resp){
             when(out.b.valid) {wstate := w_done}
@@ -158,10 +158,10 @@ class AXI extends Module with CacheParameters{
 
     /***********************buffer****************************/
     ibuffer(icnt) := Mux(rstate === r_idata, out.r.bits.data, ibuffer(icnt))
-    icnt := Mux(rstate === r_idata, icnt + 1.U, 0.U)
+    icnt := Mux(rstate === r_idata && out.r.valid, icnt + 1.U, 0.U)         // 当valid时才记录下一个数据
     drbuffer(drcnt) := Mux(rstate === r_ddata, out.r.bits.data, drbuffer(drcnt))
-    drcnt := Mux(rstate === r_ddata, drcnt + 1.U, 0.U)
-    dwcnt := Mux(wstate === w_data && out.w.ready, dwcnt + 1.U, 0.U)
+    drcnt := Mux(rstate === r_ddata && out.r.valid, drcnt + 1.U, 0.U)       // 当valid时才记录下一个数据
+    dwcnt := Mux(wstate === w_data && out.w.ready, dwcnt + 1.U, 0.U)        // 当从机ready时才记录下一个数据
 
 
     /********************* output buffer ***************************/
@@ -198,11 +198,11 @@ class AXI extends Module with CacheParameters{
 
 
     /********************** AXI signals ***********************/
-    val sel = Cat(rstate === r_iaddr, rstate === r_daddr, r_bypass)
+    val sel_raddr = Cat(rstate === r_iaddr, rstate === r_daddr, r_bypass)
     // Read address channel signals --------------------------
     // out.ar.ready
     out.ar.valid        := rstate === r_iaddr || rstate === r_daddr
-    out.ar.bits.addr    := MuxLookup(sel, 0.U, Array(
+    out.ar.bits.addr    := MuxLookup(sel_raddr, 0.U, Array(
         "b100".U -> icacheio.addr,
         "b010".U -> dcacheio.raddr,
         "b101".U -> icacheBypassIO.addr,
@@ -212,7 +212,12 @@ class AXI extends Module with CacheParameters{
     out.ar.bits.id      := 0.U
     out.ar.bits.user    := 0.U
     out.ar.bits.len     := Mux(r_bypass, 0.U, (AxiArLen - 1).U)
-    out.ar.bits.size    := Mux(r_bypass, "b010".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
+    out.ar.bits.size    := MuxLookup(sel_raddr, 0.U, Array(
+        "b100".U -> "b011".U,
+        "b010".U -> "b011".U,
+        "b101".U -> "b010".U,
+        "b011".U -> io.dcacheBypassIO.transfer,
+    ))                          //每个beat包含8个字节,icache的bypass则为4B,dcache的bypass为transfer
     out.ar.bits.burst   := "b01".U
     out.ar.bits.lock    := 0.U
     out.ar.bits.cache   := "b0010".U
@@ -235,7 +240,7 @@ class AXI extends Module with CacheParameters{
     out.aw.bits.id      := 0.U
     out.aw.bits.user    := 0.U
     out.aw.bits.len     := Mux(w_bypass, 0.U, (AxiArLen - 1).U)
-    out.aw.bits.size    := Mux(w_bypass, "b010".U, "b011".U)             //每个beat包含8个字节,bypass则为4B
+    out.aw.bits.size    := Mux(w_bypass, io.dcacheBypassIO.transfer, "b011".U)
     out.aw.bits.burst   := "b01".U
     out.aw.bits.lock    := 0.U
     out.aw.bits.cache   := "b0010".U

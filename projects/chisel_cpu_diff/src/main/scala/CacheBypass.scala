@@ -19,6 +19,8 @@ class DCacheBypassAxiIO extends Bundle{
     val wdata   = Output(UInt(64.W))
     val wmask   = Output(UInt(8.W))
     val wdone   = Input(Bool())
+
+    val transfer = Output(UInt(3.W))
 }
 
 class ICacheBypass extends Module{
@@ -67,6 +69,7 @@ class DCacheBypass extends Module{
     val wdata   = RegInit(0.U(64.W))
     val wmask   = RegInit(0.U(8.W))
     val rdata   = RegInit(0.U(64.W))
+    val transfer = RegInit(0.U(3.W))
     // state machine define
     val idle :: fetch_data :: update :: write_data :: Nil = Enum(4)
     val state = RegInit(idle)
@@ -92,16 +95,19 @@ class DCacheBypass extends Module{
         addr    := io.dmem.addr
         wdata   := io.dmem.wdata
         wmask   := io.dmem.wmask
+        transfer := io.dmem.transfer
     }
     rdata := Mux(state === update, io.axi.rdata, rdata)
     // axi r output signal
     io.axi.req      := state === fetch_data
-    io.axi.raddr    := addr & "hfffffffc".U     // 若tranfer的size为4的话，地址要求4对齐
+    io.axi.raddr    := addr & "hffffffff".U << transfer   // 若tranfer的size为4的话，地址要求4对齐
     // axi w output signal
     io.axi.weq      := state === write_data
-    io.axi.waddr    := addr & "hfffffffc".U     // 若tranfer的size为4的话，地址要求4对齐
+    io.axi.waddr    := addr & "hffffffff".U << transfer     // 若tranfer的size为4的话，地址要求4对齐
     io.axi.wdata    := wdata
     io.axi.wmask    := wmask  
+    // axi transfer
+    io.axi.transfer := transfer
     // dcachebypass output signal
     io.dmem.rdata   := rdata
     io.dmem.ok      := state === idle

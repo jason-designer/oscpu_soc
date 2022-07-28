@@ -1,7 +1,7 @@
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental._
-import difftest._
+// import difftest._
 import Instructions._
 
 class ImemIO extends Bundle{
@@ -135,6 +135,7 @@ class Core extends Module {
   io.dmem.addr  := dmem_addr
   io.dmem.wdata := preamu.io.wdata
   io.dmem.wmask := preamu.io.wmask
+  io.dmem.transfer := preamu.io.transfer
 
   // io.dmem.ren   := preamu.io.ren & memreg.io.pr.valid_out //必须是有效的流水线指令才读取
   // io.dmem.raddr := preamu.io.raddr
@@ -256,9 +257,9 @@ class Core extends Module {
 
   
   // putch
-  val regfile_a0 = WireInit(0.U(64.W))
-  BoringUtils.addSink(regfile_a0, "rf_a0")
-  when(wbreg.io.out.putch && commit_valid) {printf("%c",regfile_a0)}
+  // val regfile_a0 = WireInit(0.U(64.W))
+  // BoringUtils.addSink(regfile_a0, "rf_a0")
+  // when(wbreg.io.out.putch && commit_valid) {printf("%c",regfile_a0)}
 
 
   /* ----- Debug ------------------------------ */
@@ -278,58 +279,58 @@ class Core extends Module {
   // 注意下面有多个地方要该valid，例如dt_ic和dt_te
   // 关于时钟中断difftest的一些细节。由于时钟中断产生的ecall在提交时要把valid置为false，同时把dt_ae里面的intrNO,cause和exceptionPC设置好。
   // intrNO和cause两个都取cause就可以了
-  val inst = wbreg.io.out.inst
-  val skip_putch = wbreg.io.out.inst === PUTCH
-  val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
-  val rtthread_test_skip =  inst === "h344737f3".U // 读mip
-  val skip_clint = RegNext(RegNext(io.dmem.en && (io.dmem.addr === "h0200bff8".U || io.dmem.addr === "h02004000".U)))
+  // val inst = wbreg.io.out.inst
+  // val skip_putch = wbreg.io.out.inst === PUTCH
+  // val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U
+  // val rtthread_test_skip =  inst === "h344737f3".U // 读mip
+  // val skip_clint = RegNext(RegNext(io.dmem.en && (io.dmem.addr === "h0200bff8".U || io.dmem.addr === "h02004000".U)))
 
-  // 将中断信号打拍到wbreg的下一级（difftest要提交的级）
-  val wbreg_exception_execution = RegNext(RegNext(RegNext(RegNext(exception_execution))))   
-  val wbreg_time_intr           = RegNext(RegNext(RegNext(RegNext(csru.io.time_intr))))
-  val wbreg_cause               = RegNext(RegNext(RegNext(RegNext(csru.io.cause))))
-  val wbreg_exception_pc        = RegNext(RegNext(RegNext(RegNext(csru.io.pc))))
-  val commit_intr = wbreg_exception_execution && wbreg_time_intr && RegNext(inst === ECALL)      // 时钟中断的话就给commit来个false
+  // // 将中断信号打拍到wbreg的下一级（difftest要提交的级）
+  // val wbreg_exception_execution = RegNext(RegNext(RegNext(RegNext(exception_execution))))   
+  // val wbreg_time_intr           = RegNext(RegNext(RegNext(RegNext(csru.io.time_intr))))
+  // val wbreg_cause               = RegNext(RegNext(RegNext(RegNext(csru.io.cause))))
+  // val wbreg_exception_pc        = RegNext(RegNext(RegNext(RegNext(csru.io.pc))))
+  // val commit_intr = wbreg_exception_execution && wbreg_time_intr && RegNext(inst === ECALL)      // 时钟中断的话就给commit来个false
 
-  val dt_ic = Module(new DifftestInstrCommit)
-  dt_ic.io.clock    := clock
-  dt_ic.io.coreid   := 0.U
-  dt_ic.io.index    := 0.U
-  dt_ic.io.valid    := Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
-  dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
-  dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
-  dt_ic.io.special  := 0.U
-  dt_ic.io.skip     := skip_clint || RegNext(skip_putch || read_mcycle || rtthread_test_skip)
-  dt_ic.io.isRVC    := false.B
-  dt_ic.io.scFailed := false.B
-  dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)
-  dt_ic.io.wdata    := RegNext(wbu.io.out)
-  dt_ic.io.wdest    := RegNext(wbreg.io.out.rd_addr)
+  // val dt_ic = Module(new DifftestInstrCommit)
+  // dt_ic.io.clock    := clock
+  // dt_ic.io.coreid   := 0.U
+  // dt_ic.io.index    := 0.U
+  // dt_ic.io.valid    := Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
+  // dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
+  // dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
+  // dt_ic.io.special  := 0.U
+  // dt_ic.io.skip     := skip_clint || RegNext(skip_putch || read_mcycle || rtthread_test_skip)
+  // dt_ic.io.isRVC    := false.B
+  // dt_ic.io.scFailed := false.B
+  // dt_ic.io.wen      := RegNext(wbreg.io.out.rd_en)
+  // dt_ic.io.wdata    := RegNext(wbu.io.out)
+  // dt_ic.io.wdest    := RegNext(wbreg.io.out.rd_addr)
 
-  val dt_ae = Module(new DifftestArchEvent)
-  dt_ae.io.clock        := clock
-  dt_ae.io.coreid       := 0.U
-  dt_ae.io.intrNO       := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
-  dt_ae.io.cause        := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
-  dt_ae.io.exceptionPC  := Mux(commit_intr, wbreg_exception_pc, 0.U)
+  // val dt_ae = Module(new DifftestArchEvent)
+  // dt_ae.io.clock        := clock
+  // dt_ae.io.coreid       := 0.U
+  // dt_ae.io.intrNO       := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
+  // dt_ae.io.cause        := Mux(commit_intr, wbreg_cause(31, 0), 0.U)
+  // dt_ae.io.exceptionPC  := Mux(commit_intr, wbreg_exception_pc, 0.U)
 
-  val cycle_cnt = RegInit(0.U(64.W))
-  val instr_cnt = RegInit(0.U(64.W))
+  // val cycle_cnt = RegInit(0.U(64.W))
+  // val instr_cnt = RegInit(0.U(64.W))
 
-  cycle_cnt := cycle_cnt + 1.U
-  instr_cnt := Mux(commit_valid, instr_cnt + 1.U, instr_cnt)
+  // cycle_cnt := cycle_cnt + 1.U
+  // instr_cnt := Mux(commit_valid, instr_cnt + 1.U, instr_cnt)
 
-  val rf_a0 = WireInit(0.U(64.W))
-  BoringUtils.addSink(rf_a0, "rf_a0")
+  // val rf_a0 = WireInit(0.U(64.W))
+  // BoringUtils.addSink(rf_a0, "rf_a0")
 
-  val dt_te = Module(new DifftestTrapEvent)
-  dt_te.io.clock    := clock
-  dt_te.io.coreid   := 0.U
-  dt_te.io.valid    := (wbreg.io.out.inst === "h0000006b".U) && commit_valid
-  dt_te.io.code     := rf_a0(2, 0)
-  dt_te.io.pc       := wbreg.io.out.pc
-  dt_te.io.cycleCnt := cycle_cnt
-  dt_te.io.instrCnt := instr_cnt
+  // val dt_te = Module(new DifftestTrapEvent)
+  // dt_te.io.clock    := clock
+  // dt_te.io.coreid   := 0.U
+  // dt_te.io.valid    := (wbreg.io.out.inst === "h0000006b".U) && commit_valid
+  // dt_te.io.code     := rf_a0(2, 0)
+  // dt_te.io.pc       := wbreg.io.out.pc
+  // dt_te.io.cycleCnt := cycle_cnt
+  // dt_te.io.instrCnt := instr_cnt
 
   // val dt_cs = Module(new DifftestCSRState)
   // dt_cs.io.clock          := clock
