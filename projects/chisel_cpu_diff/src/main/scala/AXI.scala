@@ -158,10 +158,10 @@ class AXI extends Module with CacheParameters{
 
     /***********************buffer****************************/
     ibuffer(icnt) := Mux(rstate === r_idata, out.r.bits.data, ibuffer(icnt))
-    icnt := Mux(rstate === r_idata && out.r.valid, icnt + 1.U, 0.U)         // 当valid时才记录下一个数据
+    icnt := Mux(rstate === r_idata, Mux(out.r.valid, icnt + 1.U, icnt), 0.U)        // 当valid时才记录下一个数据
     drbuffer(drcnt) := Mux(rstate === r_ddata, out.r.bits.data, drbuffer(drcnt))
-    drcnt := Mux(rstate === r_ddata && out.r.valid, drcnt + 1.U, 0.U)       // 当valid时才记录下一个数据
-    dwcnt := Mux(wstate === w_data && out.w.ready, dwcnt + 1.U, 0.U)        // 当从机ready时才记录下一个数据
+    drcnt := Mux(rstate === r_ddata, Mux(out.r.valid, drcnt + 1.U, drcnt), 0.U)     // 当valid时才记录下一个数据
+    dwcnt := Mux(wstate === w_data, Mux(out.w.ready, dwcnt + 1.U, dwcnt), 0.U)      // 当从机ready时才记录下一个数据
 
 
     /********************* output buffer ***************************/

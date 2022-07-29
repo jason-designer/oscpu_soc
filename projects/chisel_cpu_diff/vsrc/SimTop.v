@@ -11405,7 +11405,7 @@ module ysyx_210888_AXI(
   wire [63:0] _GEN_42 = 3'h4 == icnt[2:0] ? ibuffer_4 : _GEN_41; // @[AXI.scala 160:25 AXI.scala 160:25]
   wire [63:0] _GEN_43 = 3'h5 == icnt[2:0] ? ibuffer_5 : _GEN_42; // @[AXI.scala 160:25 AXI.scala 160:25]
   wire [63:0] _GEN_44 = 3'h6 == icnt[2:0] ? ibuffer_6 : _GEN_43; // @[AXI.scala 160:25 AXI.scala 160:25]
-  wire [5:0] _icnt_T_3 = icnt + 6'h1; // @[AXI.scala 161:57]
+  wire [5:0] _icnt_T_2 = icnt + 6'h1; // @[AXI.scala 161:59]
   wire  _drbuffer_T = rstate == 4'h7; // @[AXI.scala 162:35]
   wire [63:0] _GEN_55 = 3'h1 == drcnt[2:0] ? drbuffer_1 : drbuffer_0; // @[AXI.scala 162:27 AXI.scala 162:27]
   wire [63:0] _GEN_56 = 3'h2 == drcnt[2:0] ? drbuffer_2 : _GEN_55; // @[AXI.scala 162:27 AXI.scala 162:27]
@@ -11413,8 +11413,8 @@ module ysyx_210888_AXI(
   wire [63:0] _GEN_58 = 3'h4 == drcnt[2:0] ? drbuffer_4 : _GEN_57; // @[AXI.scala 162:27 AXI.scala 162:27]
   wire [63:0] _GEN_59 = 3'h5 == drcnt[2:0] ? drbuffer_5 : _GEN_58; // @[AXI.scala 162:27 AXI.scala 162:27]
   wire [63:0] _GEN_60 = 3'h6 == drcnt[2:0] ? drbuffer_6 : _GEN_59; // @[AXI.scala 162:27 AXI.scala 162:27]
-  wire [5:0] _drcnt_T_3 = drcnt + 6'h1; // @[AXI.scala 163:59]
-  wire [5:0] _dwcnt_T_3 = dwcnt + 6'h1; // @[AXI.scala 164:58]
+  wire [5:0] _drcnt_T_2 = drcnt + 6'h1; // @[AXI.scala 163:61]
+  wire [5:0] _dwcnt_T_2 = dwcnt + 6'h1; // @[AXI.scala 164:60]
   wire [512:0] _T_18 = {ibuffer_7,ibuffer_6,ibuffer_5,ibuffer_4,ibuffer_3,ibuffer_2,ibuffer_1,ibuffer_0,1'h0}; // @[Cat.scala 30:58]
   wire [511:0] idata = _T_18[512:1]; // @[AXI.scala 170:18]
   wire [512:0] _T_19 = {drbuffer_7,drbuffer_6,drbuffer_5,drbuffer_4,drbuffer_3,drbuffer_2,drbuffer_1,drbuffer_0,1'h0}; // @[Cat.scala 30:58]
@@ -11636,22 +11636,28 @@ module ysyx_210888_AXI(
     end
     if (reset) begin // @[AXI.scala 73:30]
       icnt <= 6'h0; // @[AXI.scala 73:30]
-    end else if (_ibuffer_T & io_out_r_valid) begin // @[AXI.scala 161:16]
-      icnt <= _icnt_T_3;
+    end else if (_ibuffer_T) begin // @[AXI.scala 161:16]
+      if (io_out_r_valid) begin // @[AXI.scala 161:40]
+        icnt <= _icnt_T_2;
+      end
     end else begin
       icnt <= 6'h0;
     end
     if (reset) begin // @[AXI.scala 74:30]
       drcnt <= 6'h0; // @[AXI.scala 74:30]
-    end else if (_drbuffer_T & io_out_r_valid) begin // @[AXI.scala 163:17]
-      drcnt <= _drcnt_T_3;
+    end else if (_drbuffer_T) begin // @[AXI.scala 163:17]
+      if (io_out_r_valid) begin // @[AXI.scala 163:41]
+        drcnt <= _drcnt_T_2;
+      end
     end else begin
       drcnt <= 6'h0;
     end
     if (reset) begin // @[AXI.scala 75:30]
       dwcnt <= 6'h0; // @[AXI.scala 75:30]
-    end else if (wstate == 3'h2 & io_out_w_ready) begin // @[AXI.scala 164:17]
-      dwcnt <= _dwcnt_T_3;
+    end else if (wstate == 3'h2) begin // @[AXI.scala 164:17]
+      if (io_out_w_ready) begin // @[AXI.scala 164:40]
+        dwcnt <= _dwcnt_T_2;
+      end
     end else begin
       dwcnt <= 6'h0;
     end

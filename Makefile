@@ -51,6 +51,9 @@ verilogsoc:
 simsoc:
 	./build.sh -e soc -b -s -y -v '--timescale "1ns/1ns" -Wno-fatal --trace' -a "-i $(SOC_TEST_FILE) --dump-wave"
 
+simnowavesoc:
+	./build.sh -e soc -b -s -y -v '--timescale "1ns/1ns" -Wno-fatal' -a "-i $(SOC_TEST_FILE) "
+
 wavesoc:
 	gtkwave projects/soc/build_test/vlt_dump.vcd
 
