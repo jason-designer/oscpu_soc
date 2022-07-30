@@ -226,7 +226,6 @@ class Core extends Module {
   wbreg.io.en  := !stall_wb
 
   // 改变计算机状态的单元 
-  ifu.io.en     := idreg.io.en
   rfu.io.rd_en  := wbreg.io.out.rd_en && commit_valid  //必须是有效的流水线指令才写入
   csru.io.wen   := wbreg.io.out.csr_wen && commit_valid
 

@@ -20,7 +20,7 @@ class IMMIO extends Module {
         .otherwise{sel := 0.U}
     }
 
-    val sel_r = RegEnable(sel, 0.U, out_ok)
+    val sel_r = RegEnable(sel, 0.U, out_ok && io.imem.en)
 
     io.mem0.en      := Mux(sel === 0.U, io.imem.en, false.B)
     io.mem0.addr    := Mux(sel === 0.U, io.imem.addr, 0.U)
@@ -62,7 +62,7 @@ class DMMIO extends Module {
         .otherwise{sel := 0.U}
     }
 
-    val sel_r = RegEnable(sel, 0.U, out_ok)
+    val sel_r = RegEnable(sel, 0.U, out_ok && io.dmem.en)
 
     io.mem0.en          := Mux(sel === 0.U, io.dmem.en, false.B)
     io.mem0.op          := Mux(sel === 0.U, io.dmem.op, false.B)
