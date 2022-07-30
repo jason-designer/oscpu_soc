@@ -45,8 +45,8 @@ SOC_TEST_FILE = ysyxSoC/$(ALL)
 
 verilogsoc:
 	make verilog
-	cp projects/chisel_cpu_diff/vsrc/SimTop.v projects/soc/vsrc/ysyx_210888.v
-	perl -p -i -e "s/ysyx_210888_SimTop/ysyx_210888/g" projects/soc/vsrc/ysyx_210888.v
+	cp projects/chisel_cpu_diff/vsrc/SocTop.v projects/soc/vsrc/ysyx_210888.v
+	perl -p -i -e "s/ysyx_210888_SocTop/ysyx_210888/g" projects/soc/vsrc/ysyx_210888.v
 
 simsoc:
 	./build.sh -e soc -b -s -y -v '--timescale "1ns/1ns" -Wno-fatal --trace' -a "-i $(SOC_TEST_FILE) --dump-wave"

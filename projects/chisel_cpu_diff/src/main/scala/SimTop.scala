@@ -1,19 +1,16 @@
 // package oscpu
 import chisel3._
 import chisel3.util._
-// import difftest._
-
+import difftest._
 
 class SimTop extends Module{
   val io = IO(new Bundle {
-    // val logCtrl = new LogCtrlIO
-    // val perfInfo = new PerfInfoIO
-    // val uart = new UARTIO
-    val interrupt = Input(Bool())
-    // val memAXI_0 = new AxiIO
-    val master = new SocAXI4IO
-    val slave = Flipped(new SocAXI4IO)
+    val logCtrl = new LogCtrlIO
+    val perfInfo = new PerfInfoIO
+    val uart = new UARTIO
+    val memAXI_0 = new AxiIO
   })
+
   val core = Module(new Core)
   val icache = Module(new ICache)
   val dcache = Module(new DCache)
@@ -42,12 +39,52 @@ class SimTop extends Module{
   icachebypass.io.axi <> axi.io.icacheBypassIO
   dcachebypass.io.axi <> axi.io.dcacheBypassIO
 
-  // axi.io.out.ar <> io.memAXI_0.ar
-  // axi.io.out.r  <> io.memAXI_0.r
-  // axi.io.out.aw <> io.memAXI_0.aw
-  // axi.io.out.w  <> io.memAXI_0.w
-  // axi.io.out.b  <> io.memAXI_0.b 
+  axi.io.out.ar <> io.memAXI_0.ar
+  axi.io.out.r  <> io.memAXI_0.r
+  axi.io.out.aw <> io.memAXI_0.aw
+  axi.io.out.w  <> io.memAXI_0.w
+  axi.io.out.b  <> io.memAXI_0.b 
 
+  io.uart.out.valid := false.B
+  io.uart.out.ch := 0.U
+  io.uart.in.valid := false.B
+}
+
+
+class SocTop extends Module{
+  val io = IO(new Bundle {
+    val interrupt = Input(Bool())
+    val master = new SocAXI4IO
+    val slave = Flipped(new SocAXI4IO)
+  })
+
+  val core = Module(new Core)
+  val icache = Module(new ICache)
+  val dcache = Module(new DCache)
+  val axi = Module(new AXI)
+
+  val immio = Module(new IMMIO)
+  val icachebypass = Module(new ICacheBypass)
+  val dmmio = Module(new DMMIO)
+  val clintreg = Module(new ClintReg)
+  val dcachebypass = Module(new DCacheBypass)
+
+  core.io.imem  <> immio.io.imem
+  immio.io.mem0 <> icache.io.imem
+  immio.io.mem1 <> icachebypass.io.imem
+
+  core.io.dmem  <> dmmio.io.dmem
+  dmmio.io.mem0 <> dcache.io.dmem
+  dmmio.io.mem1 <> clintreg.io.mem
+  dmmio.io.mem2 <> dcachebypass.io.dmem
+
+  core.io.set_mtip    := clintreg.io.set_mtip
+  core.io.clear_mtip  := clintreg.io.clear_mtip
+
+  icache.io.axi <> axi.io.icacheio
+  dcache.io.axi <> axi.io.dcacheio
+  icachebypass.io.axi <> axi.io.icacheBypassIO
+  dcachebypass.io.axi <> axi.io.dcacheBypassIO
   /************************ SoC-AXI *************************/
   axi.io.out.aw.ready     := io.master.awready
   io.master.awvalid       := axi.io.out.aw.valid
@@ -119,10 +156,5 @@ class SimTop extends Module{
   io.slave.rdata    := 0.U
   io.slave.rlast    := false.B
   io.slave.rid      := 0.U
-
   /****************************************************/
-  // io.uart.out.valid := false.B
-  // io.uart.out.ch := 0.U
-  // io.uart.in.valid := false.B
 }
-

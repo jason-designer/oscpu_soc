@@ -18,7 +18,10 @@ class IDReg extends Module {
         val imem_ok = Output(Bool())
     })
     val valid   = RegEnable(io.in.valid, false.B, io.en)
-    val pc      = RegEnable(io.in.pc, "h2ffffffc".U(64.W), io.en)
+    val pc = Config.soc match{
+        case true   => RegEnable(io.in.pc, "h2ffffffc".U(64.W), io.en)
+        case false  => RegEnable(io.in.pc, "h7ffffffc".U(64.W), io.en)
+    }  
 
     io.imem.addr    := io.in.pc
     io.imem.en      := io.en 
