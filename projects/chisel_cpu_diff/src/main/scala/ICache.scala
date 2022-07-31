@@ -40,6 +40,7 @@ class ICache extends Module with CacheParameters{
     val io = IO(new Bundle{
         val imem    = new ICacheIO
         val axi     = new ICacheAxiIO
+        val fence   = Flipped(new FenceIO)
     })
     // addr reg
     val addr = RegEnable(io.imem.addr, 0.U(64.W), io.imem.en && io.imem.ok)
@@ -70,7 +71,7 @@ class ICache extends Module with CacheParameters{
     age1(index_addr) := Mux(hit1 ^ hit2, hit1, age1(index_addr))
     age2(index_addr) := Mux(hit1 ^ hit2, hit2, age2(index_addr))
     //state machine define
-    val idle :: miss :: Nil = Enum(2)
+    val idle :: miss :: clear_block1 :: clear_block2 :: Nil = Enum(4)
     val state = RegInit(idle)
 
     // icache output
@@ -80,12 +81,20 @@ class ICache extends Module with CacheParameters{
     io.imem.data    := data
     io.imem.ok      := (hit || not_en_yet) && state === idle 
 
+    val fence_cnt = RegInit(0.U(IndexWidth.W))
     switch(state){
         is(idle){
-            when(!hit && !not_en_yet) {state := miss}
+            when(io.fence.req){state := clear_block1}
+            .elsewhen(!hit && !not_en_yet){state := miss}
         }
         is(miss){
             when(io.axi.valid) {state := idle}
+        }
+        is(clear_block1){
+            when(fence_cnt === (CacheLineNum - 1).U){state := clear_block2}
+        }
+        is(clear_block2){
+            when(fence_cnt === (CacheLineNum - 1).U){state := idle}
         }
     }
 
@@ -104,6 +113,18 @@ class ICache extends Module with CacheParameters{
     block2(index_addr)   := Mux(update && updateway2, io.axi.data, block2(index_addr))
     tag2(index_addr)     := Mux(update && updateway2, tag_addr, tag2(index_addr))
     v2(index_addr)       := Mux(update && updateway2, true.B, v2(index_addr))
+
+    when(state === clear_block1)    {v1(fence_cnt) := false.B}
+    .elsewhen(update && updateway1) {v1(index_addr) := true.B}
+    when(state === clear_block2)    {v2(fence_cnt) := false.B}
+    .elsewhen(update && updateway2) {v2(index_addr) := true.B}
+
+    // fence_cnt
+    when(state === clear_block1 || state === clear_block2){fence_cnt := fence_cnt + 1.U}
+    .otherwise{fence_cnt := 0.U}
+    
+    // fence output
+    io.fence.done := fence_cnt === (CacheLineNum - 1).U && state === clear_block2
 }
 
 

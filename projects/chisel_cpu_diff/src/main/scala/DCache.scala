@@ -35,6 +35,7 @@ class DCache extends Module with CacheParameters{
     val io = IO(new Bundle{
         val dmem    = new DCacheIO
         val axi     = new DCacheAxiIO
+        val fence   = Flipped(new FenceIO)
     })
     // input reg
     // 当en为ture且dcache不处于busy状态（也就是输出ok）时才可以改变
@@ -64,7 +65,7 @@ class DCache extends Module with CacheParameters{
     val rdata1  = (block1(index_addr) >> (offset_addr << 3))(63, 0)
     val rdata2  = (block2(index_addr) >> (offset_addr << 3))(63, 0)
     // state machine define
-    val idle :: write_back :: fetch_data :: Nil = Enum(3)
+    val idle :: write_back :: fetch_data :: write_block1 :: block1_written :: write_block2 :: block2_written ::Nil = Enum(7)
     val state = RegInit(idle)
     // cache output
     val hit         = hit1 || hit2
@@ -87,16 +88,31 @@ class DCache extends Module with CacheParameters{
     val miss        = !hit
     val dirty       = Mux(updateway1, d1(index_addr), d2(index_addr))
     // 
+    val fence_cnt = RegInit(0.U(IndexWidth.W))
     switch(state){
         is(idle){
-            when(miss && !not_en_yet) {state := Mux(dirty, write_back, fetch_data)}
-            // when(miss && !not_en_yet) {state := write_back}
+            when(io.fence.req){state := write_block1}
+            .elsewhen(miss && !not_en_yet){state := Mux(dirty, write_back, fetch_data)}
         }
         is(write_back){
             when(io.axi.wdone) {state := fetch_data}
         }
         is(fetch_data){
             when(io.axi.rvalid) {state := idle}
+        }
+        is(write_block1){
+            when(d1(fence_cnt) === false.B) {state := block1_written}
+        }
+        is(block1_written){
+            when(fence_cnt === (CacheLineNum - 1).U) {state := write_block2}
+            .otherwise {state := write_block1}
+        }
+        is(write_block2){
+            when(d2(fence_cnt) === false.B) {state := block2_written}
+        }
+        is(block2_written){
+            when(fence_cnt === (CacheLineNum - 1).U) {state := idle}
+            .otherwise {state := write_block2}
         }
     }
 
@@ -105,8 +121,15 @@ class DCache extends Module with CacheParameters{
     val update = state === fetch_data && io.axi.rvalid
     val way1write = hit1 && op
     val way2write = hit2 && op
-    d1(index_addr) := Mux(update && updateway1, false.B, Mux(way1write, true.B, d1(index_addr)))
-    d2(index_addr) := Mux(update && updateway2, false.B, Mux(way2write, true.B, d2(index_addr)))
+    // d1(index_addr) := Mux(update && updateway1, false.B, Mux(way1write, true.B, d1(index_addr)))
+    // d2(index_addr) := Mux(update && updateway2, false.B, Mux(way2write, true.B, d2(index_addr)))
+    when(state === block1_written){d1(fence_cnt) := false.B}
+    .elsewhen(update && updateway1){d1(index_addr) := false.B}
+    .elsewhen(way1write){d1(index_addr) := true.B}
+
+    when(state === block2_written){d2(fence_cnt) := false.B}
+    .elsewhen(update && updateway2){d2(index_addr) := false.B}
+    .elsewhen(way2write){d2(index_addr) := true.B}
     // update cache data
     // block after write data
     val wm = wmask
@@ -124,12 +147,42 @@ class DCache extends Module with CacheParameters{
     tag2(index_addr)     := Mux(update && updateway2, tag_addr, tag2(index_addr))
     v2(index_addr)       := Mux(update && updateway2, true.B, v2(index_addr))
 
-    //axi request signals
+    // axi request signals
     io.axi.req      := state === fetch_data
     io.axi.raddr    := addr & Cat(Fill(IndexWidth + TagWidth, 1.U(1.W)), 0.U(OffsetWidth.W))
-    io.axi.weq      := state === write_back
-    io.axi.waddr    := Cat(Mux(updateway1, tag1(index_addr), tag2(index_addr)), index_addr, 0.U(OffsetWidth.W)) 
-    io.axi.wdata    := Mux(updateway1, block1(index_addr), block2(index_addr))
+    // io.axi.weq      := state === write_back
+    // io.axi.waddr    := Cat(Mux(updateway1, tag1(index_addr), tag2(index_addr)), index_addr, 0.U(OffsetWidth.W)) 
+    // io.axi.wdata    := Mux(updateway1, block1(index_addr), block2(index_addr))
+
+    when(state === write_block1 && d1(fence_cnt)){
+        io.axi.weq      := true.B 
+        io.axi.waddr    := Cat(tag1(fence_cnt), fence_cnt, 0.U(OffsetWidth.W)) 
+        io.axi.wdata    := block1(fence_cnt)
+    }
+    .elsewhen(state === write_block2 && d2(fence_cnt)){
+        io.axi.weq      := true.B 
+        io.axi.waddr    := Cat(tag2(fence_cnt), fence_cnt, 0.U(OffsetWidth.W)) 
+        io.axi.wdata    := block2(fence_cnt)
+    }
+    .elsewhen(state === write_back){
+        io.axi.weq      := state === write_back
+        io.axi.waddr    := Cat(Mux(updateway1, tag1(index_addr), tag2(index_addr)), index_addr, 0.U(OffsetWidth.W)) 
+        io.axi.wdata    := Mux(updateway1, block1(index_addr), block2(index_addr))
+    }
+    .otherwise{
+        io.axi.weq      := fasle.B
+        io.axi.waddr    := 0.U
+        io.axi.wdata    := 0.U
+    }
+
+    // fence_cnt
+    // 从block1_written到write_block2不需要清零，因为fence_cnt的位宽是与index位宽一致，它加1会自动清零
+    when(state === block1_written || state === block2_written){fence_cnt := fence_cnt + 1.U}
+    .elsewhen(state === write_block1 || state === write_block2){fence_cnt := fence_cnt}
+    .otherwise{fence_cnt := 0.U}
+
+    // fence output
+    io.fence.done := state === block2_written && fence_cnt === (CacheLineNum - 1).U
 }
 
 
