@@ -37,6 +37,7 @@ void release()
 
 int main(int argc, char *argv[])
 {
+    setbuf(stdout, NULL);
     printf("Emu compiled at %s, %s\n", __DATE__, __TIME__);
 
     if (signal(SIGINT, sig_handler) == SIG_ERR)

@@ -72,6 +72,9 @@ class SocTop extends Module{
   val clintreg = Module(new ClintReg)
   val dcachebypass = Module(new DCacheBypass)
 
+  icache.io.fence <> core.io.ifence
+  dcache.io.fence <> core.io.dfence
+
   core.io.imem  <> immio.io.imem
   immio.io.mem0 <> icache.io.imem
   immio.io.mem1 <> icachebypass.io.imem
