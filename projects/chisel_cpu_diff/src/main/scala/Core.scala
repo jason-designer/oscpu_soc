@@ -11,6 +11,9 @@ class Core extends Module {
 
     val set_mtip = Input(Bool())
     val clear_mtip = Input(Bool())
+
+    val ifence = new FenceIO
+    val dfence = new FenceIO
   })
   // 流水线模块
   val ifu     = Module(new IFetch)
@@ -23,6 +26,7 @@ class Core extends Module {
   val wbu     = Module(new WriteBack)
 
   val rfconflict  = Module(new RegfileConflict)
+  val fence = Module(new Fence)
 
   val idreg   = Module(new IDReg)
   val exereg  = Module(new ExeReg)
@@ -109,7 +113,7 @@ class Core extends Module {
   preamu.io.op2     := memreg.io.out.op2
   preamu.io.imm     := memreg.io.out.imm
   //dmem
-  val dmem_en = preamu.io.ren || preamu.io.wen
+  val dmem_en = preamu.io.ren || preamu.io.wen 
   val dmem_op = preamu.io.wen   // 按理说ren和wen不会同时为true
   val dmem_addr = Mux(dmem_op, preamu.io.waddr, preamu.io.raddr)
   io.dmem.en    := dmem_en & memreg.io.out.valid //必须是有效的流水线指令才读写
@@ -191,7 +195,8 @@ class Core extends Module {
   val stall_wb = Wire(Bool())
   val imem_not_ok = !io.imem.ok
   val dmem_not_ok = !io.dmem.ok
-  // 对于异常调用的处理
+
+  // 对于异常调用的处理------------------------------------------------------
   // 当idreg遇到ecall或mret的时候阻塞idreg，直到流水线清空
   // 当idreg遇到ecall或mret时，且流水线为空，且idreg不阻塞时（exception_stall不阻塞，但是其他东西在阻塞，例如imem_not_ok），则对csr进行写入
   val exception_stall = (idreg.io.inst === ECALL || idreg.io.inst === MRET) && (exereg.io.out.valid || memreg.io.out.valid || wbreg.io.out.valid)
@@ -202,15 +207,26 @@ class Core extends Module {
   csru.io.pc        := idreg.io.out.pc
   // 对于时钟中断的处理
   idreg.io.imem.data  := Mux(csru.io.time_intr, "h00000073".U, io.imem.data)
-  //熄火的时候（暂停idreg以及自前的流水线）: 
-  //          1.exereg的valid要为false.B
-  //          2.ifu维持原值
-  //          3.idreg维持原值(en为false)
-  //          其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
-  stall_id := rfconflict.io.conflict || imem_not_ok || exception_stall
-  //全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:
-  //  1.全部流水线寄存器都保持原值
-  //  2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
+
+  // 对于fence.i的处理------------------------------------------------------
+  // 当遇到fence.i时，首先要清空流水线，清空后给go信号让fence执行，等到fence执行完就继续流动
+  val fence_wait = idreg.io.inst === FENCEI && (exereg.io.out.valid || memreg.io.out.valid || wbreg.io.out.valid)
+  fence.io.go := idreg.io.inst === FENCEI && !exereg.io.out.valid && !memreg.io.out.valid && !wbreg.io.out.valid
+  val fence_running = !fence.io.ok
+
+  fence.io.ifence <> io.ifence
+  fence.io.dfence <> io.dfence
+
+  // 熄火的时候（暂停idreg以及自前的流水线）: --------------------------------
+  //    1.exereg的valid要为false.B
+  //    2.ifu维持原值
+  //    3.idreg维持原值(en为false)
+  //    其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
+  stall_id := rfconflict.io.conflict || imem_not_ok || exception_stall || fence_wait || fence_running
+
+  // 全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:----------------------
+  //    1.全部流水线寄存器都保持原值
+  //    2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
   stall_wb := dmem_not_ok
   
   
@@ -259,7 +275,7 @@ class Core extends Module {
   dt_ic.io.clock    := clock
   dt_ic.io.coreid   := 0.U
   dt_ic.io.index    := 0.U
-  dt_ic.io.valid    := Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
+  dt_ic.io.valid    := false.B//Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
   dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
   dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U

@@ -101,14 +101,14 @@ class DCache extends Module with CacheParameters{
             when(io.axi.rvalid) {state := idle}
         }
         is(write_block1){
-            when(d1(fence_cnt) === false.B) {state := block1_written}
+            when(d1(fence_cnt) === false.B || (d1(fence_cnt) === true.B && io.axi.wdone)) {state := block1_written}
         }
         is(block1_written){
             when(fence_cnt === (CacheLineNum - 1).U) {state := write_block2}
             .otherwise {state := write_block1}
         }
         is(write_block2){
-            when(d2(fence_cnt) === false.B) {state := block2_written}
+            when(d2(fence_cnt) === false.B || (d2(fence_cnt) === true.B && io.axi.wdone)) {state := block2_written}
         }
         is(block2_written){
             when(fence_cnt === (CacheLineNum - 1).U) {state := idle}
@@ -120,7 +120,7 @@ class DCache extends Module with CacheParameters{
     // 按理说不会两个都hit，所以这里不考虑两个都hit的情况
     val update = state === fetch_data && io.axi.rvalid
     val way1write = hit1 && op
-    val way2write = hit2 && op
+    val way2write = hit2 && op 
     // d1(index_addr) := Mux(update && updateway1, false.B, Mux(way1write, true.B, d1(index_addr)))
     // d2(index_addr) := Mux(update && updateway2, false.B, Mux(way2write, true.B, d2(index_addr)))
     when(state === block1_written){d1(fence_cnt) := false.B}
@@ -170,7 +170,7 @@ class DCache extends Module with CacheParameters{
         io.axi.wdata    := Mux(updateway1, block1(index_addr), block2(index_addr))
     }
     .otherwise{
-        io.axi.weq      := fasle.B
+        io.axi.weq      := false.B
         io.axi.waddr    := 0.U
         io.axi.wdata    := 0.U
     }

@@ -9,22 +9,21 @@ class FenceIO extends Bundle{
 
 class Fence extends Module{
     val io = IO(new Bundle{
-        val inst    = Input(UInt(32.W))
         val go      = Input(Bool())
         val ok      = Output(Bool())
         val ifence  = new FenceIO
         val dfence  = new FenceIO
     })
     // state machine
-    val idle :: wait :: dcache :: icache :: done :: Nil = Enum(5)
+    val idle :: run_fence :: dcache :: icache :: done :: Nil = Enum(5)
     val state = RegInit(idle)
 
     switch(state){
         is(idle){
-            when(io.inst === FENCEI){state := wait}
+            when(io.go){state := run_fence}
         }
-        is(wait){
-            when(io.go){state := dcache}
+        is(run_fence){          // 在这个状态会输出ok，让fence指令流掉。如果不留掉的话，icache的v被置为0，会导致重复取fence指令。
+            state := dcache
         }
         is(dcache){
             when(io.dfence.done){state := icache}
@@ -37,9 +36,9 @@ class Fence extends Module{
         }
     }
     // output
-    io.ok := state === idle && io.inst =/= FENCEI
-    io.dfence.req := idle === dcache
-    io.dfence.req := idle === icache
+    io.ok := (state === idle && io.go === false.B) || state === done || state === run_fence
+    io.dfence.req := state === dcache
+    io.ifence.req := state === icache
 }
 
 
