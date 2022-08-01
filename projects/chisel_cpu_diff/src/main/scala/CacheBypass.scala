@@ -117,15 +117,16 @@ class DCacheBypass extends Module{
 // icache可以选择不走bypass，而是通过一个转换器将burst取值变为非burst取值
 // 这样icache就可以访问外设了
 // 做个的原因是外设不走icache的仿真速度会很慢
-class ICacheSocAxi with Module with CacheParameters{
+class ICacheSocAxi extends Module with CacheParameters{
     val io = IO(new Bundle{
         val in = Flipped(new ICacheAxiIO)
-        val out = new ICacheBypassAxiIO
+        val out0 = new ICacheAxiIO
+        val out1 = new ICacheBypassAxiIO
     })
     //
     val times = CacheLineByte / 4
     //
-    val idle :: wait :: done :: all_done :: Nil = Enum(4)
+    val idle :: fetch :: done :: soc_fetch :: soc_done :: soc_all_done :: Nil = Enum(6)
     val state = RegInit(idle)
     //
     val cnt = RegInit(0.U)
@@ -133,31 +134,45 @@ class ICacheSocAxi with Module with CacheParameters{
     //
     switch(state){
         is(idle){
-            when(io.in.req){state := wait}
+            when(io.in.req && (io.in.addr < "h80000000".U)){state := soc_fetch}
+            .elsewhen(io.in.req){state := fetch}
         }
-        is(wait){
-            when(io.out.valid){state := done}
+        is(fetch){
+            when(io.out0.valid){state := done}
         }
         is(done){
-            when(cnt === (times - 1).U){state := all_done}
-            .otherwise{state === wait}
+            state := idle
         }
-        is(all_done){
+        is(soc_fetch){
+            when(io.out1.valid){state := soc_done}
+        }
+        is(soc_done){
+            when(cnt === (times - 1).U){state := soc_all_done}
+            .otherwise{state === soc_fetch}
+        }
+        is(soc_all_done){
             state := idle
         }
     }
     //
-    when(state === done){cnt := cnt + 1.U}
-    //
-    io.out.req  := state === wait
-    io.out.addr := io.in.addr + (cnt << 2.U)
-    //
-    io.in.valid := state === all_done
-    when(state === done){buffer(cnt) := io.in.data}
+    when(state === soc_done){buffer(cnt) := io.in.data}
     var data = 0.U(1.W)
     for(i <- 0 to (AxiArLen - 1)) data = Cat(buffer(i), data)
     data = data(AxiArLen * 64 ,1)
-    io.in.data := data
+    //
+    when(state === soc_done){cnt := cnt + 1.U}
+    .elsewhen(state === soc_all_done){cnt := 0.U}
+    //
+    io.out0.req  := state === fetch
+    io.out0.addr := io.in.addr
+    io.out1.req  := state === soc_fetch
+    io.out1.addr := io.in.addr + (cnt << 2.U)
+    //
+    io.in.valid := state === soc_all_done || state === done
+    when(state === done){io.in.data := io.out0.data}
+    .elsewhen(state === soc_all_done){io.in.data := data}
+    .otherwise{io.in.data := 0.U}
+    
 }
 
 
