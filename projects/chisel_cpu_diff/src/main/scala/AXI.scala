@@ -145,7 +145,7 @@ class AXI extends Module with CacheParameters{
             when(out.r.valid) {rstate := r_idata}
         }
         is(r_idata){
-            when(out.r.bits.last) {rstate := r_idone} // 当last的时候才下一步，此时当valid为true才记录数据
+            when(out.r.valid && out.r.bits.last) {rstate := r_idone} // 当last的时候才下一步，此时当valid为true才记录数据
         }
         is(r_idone){
             rstate := r_idle
@@ -158,7 +158,7 @@ class AXI extends Module with CacheParameters{
             when(out.r.valid) {rstate := r_ddata}
         }
         is(r_ddata){
-            when(out.r.bits.last) {rstate := r_ddone}   // 当last的时候才下一步，此时当valid为true才记录数据
+            when(out.r.valid && out.r.bits.last) {rstate := r_ddone}   // 当last的时候才下一步，此时当valid为true才记录数据
         }
         is(r_ddone){
             rstate := r_idle

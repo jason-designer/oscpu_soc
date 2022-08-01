@@ -114,6 +114,51 @@ class DCacheBypass extends Module{
 }
 
 
+// icache可以选择不走bypass，而是通过一个转换器将burst取值变为非burst取值
+// 这样icache就可以访问外设了
+// 做个的原因是外设不走icache的仿真速度会很慢
+class ICacheSocAxi with Module with CacheParameters{
+    val io = IO(new Bundle{
+        val in = Flipped(new ICacheAxiIO)
+        val out = new ICacheBypassAxiIO
+    })
+    //
+    val times = CacheLineByte / 4
+    //
+    val idle :: wait :: done :: all_done :: Nil = Enum(4)
+    val state = RegInit(idle)
+    //
+    val cnt = RegInit(0.U)
+    val buffer = RegInit(VecInit(Seq.fill(times)(0.U(32.W))))
+    //
+    switch(state){
+        is(idle){
+            when(io.in.req){state := wait}
+        }
+        is(wait){
+            when(io.out.valid){state := done}
+        }
+        is(done){
+            when(cnt === (times - 1).U){state := all_done}
+            .otherwise{state === wait}
+        }
+        is(all_done){
+            state := idle
+        }
+    }
+    //
+    when(state === done){cnt := cnt + 1.U}
+    //
+    io.out.req  := state === wait
+    io.out.addr := io.in.addr + (cnt << 2.U)
+    //
+    io.in.valid := state === all_done
+    when(state === done){buffer(cnt) := io.in.data}
+    var data = 0.U(1.W)
+    for(i <- 0 to (AxiArLen - 1)) data = Cat(buffer(i), data)
+    data = data(AxiArLen * 64 ,1)
+    io.in.data := data
+}
 
 
 
