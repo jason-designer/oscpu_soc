@@ -275,7 +275,7 @@ class Core extends Module {
   dt_ic.io.clock    := clock
   dt_ic.io.coreid   := 0.U
   dt_ic.io.index    := 0.U
-  dt_ic.io.valid    := false.B//Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
+  dt_ic.io.valid    := Mux(commit_intr, false.B, RegNext(commit_valid)) // 判断是否是中断
   dt_ic.io.pc       := RegNext(wbreg.io.out.pc)
   dt_ic.io.instr    := RegNext(wbreg.io.out.inst)
   dt_ic.io.special  := 0.U
