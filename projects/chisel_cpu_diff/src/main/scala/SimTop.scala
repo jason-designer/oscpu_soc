@@ -16,8 +16,9 @@ class SimTop extends Module{
   val dcache = Module(new DCache)
   val axi = Module(new AXI)
 
-  val immio = Module(new IMMIO)
-  val icachebypass = Module(new ICacheBypass)
+  // val immio = Module(new IMMIO)
+  // val icachebypass = Module(new ICacheBypass)
+  val icacheaxi = Module(new ICacheSocAxi)
   val dmmio = Module(new DMMIO)
   val clintreg = Module(new ClintReg)
   val dcachebypass = Module(new DCacheBypass)
@@ -25,9 +26,7 @@ class SimTop extends Module{
   icache.io.fence <> core.io.ifence
   dcache.io.fence <> core.io.dfence
 
-  core.io.imem  <> immio.io.imem
-  immio.io.mem0 <> icache.io.imem
-  immio.io.mem1 <> icachebypass.io.imem
+  core.io.imem  <> icache.io.imem
 
   core.io.dmem  <> dmmio.io.dmem
   dmmio.io.mem0 <> dcache.io.dmem
@@ -37,9 +36,11 @@ class SimTop extends Module{
   core.io.set_mtip    := clintreg.io.set_mtip
   core.io.clear_mtip  := clintreg.io.clear_mtip
 
-  icache.io.axi <> axi.io.icacheio
+  icache.io.axi <> icacheaxi.io.in
+  icacheaxi.io.out0 <> axi.io.icacheio
+  icacheaxi.io.out1 <> axi.io.icacheBypassIO
+
   dcache.io.axi <> axi.io.dcacheio
-  icachebypass.io.axi <> axi.io.icacheBypassIO
   dcachebypass.io.axi <> axi.io.dcacheBypassIO
 
   axi.io.out.ar <> io.memAXI_0.ar
@@ -66,8 +67,9 @@ class SocTop extends Module{
   val dcache = Module(new DCache)
   val axi = Module(new AXI)
 
-  val immio = Module(new IMMIO)
-  val icachebypass = Module(new ICacheBypass)
+  // val immio = Module(new IMMIO)
+  // val icachebypass = Module(new ICacheBypass)
+  val icacheaxi = Module(new ICacheSocAxi)
   val dmmio = Module(new DMMIO)
   val clintreg = Module(new ClintReg)
   val dcachebypass = Module(new DCacheBypass)
@@ -75,9 +77,7 @@ class SocTop extends Module{
   icache.io.fence <> core.io.ifence
   dcache.io.fence <> core.io.dfence
 
-  core.io.imem  <> immio.io.imem
-  immio.io.mem0 <> icache.io.imem
-  immio.io.mem1 <> icachebypass.io.imem
+  core.io.imem  <> icache.io.imem
 
   core.io.dmem  <> dmmio.io.dmem
   dmmio.io.mem0 <> dcache.io.dmem
@@ -87,9 +87,11 @@ class SocTop extends Module{
   core.io.set_mtip    := clintreg.io.set_mtip
   core.io.clear_mtip  := clintreg.io.clear_mtip
 
-  icache.io.axi <> axi.io.icacheio
+  icache.io.axi <> icacheaxi.io.in
+  icacheaxi.io.out0 <> axi.io.icacheio
+  icacheaxi.io.out1 <> axi.io.icacheBypassIO
+
   dcache.io.axi <> axi.io.dcacheio
-  icachebypass.io.axi <> axi.io.icacheBypassIO
   dcachebypass.io.axi <> axi.io.dcacheBypassIO
   /************************ SoC-AXI *************************/
   axi.io.out.aw.ready     := io.master.awready

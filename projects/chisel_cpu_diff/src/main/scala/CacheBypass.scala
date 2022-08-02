@@ -157,8 +157,8 @@ class ICacheSocAxi extends Module with CacheParameters{
     //
     when(state === soc_done){buffer(cnt) := io.in.data}
     var data = 0.U(1.W)
-    for(i <- 0 to (AxiArLen - 1)) data = Cat(buffer(i), data)
-    data = data(AxiArLen * 64 ,1)
+    for(i <- 0 to (times - 1)) data = Cat(buffer(i), data)
+    data = data(times * 32, 1)
     //
     when(state === soc_done){cnt := cnt + 1.U}
     .elsewhen(state === soc_all_done){cnt := 0.U}
