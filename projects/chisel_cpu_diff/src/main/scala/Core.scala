@@ -4,7 +4,7 @@ import chisel3.util.experimental._
 import difftest._
 import Instructions._
 
-class Core extends Module {
+class Core extends Module{
   val io = IO(new Bundle {
     val imem = Flipped(new ICacheIO)
     val dmem = Flipped(new DCacheIO)
@@ -62,7 +62,8 @@ class Core extends Module {
   exereg.io.in.fu_code  := idu.io.decode_info.fu_code
   exereg.io.in.alu_code := idu.io.decode_info.alu_code
   exereg.io.in.bu_code  := idu.io.decode_info.bu_code
-  exereg.io.in.mdu_code := idu.io.decode_info.mdu_code
+  exereg.io.in.mu_code  := idu.io.decode_info.mu_code
+  exereg.io.in.du_code  := idu.io.decode_info.du_code
   exereg.io.in.lu_code  := idu.io.decode_info.lu_code
   exereg.io.in.su_code  := idu.io.decode_info.su_code
   exereg.io.in.csru_code    := idu.io.decode_info.csru_code
@@ -71,7 +72,8 @@ class Core extends Module {
   ieu.io.decode_info.fu_code  := exereg.io.out.fu_code
   ieu.io.decode_info.alu_code := exereg.io.out.alu_code
   ieu.io.decode_info.bu_code  := exereg.io.out.bu_code
-  ieu.io.decode_info.mdu_code := exereg.io.out.mdu_code
+  ieu.io.decode_info.mu_code  := exereg.io.out.mu_code
+  ieu.io.decode_info.du_code  := exereg.io.out.du_code
   ieu.io.decode_info.lu_code  := exereg.io.out.lu_code
   ieu.io.decode_info.su_code  := exereg.io.out.su_code
   ieu.io.decode_info.csru_code := exereg.io.out.csru_code
@@ -92,14 +94,16 @@ class Core extends Module {
   memreg.io.in.fu_code  := exereg.io.out.fu_code
   memreg.io.in.alu_code := exereg.io.out.alu_code
   memreg.io.in.bu_code  := exereg.io.out.bu_code
-  memreg.io.in.mdu_code := exereg.io.out.mdu_code
+  memreg.io.in.mu_code  := exereg.io.out.mu_code
+  memreg.io.in.du_code  := exereg.io.out.du_code
   memreg.io.in.lu_code  := exereg.io.out.lu_code
   memreg.io.in.su_code  := exereg.io.out.su_code
   memreg.io.in.csru_code := exereg.io.out.csru_code
 
   memreg.io.in.alu_out  := ieu.io.alu_out
   memreg.io.in.bu_out   := ieu.io.bu_out
-  memreg.io.in.mdu_out  := ieu.io.mdu_out
+  memreg.io.in.mu_out   := ieu.io.mu_out
+  memreg.io.in.du_out   := ieu.io.du_out
   memreg.io.in.csru_out := ieu.io.csru_out
 
   memreg.io.in.putch      := exereg.io.out.putch
@@ -129,7 +133,8 @@ class Core extends Module {
   wbreg.io.in.rd_addr   := memreg.io.out.rd_addr
   wbreg.io.in.alu_out   := memreg.io.out.alu_out
   wbreg.io.in.bu_out    := memreg.io.out.bu_out
-  wbreg.io.in.mdu_out   := memreg.io.out.mdu_out
+  wbreg.io.in.mu_out    := memreg.io.out.mu_out
+  wbreg.io.in.du_out    := memreg.io.out.du_out
   wbreg.io.in.csru_out  := memreg.io.out.csru_out
   wbreg.io.in.fu_code   := memreg.io.out.fu_code
   wbreg.io.in.lu_code   := memreg.io.out.lu_code
@@ -152,7 +157,8 @@ class Core extends Module {
   wbu.io.fu_code  := wbreg.io.out.fu_code
   wbu.io.alu_out  := wbreg.io.out.alu_out
   wbu.io.bu_out   := wbreg.io.out.bu_out
-  wbu.io.mdu_out  := wbreg.io.out.mdu_out
+  wbu.io.mu_out   := wbreg.io.out.mu_out
+  wbu.io.du_out   := wbreg.io.out.du_out
   wbu.io.csru_out := wbreg.io.out.csru_out
   wbu.io.lu_out   := amu.io.lu_out
 
@@ -305,7 +311,7 @@ class Core extends Module {
   val dt_te = Module(new DifftestTrapEvent)
   dt_te.io.clock    := clock
   dt_te.io.coreid   := 0.U
-  dt_te.io.valid    := (wbreg.io.out.inst === "h0000006b".U) && commit_valid
+  dt_te.io.valid    := (wbreg.io.out.inst === "h0000006b".U || wbreg.io.out.inst === "h00100073".U) && commit_valid
   dt_te.io.code     := rf_a0(2, 0)
   dt_te.io.pc       := wbreg.io.out.pc
   dt_te.io.cycleCnt := cycle_cnt

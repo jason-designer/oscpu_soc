@@ -12,7 +12,8 @@ class Execution extends Module{
 
         val alu_out     = Output(UInt(64.W))
         val bu_out      = Output(UInt(64.W))
-        val mdu_out     = Output(UInt(64.W))
+        val mu_out      = Output(UInt(64.W))
+        val du_out      = Output(UInt(64.W))
         val csru_out    = Output(UInt(64.W))
 
         val rs1_addr    = Input(UInt(5.W))
@@ -26,13 +27,14 @@ class Execution extends Module{
     val op2 = io.op2
     val pc  = io.pc
     val imm = io.imm
-    val fu_code  = io.decode_info.fu_code
-    val alu_code = io.decode_info.alu_code
-    val bu_code  = io.decode_info.bu_code
-    val lu_code  = io.decode_info.lu_code
-    val su_code  = io.decode_info.su_code
-    val mdu_code = io.decode_info.mdu_code
-    val csru_code = io.decode_info.csru_code
+    val fu_code     = io.decode_info.fu_code
+    val alu_code    = io.decode_info.alu_code
+    val bu_code     = io.decode_info.bu_code
+    val lu_code     = io.decode_info.lu_code
+    val su_code     = io.decode_info.su_code
+    val mu_code     = io.decode_info.mu_code
+    val du_code     = io.decode_info.du_code
+    val csru_code   = io.decode_info.csru_code
 
     //
     def sext(v:UInt, len:Int):UInt = len match{
@@ -69,18 +71,22 @@ class Execution extends Module{
     //bu
     val bu_out = Mux(bu_code === "b10000000".U || bu_code === "b01000000".U, pc + 4.U, 0.U)
 
-    //mdu
-    val mdu_out = MuxLookup(mdu_code, 0.U, Array(
-        "b0000000001".U -> (op1 * op2),                                             //mul
-        "b0000000010".U -> sext((op1 * op2), 4),                                    //mulw
-        "b0000000100".U -> (op1.asSInt() / op2.asSInt()).asUInt(),                  //div
-        "b0000001000".U -> (op1(31, 0).asSInt() / op2(31, 0).asSInt()).asUInt(),    //divw
-        "b0000010000".U -> (op1 / op2),                 //divu
-        "b0000100000".U -> (op1(31, 0) / op2(31, 0)),   //divuw
-        "b0001000000".U -> (op1.asSInt() % op2.asSInt()).asUInt(),  //rem
-        "b0010000000".U -> (op1(31, 0).asSInt() % op2(31, 0).asSInt()).asUInt(),  //remw
-        "b0100000000".U -> (op1 % op2),  //remu
-        "b1000000000".U -> (op1(31, 0) % op2(31, 0)),  //remuw
+    //mu
+    val mu_out = MuxLookup(mu_code, 0.U, Array(
+        "b01".U -> (op1 * op2),             //mul
+        "b10".U -> sext((op1 * op2), 4),    //mulw
+    ))
+
+    //du
+    val du_out = MuxLookup(du_code, 0.U, Array(
+        "b00000001".U -> (op1.asSInt() / op2.asSInt()).asUInt(),                    //div
+        "b00000010".U -> (op1(31, 0).asSInt() / op2(31, 0).asSInt()).asUInt(),      //divw
+        "b00000100".U -> (op1 / op2),                                               //divu
+        "b00001000".U -> (op1(31, 0) / op2(31, 0)),                                 //divuw
+        "b00010000".U -> (op1.asSInt() % op2.asSInt()).asUInt(),                    //rem
+        "b00100000".U -> (op1(31, 0).asSInt() % op2(31, 0).asSInt()).asUInt(),      //remw
+        "b01000000".U -> (op1 % op2),                                               //remu
+        "b10000000".U -> (op1(31, 0) % op2(31, 0)),                                 //remuw
     ))
 
     //csru
@@ -121,14 +127,14 @@ class Execution extends Module{
     // out
     io.alu_out  := alu_out
     io.bu_out   := bu_out
-    io.mdu_out  := mdu_out
+    io.mu_out   := mu_out
+    io.du_out   := du_out
     io.csru_out := csru_out
 
     // csr io
     io.csr_wen      := csr_wen
     io.csr_waddr    := csr_waddr
     io.csr_wdata    := csr_wdata
-
 }
 
 

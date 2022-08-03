@@ -48,7 +48,8 @@ class ExeReg_BUS_R extends Bundle {
     val bu_code     = UInt(bu_code_length.W)
     val lu_code     = UInt(lu_code_length.W)
     val su_code     = UInt(su_code_length.W)
-    val mdu_code    = UInt(mdu_code_length.W)
+    val mu_code     = UInt(mu_code_length.W)
+    val du_code     = UInt(du_code_length.W)
     val csru_code   = UInt(csru_code_length.W)
     //
     val rs1_addr    = UInt(5.W)
@@ -79,7 +80,8 @@ class MemReg_BUS_R extends Bundle {
     //
     val alu_out = UInt(64.W)
     val bu_out  = UInt(64.W)
-    val mdu_out = UInt(64.W)
+    val mu_out  = UInt(64.W)
+    val du_out  = UInt(64.W)
     val csru_out = UInt(64.W)
     //
     val fu_code     = UInt(fu_code_length.W)
@@ -87,7 +89,8 @@ class MemReg_BUS_R extends Bundle {
     val bu_code     = UInt(bu_code_length.W)
     val lu_code     = UInt(lu_code_length.W)
     val su_code     = UInt(su_code_length.W)
-    val mdu_code    = UInt(mdu_code_length.W)
+    val mu_code     = UInt(mu_code_length.W)
+    val du_code     = UInt(du_code_length.W)
     val csru_code   = UInt(csru_code_length.W)
     //
     val putch   = Bool()
@@ -117,7 +120,8 @@ class WBReg_BUS_R extends Bundle {
     //
     val alu_out = UInt(64.W)
     val bu_out  = UInt(64.W)
-    val mdu_out = UInt(64.W)
+    val mu_out  = UInt(64.W)
+    val du_out  = UInt(64.W)
     val csru_out = UInt(64.W)
     //
     val fu_code     = UInt(fu_code_length.W)

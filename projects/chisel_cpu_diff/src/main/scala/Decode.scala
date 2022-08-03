@@ -3,22 +3,24 @@ import chisel3.util._
 import Instructions._
 
 object Decode_constant{
-    val fu_code_length  = 6
-    val alu_code_length = 16
-    val bu_code_length  = 8
-    val lu_code_length  = 7
-    val su_code_length  = 4
-    val mdu_code_length = 10
-    val csru_code_length = 8
+    val fu_code_length      = 7
+    val alu_code_length     = 16
+    val bu_code_length      = 8
+    val lu_code_length      = 7
+    val su_code_length      = 4
+    val mu_code_length      = 2
+    val du_code_length      = 8
+    val csru_code_length    = 8
 }
 class DecodeInfo extends Bundle{
-    val fu_code   = Output(UInt())
-    val alu_code  = Output(UInt())
-    val bu_code   = Output(UInt())
-    val lu_code   = Output(UInt())
-    val su_code   = Output(UInt())
-    val mdu_code  = Output(UInt())
-    val csru_code = Output(UInt())
+    val fu_code     = Output(UInt())
+    val alu_code    = Output(UInt())
+    val bu_code     = Output(UInt())
+    val lu_code     = Output(UInt())
+    val su_code     = Output(UInt())
+    val mu_code     = Output(UInt())
+    val du_code     = Output(UInt())
+    val csru_code   = Output(UInt())
 }
 class Decode extends Module{
     val io = IO(new Bundle{
@@ -165,14 +167,17 @@ class Decode extends Module{
     //su
     val su_code = Cat(sd, sw, sh, sb)
     val su_en   = su_code =/= 0.U
-    //mdu
-    val mdu_code = Cat(remuw, remu, remw, rem, divuw, divu, divw, div, mulw, mul)
-    val mdu_en   = mdu_code =/= 0.U
+    //mu
+    val mu_code = Cat(mulw, mul)
+    val mu_en   = mu_code =/= 0.U
+    //du
+    val du_code = Cat(remuw, remu, remw, rem, divuw, divu, divw, div)
+    val du_en   = du_code =/= 0.U
     //csrrs
     val csru_code = Cat(csrrci, csrrwi, csrrsi, csrrc, csrrw, csrrs, mret, ecall)
     val csr_en    = csru_code =/= 0.U
     //fu_code
-    val fu_code = Cat(csr_en, mdu_en, su_en, lu_en, bu_en, alu_en)
+    val fu_code = Cat(csr_en, du_en, mu_en, su_en, lu_en, bu_en, alu_en)
   
     //----------------------------------------get inst type
     val type_r =    sll   || srl   || sra   || sllw  || srlw   || sraw   ||
@@ -218,7 +223,8 @@ class Decode extends Module{
     io.decode_info.bu_code   := bu_code
     io.decode_info.lu_code   := lu_code
     io.decode_info.su_code   := su_code
-    io.decode_info.mdu_code  := mdu_code
+    io.decode_info.mu_code   := mu_code
+    io.decode_info.du_code   := du_code
     io.decode_info.csru_code := csru_code
 
     io.rs1_addr := inst(19, 15)

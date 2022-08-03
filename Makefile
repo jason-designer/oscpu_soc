@@ -27,6 +27,10 @@ simnowave:
 simall:
 	./build.sh -e chisel_cpu_diff -b -r "non-output/cpu-tests non-output/riscv-tests"
 
+simall4:
+	./build.sh -e chisel_cpu_diff -b -r "non-output/riscv64-npc"
+
+
 simtestall:
 	make simall
 	make simnowave ALL=non-output/microbench/microbench-test.bin

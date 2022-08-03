@@ -1,5 +1,5 @@
 object Config{
-  val soc = true
+  val soc = false
 }
 
 object TopMain extends App {
