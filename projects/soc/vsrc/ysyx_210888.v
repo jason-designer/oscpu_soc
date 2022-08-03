@@ -13089,152 +13089,225 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
-module ysyx_210888_IMMIO(
-  input         clock,
-  input         reset,
-  input  [63:0] io_imem_addr,
-  input         io_imem_en,
-  output [31:0] io_imem_data,
-  output        io_imem_ok,
-  output [63:0] io_mem0_addr,
-  output        io_mem0_en,
-  input  [31:0] io_mem0_data,
-  input         io_mem0_ok,
-  output [63:0] io_mem1_addr,
-  output        io_mem1_en,
-  input  [31:0] io_mem1_data,
-  input         io_mem1_ok
-);
-`ifdef RANDOMIZE_REG_INIT
-  reg [31:0] _RAND_0;
-`endif // RANDOMIZE_REG_INIT
-  wire  _T_2 = io_imem_addr < 64'h80000000; // @[MMIO.scala 19:27]
-  wire  _GEN_1 = ~io_mem1_ok | _T_2; // @[MMIO.scala 16:27 MMIO.scala 16:32]
-  wire  sel = ~io_mem0_ok ? 1'h0 : _GEN_1; // @[MMIO.scala 15:22 MMIO.scala 15:27]
-  reg  sel_r; // @[Reg.scala 27:20]
-  wire  out_ok = sel_r ? io_mem1_ok : ~sel_r & io_mem0_ok; // @[Mux.scala 80:57]
-  wire  _sel_r_T = out_ok & io_imem_en; // @[MMIO.scala 23:44]
-  wire  _io_mem0_en_T = ~sel; // @[MMIO.scala 25:32]
-  wire [31:0] _out_data_T_1 = ~sel_r ? io_mem0_data : 32'h0; // @[Mux.scala 80:57]
-  wire [31:0] _out_data_T_3 = sel_r ? io_mem1_data : _out_data_T_1; // @[Mux.scala 80:57]
-  wire [63:0] out_data = {{32'd0}, _out_data_T_3};
-  assign io_imem_data = out_data[31:0]; // @[MMIO.scala 40:18]
-  assign io_imem_ok = sel_r ? io_mem1_ok : ~sel_r & io_mem0_ok; // @[Mux.scala 80:57]
-  assign io_mem0_addr = _io_mem0_en_T ? io_imem_addr : 64'h0; // @[MMIO.scala 26:27]
-  assign io_mem0_en = ~sel & io_imem_en; // @[MMIO.scala 25:27]
-  assign io_mem1_addr = sel ? io_imem_addr : 64'h0; // @[MMIO.scala 28:27]
-  assign io_mem1_en = sel & io_imem_en; // @[MMIO.scala 27:27]
-  always @(posedge clock) begin
-    if (reset) begin // @[Reg.scala 27:20]
-      sel_r <= 1'h0; // @[Reg.scala 27:20]
-    end else if (_sel_r_T) begin // @[Reg.scala 28:19]
-      if (~io_mem0_ok) begin // @[MMIO.scala 15:22]
-        sel_r <= 1'h0; // @[MMIO.scala 15:27]
-      end else begin
-        sel_r <= _GEN_1;
-      end
-    end
-  end
-// Register and memory initialization
-`ifdef RANDOMIZE_GARBAGE_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_INVALID_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_REG_INIT
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-`define RANDOMIZE
-`endif
-`ifndef RANDOM
-`define RANDOM $random
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-  integer initvar;
-`endif
-`ifndef SYNTHESIS
-`ifdef FIRRTL_BEFORE_INITIAL
-`FIRRTL_BEFORE_INITIAL
-`endif
-initial begin
-  `ifdef RANDOMIZE
-    `ifdef INIT_RANDOM
-      `INIT_RANDOM
-    `endif
-    `ifndef VERILATOR
-      `ifdef RANDOMIZE_DELAY
-        #`RANDOMIZE_DELAY begin end
-      `else
-        #0.002 begin end
-      `endif
-    `endif
-`ifdef RANDOMIZE_REG_INIT
-  _RAND_0 = {1{`RANDOM}};
-  sel_r = _RAND_0[0:0];
-`endif // RANDOMIZE_REG_INIT
-  `endif // RANDOMIZE
-end // initial
-`ifdef FIRRTL_AFTER_INITIAL
-`FIRRTL_AFTER_INITIAL
-`endif
-`endif // SYNTHESIS
-endmodule
-module ysyx_210888_ICacheBypass(
-  input         clock,
-  input         reset,
-  input  [63:0] io_imem_addr,
-  input         io_imem_en,
-  output [31:0] io_imem_data,
-  output        io_imem_ok,
-  output        io_axi_req,
-  output [31:0] io_axi_addr,
-  input         io_axi_valid,
-  input  [63:0] io_axi_data
+module ysyx_210888_ICacheSocAxi(
+  input          clock,
+  input          reset,
+  input          io_in_req,
+  input  [63:0]  io_in_addr,
+  output         io_in_valid,
+  output [511:0] io_in_data,
+  output         io_out0_req,
+  output [63:0]  io_out0_addr,
+  input          io_out0_valid,
+  input  [511:0] io_out0_data,
+  output         io_out1_req,
+  output [31:0]  io_out1_addr,
+  input          io_out1_valid,
+  input  [63:0]  io_out1_data
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
   reg [31:0] _RAND_1;
   reg [31:0] _RAND_2;
+  reg [31:0] _RAND_3;
+  reg [31:0] _RAND_4;
+  reg [31:0] _RAND_5;
+  reg [31:0] _RAND_6;
+  reg [31:0] _RAND_7;
+  reg [31:0] _RAND_8;
+  reg [31:0] _RAND_9;
+  reg [31:0] _RAND_10;
+  reg [31:0] _RAND_11;
+  reg [31:0] _RAND_12;
+  reg [31:0] _RAND_13;
+  reg [31:0] _RAND_14;
+  reg [31:0] _RAND_15;
+  reg [31:0] _RAND_16;
+  reg [31:0] _RAND_17;
 `endif // RANDOMIZE_REG_INIT
-  reg [31:0] addr; // @[CacheBypass.scala 32:26]
-  reg [31:0] data; // @[CacheBypass.scala 33:25]
-  reg [1:0] state; // @[CacheBypass.scala 36:24]
-  wire  _T = 2'h0 == state; // @[Conditional.scala 37:30]
-  wire  _T_1 = 2'h1 == state; // @[Conditional.scala 37:30]
-  wire  _T_2 = 2'h2 == state; // @[Conditional.scala 37:30]
-  wire [63:0] _addr_T_2 = state == 2'h0 & io_imem_en ? io_imem_addr : {{32'd0}, addr}; // @[CacheBypass.scala 50:18]
-  wire [5:0] _data_T_2 = {addr[2:0], 3'h0}; // @[CacheBypass.scala 51:64]
-  wire [63:0] _data_T_3 = io_axi_data >> _data_T_2; // @[CacheBypass.scala 51:49]
-  wire [63:0] _data_T_4 = state == 2'h2 ? _data_T_3 : {{32'd0}, data}; // @[CacheBypass.scala 51:18]
-  assign io_imem_data = data; // @[CacheBypass.scala 56:21]
-  assign io_imem_ok = state == 2'h0; // @[CacheBypass.scala 57:30]
-  assign io_axi_req = state == 2'h1; // @[CacheBypass.scala 53:30]
-  assign io_axi_addr = addr & 32'hfffffffc; // @[CacheBypass.scala 54:29]
+  reg [2:0] state; // @[CacheBypass.scala 131:24]
+  reg [3:0] cnt; // @[CacheBypass.scala 133:22]
+  reg [31:0] buffer_0; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_1; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_2; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_3; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_4; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_5; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_6; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_7; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_8; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_9; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_10; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_11; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_12; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_13; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_14; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_15; // @[CacheBypass.scala 134:25]
+  wire  _T = 3'h0 == state; // @[Conditional.scala 37:30]
+  wire  _T_3 = 3'h1 == state; // @[Conditional.scala 37:30]
+  wire  _T_4 = 3'h2 == state; // @[Conditional.scala 37:30]
+  wire  _T_5 = 3'h3 == state; // @[Conditional.scala 37:30]
+  wire [2:0] _GEN_3 = io_out1_valid ? 3'h4 : state; // @[CacheBypass.scala 149:32 CacheBypass.scala 149:39 CacheBypass.scala 131:24]
+  wire  _T_6 = 3'h4 == state; // @[Conditional.scala 37:30]
+  wire [2:0] _GEN_4 = cnt == 4'hf ? 3'h5 : 3'h3; // @[CacheBypass.scala 152:40 CacheBypass.scala 152:47 CacheBypass.scala 153:30]
+  wire  _T_8 = 3'h5 == state; // @[Conditional.scala 37:30]
+  wire [2:0] _GEN_5 = _T_8 ? 3'h0 : state; // @[Conditional.scala 39:67 CacheBypass.scala 156:19 CacheBypass.scala 131:24]
+  wire [2:0] _GEN_6 = _T_6 ? _GEN_4 : _GEN_5; // @[Conditional.scala 39:67]
+  wire [2:0] _GEN_7 = _T_5 ? _GEN_3 : _GEN_6; // @[Conditional.scala 39:67]
+  wire  _T_9 = state == 3'h4; // @[CacheBypass.scala 160:16]
+  wire [288:0] lo_8 = {buffer_8,buffer_7,buffer_6,buffer_5,buffer_4,buffer_3,buffer_2,buffer_1,buffer_0,1'h0}; // @[Cat.scala 30:58]
+  wire [512:0] _T_10 = {buffer_15,buffer_14,buffer_13,buffer_12,buffer_11,buffer_10,buffer_9,lo_8}; // @[Cat.scala 30:58]
+  wire [511:0] data = _T_10[512:1]; // @[CacheBypass.scala 163:16]
+  wire [3:0] _cnt_T_1 = cnt + 4'h1; // @[CacheBypass.scala 165:41]
+  wire  _T_12 = state == 3'h5; // @[CacheBypass.scala 166:21]
+  wire [5:0] _GEN_47 = {cnt, 2'h0}; // @[CacheBypass.scala 172:39]
+  wire [6:0] _io_out1_addr_T = {{1'd0}, _GEN_47}; // @[CacheBypass.scala 172:39]
+  wire [63:0] _GEN_48 = {{57'd0}, _io_out1_addr_T}; // @[CacheBypass.scala 172:32]
+  wire [63:0] _io_out1_addr_T_2 = io_in_addr + _GEN_48; // @[CacheBypass.scala 172:32]
+  wire  _io_in_valid_T_1 = state == 3'h2; // @[CacheBypass.scala 174:52]
+  wire [511:0] _GEN_45 = _T_12 ? data : 512'h0; // @[CacheBypass.scala 176:38 CacheBypass.scala 176:50 CacheBypass.scala 177:27]
+  assign io_in_valid = _T_12 | state == 3'h2; // @[CacheBypass.scala 174:43]
+  assign io_in_data = _io_in_valid_T_1 ? io_out0_data : _GEN_45; // @[CacheBypass.scala 175:25 CacheBypass.scala 175:37]
+  assign io_out0_req = state == 3'h1; // @[CacheBypass.scala 169:27]
+  assign io_out0_addr = io_in_addr; // @[CacheBypass.scala 170:18]
+  assign io_out1_req = state == 3'h3; // @[CacheBypass.scala 171:27]
+  assign io_out1_addr = _io_out1_addr_T_2[31:0]; // @[CacheBypass.scala 172:18]
   always @(posedge clock) begin
-    if (reset) begin // @[CacheBypass.scala 32:26]
-      addr <= 32'h0; // @[CacheBypass.scala 32:26]
-    end else begin
-      addr <= _addr_T_2[31:0]; // @[CacheBypass.scala 50:12]
-    end
-    if (reset) begin // @[CacheBypass.scala 33:25]
-      data <= 32'h0; // @[CacheBypass.scala 33:25]
-    end else begin
-      data <= _data_T_4[31:0]; // @[CacheBypass.scala 51:12]
-    end
-    if (reset) begin // @[CacheBypass.scala 36:24]
-      state <= 2'h0; // @[CacheBypass.scala 36:24]
+    if (reset) begin // @[CacheBypass.scala 131:24]
+      state <= 3'h0; // @[CacheBypass.scala 131:24]
     end else if (_T) begin // @[Conditional.scala 40:58]
-      if (io_imem_en) begin // @[CacheBypass.scala 40:30]
-        state <= 2'h1; // @[CacheBypass.scala 40:37]
+      if (io_in_req & io_in_addr < 64'h80000000) begin // @[CacheBypass.scala 138:60]
+        state <= 3'h3; // @[CacheBypass.scala 138:67]
+      end else if (io_in_req) begin // @[CacheBypass.scala 139:33]
+        state <= 3'h1; // @[CacheBypass.scala 139:40]
       end
-    end else if (_T_1) begin // @[Conditional.scala 39:67]
-      if (io_axi_valid) begin // @[CacheBypass.scala 43:32]
-        state <= 2'h2; // @[CacheBypass.scala 43:39]
+    end else if (_T_3) begin // @[Conditional.scala 39:67]
+      if (io_out0_valid) begin // @[CacheBypass.scala 143:32]
+        state <= 3'h2; // @[CacheBypass.scala 143:39]
       end
-    end else if (_T_2) begin // @[Conditional.scala 39:67]
-      state <= 2'h0; // @[CacheBypass.scala 46:19]
+    end else if (_T_4) begin // @[Conditional.scala 39:67]
+      state <= 3'h0; // @[CacheBypass.scala 146:19]
+    end else begin
+      state <= _GEN_7;
+    end
+    if (reset) begin // @[CacheBypass.scala 133:22]
+      cnt <= 4'h0; // @[CacheBypass.scala 133:22]
+    end else if (_T_9) begin // @[CacheBypass.scala 165:29]
+      cnt <= _cnt_T_1; // @[CacheBypass.scala 165:34]
+    end else if (state == 3'h5) begin // @[CacheBypass.scala 166:38]
+      cnt <= 4'h0; // @[CacheBypass.scala 166:43]
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_0 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h0 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_0 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_1 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h1 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_1 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_2 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h2 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_2 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_3 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h3 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_3 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_4 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h4 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_4 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_5 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h5 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_5 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_6 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h6 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_6 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_7 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h7 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_7 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_8 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h8 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_8 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_9 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'h9 == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_9 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_10 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'ha == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_10 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_11 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'hb == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_11 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_12 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'hc == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_12 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_13 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'hd == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_13 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_14 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'he == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_14 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
+    end
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_15 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 160:29]
+      if (4'hf == cnt) begin // @[CacheBypass.scala 160:42]
+        buffer_15 <= io_out1_data[31:0]; // @[CacheBypass.scala 160:42]
+      end
     end
   end
 // Register and memory initialization
@@ -13274,11 +13347,41 @@ initial begin
     `endif
 `ifdef RANDOMIZE_REG_INIT
   _RAND_0 = {1{`RANDOM}};
-  addr = _RAND_0[31:0];
+  state = _RAND_0[2:0];
   _RAND_1 = {1{`RANDOM}};
-  data = _RAND_1[31:0];
+  cnt = _RAND_1[3:0];
   _RAND_2 = {1{`RANDOM}};
-  state = _RAND_2[1:0];
+  buffer_0 = _RAND_2[31:0];
+  _RAND_3 = {1{`RANDOM}};
+  buffer_1 = _RAND_3[31:0];
+  _RAND_4 = {1{`RANDOM}};
+  buffer_2 = _RAND_4[31:0];
+  _RAND_5 = {1{`RANDOM}};
+  buffer_3 = _RAND_5[31:0];
+  _RAND_6 = {1{`RANDOM}};
+  buffer_4 = _RAND_6[31:0];
+  _RAND_7 = {1{`RANDOM}};
+  buffer_5 = _RAND_7[31:0];
+  _RAND_8 = {1{`RANDOM}};
+  buffer_6 = _RAND_8[31:0];
+  _RAND_9 = {1{`RANDOM}};
+  buffer_7 = _RAND_9[31:0];
+  _RAND_10 = {1{`RANDOM}};
+  buffer_8 = _RAND_10[31:0];
+  _RAND_11 = {1{`RANDOM}};
+  buffer_9 = _RAND_11[31:0];
+  _RAND_12 = {1{`RANDOM}};
+  buffer_10 = _RAND_12[31:0];
+  _RAND_13 = {1{`RANDOM}};
+  buffer_11 = _RAND_13[31:0];
+  _RAND_14 = {1{`RANDOM}};
+  buffer_12 = _RAND_14[31:0];
+  _RAND_15 = {1{`RANDOM}};
+  buffer_13 = _RAND_15[31:0];
+  _RAND_16 = {1{`RANDOM}};
+  buffer_14 = _RAND_16[31:0];
+  _RAND_17 = {1{`RANDOM}};
+  buffer_15 = _RAND_17[31:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -13783,192 +13886,182 @@ module ysyx_210888(
   output        io_slave_rlast,
   output [3:0]  io_slave_rid
 );
-  wire  core_clock; // @[SimTop.scala 64:20]
-  wire  core_reset; // @[SimTop.scala 64:20]
-  wire [63:0] core_io_imem_addr; // @[SimTop.scala 64:20]
-  wire  core_io_imem_en; // @[SimTop.scala 64:20]
-  wire [31:0] core_io_imem_data; // @[SimTop.scala 64:20]
-  wire  core_io_imem_ok; // @[SimTop.scala 64:20]
-  wire  core_io_dmem_en; // @[SimTop.scala 64:20]
-  wire  core_io_dmem_op; // @[SimTop.scala 64:20]
-  wire [63:0] core_io_dmem_addr; // @[SimTop.scala 64:20]
-  wire [63:0] core_io_dmem_wdata; // @[SimTop.scala 64:20]
-  wire [7:0] core_io_dmem_wmask; // @[SimTop.scala 64:20]
-  wire [31:0] core_io_dmem_transfer; // @[SimTop.scala 64:20]
-  wire  core_io_dmem_ok; // @[SimTop.scala 64:20]
-  wire [63:0] core_io_dmem_rdata; // @[SimTop.scala 64:20]
-  wire  core_io_set_mtip; // @[SimTop.scala 64:20]
-  wire  core_io_clear_mtip; // @[SimTop.scala 64:20]
-  wire  core_io_ifence_req; // @[SimTop.scala 64:20]
-  wire  core_io_ifence_done; // @[SimTop.scala 64:20]
-  wire  core_io_dfence_req; // @[SimTop.scala 64:20]
-  wire  core_io_dfence_done; // @[SimTop.scala 64:20]
-  wire  icache_clock; // @[SimTop.scala 65:22]
-  wire  icache_reset; // @[SimTop.scala 65:22]
-  wire [63:0] icache_io_imem_addr; // @[SimTop.scala 65:22]
-  wire  icache_io_imem_en; // @[SimTop.scala 65:22]
-  wire [31:0] icache_io_imem_data; // @[SimTop.scala 65:22]
-  wire  icache_io_imem_ok; // @[SimTop.scala 65:22]
-  wire  icache_io_axi_req; // @[SimTop.scala 65:22]
-  wire [63:0] icache_io_axi_addr; // @[SimTop.scala 65:22]
-  wire  icache_io_axi_valid; // @[SimTop.scala 65:22]
-  wire [511:0] icache_io_axi_data; // @[SimTop.scala 65:22]
-  wire  icache_io_fence_req; // @[SimTop.scala 65:22]
-  wire  icache_io_fence_done; // @[SimTop.scala 65:22]
-  wire  dcache_clock; // @[SimTop.scala 66:22]
-  wire  dcache_reset; // @[SimTop.scala 66:22]
-  wire  dcache_io_dmem_en; // @[SimTop.scala 66:22]
-  wire  dcache_io_dmem_op; // @[SimTop.scala 66:22]
-  wire [63:0] dcache_io_dmem_addr; // @[SimTop.scala 66:22]
-  wire [63:0] dcache_io_dmem_wdata; // @[SimTop.scala 66:22]
-  wire [7:0] dcache_io_dmem_wmask; // @[SimTop.scala 66:22]
-  wire  dcache_io_dmem_ok; // @[SimTop.scala 66:22]
-  wire [63:0] dcache_io_dmem_rdata; // @[SimTop.scala 66:22]
-  wire  dcache_io_axi_req; // @[SimTop.scala 66:22]
-  wire [63:0] dcache_io_axi_raddr; // @[SimTop.scala 66:22]
-  wire  dcache_io_axi_rvalid; // @[SimTop.scala 66:22]
-  wire [511:0] dcache_io_axi_rdata; // @[SimTop.scala 66:22]
-  wire  dcache_io_axi_weq; // @[SimTop.scala 66:22]
-  wire [63:0] dcache_io_axi_waddr; // @[SimTop.scala 66:22]
-  wire [511:0] dcache_io_axi_wdata; // @[SimTop.scala 66:22]
-  wire  dcache_io_axi_wdone; // @[SimTop.scala 66:22]
-  wire  dcache_io_fence_req; // @[SimTop.scala 66:22]
-  wire  dcache_io_fence_done; // @[SimTop.scala 66:22]
-  wire  axi_clock; // @[SimTop.scala 67:19]
-  wire  axi_reset; // @[SimTop.scala 67:19]
-  wire  axi_io_out_aw_ready; // @[SimTop.scala 67:19]
-  wire  axi_io_out_aw_valid; // @[SimTop.scala 67:19]
-  wire [7:0] axi_io_out_aw_bits_len; // @[SimTop.scala 67:19]
-  wire [2:0] axi_io_out_aw_bits_size; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_out_aw_bits_addr; // @[SimTop.scala 67:19]
-  wire  axi_io_out_w_ready; // @[SimTop.scala 67:19]
-  wire  axi_io_out_w_valid; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_out_w_bits_data; // @[SimTop.scala 67:19]
-  wire [7:0] axi_io_out_w_bits_strb; // @[SimTop.scala 67:19]
-  wire  axi_io_out_w_bits_last; // @[SimTop.scala 67:19]
-  wire  axi_io_out_b_ready; // @[SimTop.scala 67:19]
-  wire  axi_io_out_b_valid; // @[SimTop.scala 67:19]
-  wire  axi_io_out_ar_ready; // @[SimTop.scala 67:19]
-  wire  axi_io_out_ar_valid; // @[SimTop.scala 67:19]
-  wire [7:0] axi_io_out_ar_bits_len; // @[SimTop.scala 67:19]
-  wire [2:0] axi_io_out_ar_bits_size; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_out_ar_bits_addr; // @[SimTop.scala 67:19]
-  wire  axi_io_out_r_ready; // @[SimTop.scala 67:19]
-  wire  axi_io_out_r_valid; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_out_r_bits_data; // @[SimTop.scala 67:19]
-  wire  axi_io_out_r_bits_last; // @[SimTop.scala 67:19]
-  wire  axi_io_icacheio_req; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_icacheio_addr; // @[SimTop.scala 67:19]
-  wire  axi_io_icacheio_valid; // @[SimTop.scala 67:19]
-  wire [511:0] axi_io_icacheio_data; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheio_req; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_dcacheio_raddr; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheio_rvalid; // @[SimTop.scala 67:19]
-  wire [511:0] axi_io_dcacheio_rdata; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheio_weq; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_dcacheio_waddr; // @[SimTop.scala 67:19]
-  wire [511:0] axi_io_dcacheio_wdata; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheio_wdone; // @[SimTop.scala 67:19]
-  wire  axi_io_icacheBypassIO_req; // @[SimTop.scala 67:19]
-  wire [31:0] axi_io_icacheBypassIO_addr; // @[SimTop.scala 67:19]
-  wire  axi_io_icacheBypassIO_valid; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_icacheBypassIO_data; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheBypassIO_req; // @[SimTop.scala 67:19]
-  wire [31:0] axi_io_dcacheBypassIO_raddr; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheBypassIO_rvalid; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_dcacheBypassIO_rdata; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheBypassIO_weq; // @[SimTop.scala 67:19]
-  wire [31:0] axi_io_dcacheBypassIO_waddr; // @[SimTop.scala 67:19]
-  wire [63:0] axi_io_dcacheBypassIO_wdata; // @[SimTop.scala 67:19]
-  wire [7:0] axi_io_dcacheBypassIO_wmask; // @[SimTop.scala 67:19]
-  wire  axi_io_dcacheBypassIO_wdone; // @[SimTop.scala 67:19]
-  wire [2:0] axi_io_dcacheBypassIO_transfer; // @[SimTop.scala 67:19]
-  wire  immio_clock; // @[SimTop.scala 69:21]
-  wire  immio_reset; // @[SimTop.scala 69:21]
-  wire [63:0] immio_io_imem_addr; // @[SimTop.scala 69:21]
-  wire  immio_io_imem_en; // @[SimTop.scala 69:21]
-  wire [31:0] immio_io_imem_data; // @[SimTop.scala 69:21]
-  wire  immio_io_imem_ok; // @[SimTop.scala 69:21]
-  wire [63:0] immio_io_mem0_addr; // @[SimTop.scala 69:21]
-  wire  immio_io_mem0_en; // @[SimTop.scala 69:21]
-  wire [31:0] immio_io_mem0_data; // @[SimTop.scala 69:21]
-  wire  immio_io_mem0_ok; // @[SimTop.scala 69:21]
-  wire [63:0] immio_io_mem1_addr; // @[SimTop.scala 69:21]
-  wire  immio_io_mem1_en; // @[SimTop.scala 69:21]
-  wire [31:0] immio_io_mem1_data; // @[SimTop.scala 69:21]
-  wire  immio_io_mem1_ok; // @[SimTop.scala 69:21]
-  wire  icachebypass_clock; // @[SimTop.scala 70:28]
-  wire  icachebypass_reset; // @[SimTop.scala 70:28]
-  wire [63:0] icachebypass_io_imem_addr; // @[SimTop.scala 70:28]
-  wire  icachebypass_io_imem_en; // @[SimTop.scala 70:28]
-  wire [31:0] icachebypass_io_imem_data; // @[SimTop.scala 70:28]
-  wire  icachebypass_io_imem_ok; // @[SimTop.scala 70:28]
-  wire  icachebypass_io_axi_req; // @[SimTop.scala 70:28]
-  wire [31:0] icachebypass_io_axi_addr; // @[SimTop.scala 70:28]
-  wire  icachebypass_io_axi_valid; // @[SimTop.scala 70:28]
-  wire [63:0] icachebypass_io_axi_data; // @[SimTop.scala 70:28]
-  wire  dmmio_clock; // @[SimTop.scala 71:21]
-  wire  dmmio_reset; // @[SimTop.scala 71:21]
-  wire  dmmio_io_dmem_en; // @[SimTop.scala 71:21]
-  wire  dmmio_io_dmem_op; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_dmem_addr; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_dmem_wdata; // @[SimTop.scala 71:21]
-  wire [7:0] dmmio_io_dmem_wmask; // @[SimTop.scala 71:21]
-  wire [31:0] dmmio_io_dmem_transfer; // @[SimTop.scala 71:21]
-  wire  dmmio_io_dmem_ok; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_dmem_rdata; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem0_en; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem0_op; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem0_addr; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem0_wdata; // @[SimTop.scala 71:21]
-  wire [7:0] dmmio_io_mem0_wmask; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem0_ok; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem0_rdata; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem1_en; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem1_op; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem1_addr; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem1_wdata; // @[SimTop.scala 71:21]
-  wire [7:0] dmmio_io_mem1_wmask; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem1_rdata; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem2_en; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem2_op; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem2_addr; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem2_wdata; // @[SimTop.scala 71:21]
-  wire [7:0] dmmio_io_mem2_wmask; // @[SimTop.scala 71:21]
-  wire [31:0] dmmio_io_mem2_transfer; // @[SimTop.scala 71:21]
-  wire  dmmio_io_mem2_ok; // @[SimTop.scala 71:21]
-  wire [63:0] dmmio_io_mem2_rdata; // @[SimTop.scala 71:21]
-  wire  clintreg_clock; // @[SimTop.scala 72:24]
-  wire  clintreg_reset; // @[SimTop.scala 72:24]
-  wire  clintreg_io_mem_en; // @[SimTop.scala 72:24]
-  wire  clintreg_io_mem_op; // @[SimTop.scala 72:24]
-  wire [63:0] clintreg_io_mem_addr; // @[SimTop.scala 72:24]
-  wire [63:0] clintreg_io_mem_wdata; // @[SimTop.scala 72:24]
-  wire [7:0] clintreg_io_mem_wmask; // @[SimTop.scala 72:24]
-  wire [63:0] clintreg_io_mem_rdata; // @[SimTop.scala 72:24]
-  wire  clintreg_io_set_mtip; // @[SimTop.scala 72:24]
-  wire  clintreg_io_clear_mtip; // @[SimTop.scala 72:24]
-  wire  dcachebypass_clock; // @[SimTop.scala 73:28]
-  wire  dcachebypass_reset; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_dmem_en; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_dmem_op; // @[SimTop.scala 73:28]
-  wire [63:0] dcachebypass_io_dmem_addr; // @[SimTop.scala 73:28]
-  wire [63:0] dcachebypass_io_dmem_wdata; // @[SimTop.scala 73:28]
-  wire [7:0] dcachebypass_io_dmem_wmask; // @[SimTop.scala 73:28]
-  wire [31:0] dcachebypass_io_dmem_transfer; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_dmem_ok; // @[SimTop.scala 73:28]
-  wire [63:0] dcachebypass_io_dmem_rdata; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_axi_req; // @[SimTop.scala 73:28]
-  wire [31:0] dcachebypass_io_axi_raddr; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_axi_rvalid; // @[SimTop.scala 73:28]
-  wire [63:0] dcachebypass_io_axi_rdata; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_axi_weq; // @[SimTop.scala 73:28]
-  wire [31:0] dcachebypass_io_axi_waddr; // @[SimTop.scala 73:28]
-  wire [63:0] dcachebypass_io_axi_wdata; // @[SimTop.scala 73:28]
-  wire [7:0] dcachebypass_io_axi_wmask; // @[SimTop.scala 73:28]
-  wire  dcachebypass_io_axi_wdone; // @[SimTop.scala 73:28]
-  wire [2:0] dcachebypass_io_axi_transfer; // @[SimTop.scala 73:28]
-  ysyx_210888_Core core ( // @[SimTop.scala 64:20]
+  wire  core_clock; // @[SimTop.scala 65:20]
+  wire  core_reset; // @[SimTop.scala 65:20]
+  wire [63:0] core_io_imem_addr; // @[SimTop.scala 65:20]
+  wire  core_io_imem_en; // @[SimTop.scala 65:20]
+  wire [31:0] core_io_imem_data; // @[SimTop.scala 65:20]
+  wire  core_io_imem_ok; // @[SimTop.scala 65:20]
+  wire  core_io_dmem_en; // @[SimTop.scala 65:20]
+  wire  core_io_dmem_op; // @[SimTop.scala 65:20]
+  wire [63:0] core_io_dmem_addr; // @[SimTop.scala 65:20]
+  wire [63:0] core_io_dmem_wdata; // @[SimTop.scala 65:20]
+  wire [7:0] core_io_dmem_wmask; // @[SimTop.scala 65:20]
+  wire [31:0] core_io_dmem_transfer; // @[SimTop.scala 65:20]
+  wire  core_io_dmem_ok; // @[SimTop.scala 65:20]
+  wire [63:0] core_io_dmem_rdata; // @[SimTop.scala 65:20]
+  wire  core_io_set_mtip; // @[SimTop.scala 65:20]
+  wire  core_io_clear_mtip; // @[SimTop.scala 65:20]
+  wire  core_io_ifence_req; // @[SimTop.scala 65:20]
+  wire  core_io_ifence_done; // @[SimTop.scala 65:20]
+  wire  core_io_dfence_req; // @[SimTop.scala 65:20]
+  wire  core_io_dfence_done; // @[SimTop.scala 65:20]
+  wire  icache_clock; // @[SimTop.scala 66:22]
+  wire  icache_reset; // @[SimTop.scala 66:22]
+  wire [63:0] icache_io_imem_addr; // @[SimTop.scala 66:22]
+  wire  icache_io_imem_en; // @[SimTop.scala 66:22]
+  wire [31:0] icache_io_imem_data; // @[SimTop.scala 66:22]
+  wire  icache_io_imem_ok; // @[SimTop.scala 66:22]
+  wire  icache_io_axi_req; // @[SimTop.scala 66:22]
+  wire [63:0] icache_io_axi_addr; // @[SimTop.scala 66:22]
+  wire  icache_io_axi_valid; // @[SimTop.scala 66:22]
+  wire [511:0] icache_io_axi_data; // @[SimTop.scala 66:22]
+  wire  icache_io_fence_req; // @[SimTop.scala 66:22]
+  wire  icache_io_fence_done; // @[SimTop.scala 66:22]
+  wire  dcache_clock; // @[SimTop.scala 67:22]
+  wire  dcache_reset; // @[SimTop.scala 67:22]
+  wire  dcache_io_dmem_en; // @[SimTop.scala 67:22]
+  wire  dcache_io_dmem_op; // @[SimTop.scala 67:22]
+  wire [63:0] dcache_io_dmem_addr; // @[SimTop.scala 67:22]
+  wire [63:0] dcache_io_dmem_wdata; // @[SimTop.scala 67:22]
+  wire [7:0] dcache_io_dmem_wmask; // @[SimTop.scala 67:22]
+  wire  dcache_io_dmem_ok; // @[SimTop.scala 67:22]
+  wire [63:0] dcache_io_dmem_rdata; // @[SimTop.scala 67:22]
+  wire  dcache_io_axi_req; // @[SimTop.scala 67:22]
+  wire [63:0] dcache_io_axi_raddr; // @[SimTop.scala 67:22]
+  wire  dcache_io_axi_rvalid; // @[SimTop.scala 67:22]
+  wire [511:0] dcache_io_axi_rdata; // @[SimTop.scala 67:22]
+  wire  dcache_io_axi_weq; // @[SimTop.scala 67:22]
+  wire [63:0] dcache_io_axi_waddr; // @[SimTop.scala 67:22]
+  wire [511:0] dcache_io_axi_wdata; // @[SimTop.scala 67:22]
+  wire  dcache_io_axi_wdone; // @[SimTop.scala 67:22]
+  wire  dcache_io_fence_req; // @[SimTop.scala 67:22]
+  wire  dcache_io_fence_done; // @[SimTop.scala 67:22]
+  wire  axi_clock; // @[SimTop.scala 68:19]
+  wire  axi_reset; // @[SimTop.scala 68:19]
+  wire  axi_io_out_aw_ready; // @[SimTop.scala 68:19]
+  wire  axi_io_out_aw_valid; // @[SimTop.scala 68:19]
+  wire [7:0] axi_io_out_aw_bits_len; // @[SimTop.scala 68:19]
+  wire [2:0] axi_io_out_aw_bits_size; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_out_aw_bits_addr; // @[SimTop.scala 68:19]
+  wire  axi_io_out_w_ready; // @[SimTop.scala 68:19]
+  wire  axi_io_out_w_valid; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_out_w_bits_data; // @[SimTop.scala 68:19]
+  wire [7:0] axi_io_out_w_bits_strb; // @[SimTop.scala 68:19]
+  wire  axi_io_out_w_bits_last; // @[SimTop.scala 68:19]
+  wire  axi_io_out_b_ready; // @[SimTop.scala 68:19]
+  wire  axi_io_out_b_valid; // @[SimTop.scala 68:19]
+  wire  axi_io_out_ar_ready; // @[SimTop.scala 68:19]
+  wire  axi_io_out_ar_valid; // @[SimTop.scala 68:19]
+  wire [7:0] axi_io_out_ar_bits_len; // @[SimTop.scala 68:19]
+  wire [2:0] axi_io_out_ar_bits_size; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_out_ar_bits_addr; // @[SimTop.scala 68:19]
+  wire  axi_io_out_r_ready; // @[SimTop.scala 68:19]
+  wire  axi_io_out_r_valid; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_out_r_bits_data; // @[SimTop.scala 68:19]
+  wire  axi_io_out_r_bits_last; // @[SimTop.scala 68:19]
+  wire  axi_io_icacheio_req; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_icacheio_addr; // @[SimTop.scala 68:19]
+  wire  axi_io_icacheio_valid; // @[SimTop.scala 68:19]
+  wire [511:0] axi_io_icacheio_data; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheio_req; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_dcacheio_raddr; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheio_rvalid; // @[SimTop.scala 68:19]
+  wire [511:0] axi_io_dcacheio_rdata; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheio_weq; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_dcacheio_waddr; // @[SimTop.scala 68:19]
+  wire [511:0] axi_io_dcacheio_wdata; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheio_wdone; // @[SimTop.scala 68:19]
+  wire  axi_io_icacheBypassIO_req; // @[SimTop.scala 68:19]
+  wire [31:0] axi_io_icacheBypassIO_addr; // @[SimTop.scala 68:19]
+  wire  axi_io_icacheBypassIO_valid; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_icacheBypassIO_data; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheBypassIO_req; // @[SimTop.scala 68:19]
+  wire [31:0] axi_io_dcacheBypassIO_raddr; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheBypassIO_rvalid; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_dcacheBypassIO_rdata; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheBypassIO_weq; // @[SimTop.scala 68:19]
+  wire [31:0] axi_io_dcacheBypassIO_waddr; // @[SimTop.scala 68:19]
+  wire [63:0] axi_io_dcacheBypassIO_wdata; // @[SimTop.scala 68:19]
+  wire [7:0] axi_io_dcacheBypassIO_wmask; // @[SimTop.scala 68:19]
+  wire  axi_io_dcacheBypassIO_wdone; // @[SimTop.scala 68:19]
+  wire [2:0] axi_io_dcacheBypassIO_transfer; // @[SimTop.scala 68:19]
+  wire  icacheaxi_clock; // @[SimTop.scala 72:25]
+  wire  icacheaxi_reset; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_in_req; // @[SimTop.scala 72:25]
+  wire [63:0] icacheaxi_io_in_addr; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_in_valid; // @[SimTop.scala 72:25]
+  wire [511:0] icacheaxi_io_in_data; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_out0_req; // @[SimTop.scala 72:25]
+  wire [63:0] icacheaxi_io_out0_addr; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_out0_valid; // @[SimTop.scala 72:25]
+  wire [511:0] icacheaxi_io_out0_data; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_out1_req; // @[SimTop.scala 72:25]
+  wire [31:0] icacheaxi_io_out1_addr; // @[SimTop.scala 72:25]
+  wire  icacheaxi_io_out1_valid; // @[SimTop.scala 72:25]
+  wire [63:0] icacheaxi_io_out1_data; // @[SimTop.scala 72:25]
+  wire  dmmio_clock; // @[SimTop.scala 73:21]
+  wire  dmmio_reset; // @[SimTop.scala 73:21]
+  wire  dmmio_io_dmem_en; // @[SimTop.scala 73:21]
+  wire  dmmio_io_dmem_op; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_dmem_addr; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_dmem_wdata; // @[SimTop.scala 73:21]
+  wire [7:0] dmmio_io_dmem_wmask; // @[SimTop.scala 73:21]
+  wire [31:0] dmmio_io_dmem_transfer; // @[SimTop.scala 73:21]
+  wire  dmmio_io_dmem_ok; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_dmem_rdata; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem0_en; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem0_op; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem0_addr; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem0_wdata; // @[SimTop.scala 73:21]
+  wire [7:0] dmmio_io_mem0_wmask; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem0_ok; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem0_rdata; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem1_en; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem1_op; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem1_addr; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem1_wdata; // @[SimTop.scala 73:21]
+  wire [7:0] dmmio_io_mem1_wmask; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem1_rdata; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem2_en; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem2_op; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem2_addr; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem2_wdata; // @[SimTop.scala 73:21]
+  wire [7:0] dmmio_io_mem2_wmask; // @[SimTop.scala 73:21]
+  wire [31:0] dmmio_io_mem2_transfer; // @[SimTop.scala 73:21]
+  wire  dmmio_io_mem2_ok; // @[SimTop.scala 73:21]
+  wire [63:0] dmmio_io_mem2_rdata; // @[SimTop.scala 73:21]
+  wire  clintreg_clock; // @[SimTop.scala 74:24]
+  wire  clintreg_reset; // @[SimTop.scala 74:24]
+  wire  clintreg_io_mem_en; // @[SimTop.scala 74:24]
+  wire  clintreg_io_mem_op; // @[SimTop.scala 74:24]
+  wire [63:0] clintreg_io_mem_addr; // @[SimTop.scala 74:24]
+  wire [63:0] clintreg_io_mem_wdata; // @[SimTop.scala 74:24]
+  wire [7:0] clintreg_io_mem_wmask; // @[SimTop.scala 74:24]
+  wire [63:0] clintreg_io_mem_rdata; // @[SimTop.scala 74:24]
+  wire  clintreg_io_set_mtip; // @[SimTop.scala 74:24]
+  wire  clintreg_io_clear_mtip; // @[SimTop.scala 74:24]
+  wire  dcachebypass_clock; // @[SimTop.scala 75:28]
+  wire  dcachebypass_reset; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_dmem_en; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_dmem_op; // @[SimTop.scala 75:28]
+  wire [63:0] dcachebypass_io_dmem_addr; // @[SimTop.scala 75:28]
+  wire [63:0] dcachebypass_io_dmem_wdata; // @[SimTop.scala 75:28]
+  wire [7:0] dcachebypass_io_dmem_wmask; // @[SimTop.scala 75:28]
+  wire [31:0] dcachebypass_io_dmem_transfer; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_dmem_ok; // @[SimTop.scala 75:28]
+  wire [63:0] dcachebypass_io_dmem_rdata; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_axi_req; // @[SimTop.scala 75:28]
+  wire [31:0] dcachebypass_io_axi_raddr; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_axi_rvalid; // @[SimTop.scala 75:28]
+  wire [63:0] dcachebypass_io_axi_rdata; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_axi_weq; // @[SimTop.scala 75:28]
+  wire [31:0] dcachebypass_io_axi_waddr; // @[SimTop.scala 75:28]
+  wire [63:0] dcachebypass_io_axi_wdata; // @[SimTop.scala 75:28]
+  wire [7:0] dcachebypass_io_axi_wmask; // @[SimTop.scala 75:28]
+  wire  dcachebypass_io_axi_wdone; // @[SimTop.scala 75:28]
+  wire [2:0] dcachebypass_io_axi_transfer; // @[SimTop.scala 75:28]
+  ysyx_210888_Core core ( // @[SimTop.scala 65:20]
     .clock(core_clock),
     .reset(core_reset),
     .io_imem_addr(core_io_imem_addr),
@@ -13990,7 +14083,7 @@ module ysyx_210888(
     .io_dfence_req(core_io_dfence_req),
     .io_dfence_done(core_io_dfence_done)
   );
-  ysyx_210888_ICache icache ( // @[SimTop.scala 65:22]
+  ysyx_210888_ICache icache ( // @[SimTop.scala 66:22]
     .clock(icache_clock),
     .reset(icache_reset),
     .io_imem_addr(icache_io_imem_addr),
@@ -14004,7 +14097,7 @@ module ysyx_210888(
     .io_fence_req(icache_io_fence_req),
     .io_fence_done(icache_io_fence_done)
   );
-  ysyx_210888_DCache dcache ( // @[SimTop.scala 66:22]
+  ysyx_210888_DCache dcache ( // @[SimTop.scala 67:22]
     .clock(dcache_clock),
     .reset(dcache_reset),
     .io_dmem_en(dcache_io_dmem_en),
@@ -14025,7 +14118,7 @@ module ysyx_210888(
     .io_fence_req(dcache_io_fence_req),
     .io_fence_done(dcache_io_fence_done)
   );
-  ysyx_210888_AXI axi ( // @[SimTop.scala 67:19]
+  ysyx_210888_AXI axi ( // @[SimTop.scala 68:19]
     .clock(axi_clock),
     .reset(axi_reset),
     .io_out_aw_ready(axi_io_out_aw_ready),
@@ -14076,35 +14169,23 @@ module ysyx_210888(
     .io_dcacheBypassIO_wdone(axi_io_dcacheBypassIO_wdone),
     .io_dcacheBypassIO_transfer(axi_io_dcacheBypassIO_transfer)
   );
-  ysyx_210888_IMMIO immio ( // @[SimTop.scala 69:21]
-    .clock(immio_clock),
-    .reset(immio_reset),
-    .io_imem_addr(immio_io_imem_addr),
-    .io_imem_en(immio_io_imem_en),
-    .io_imem_data(immio_io_imem_data),
-    .io_imem_ok(immio_io_imem_ok),
-    .io_mem0_addr(immio_io_mem0_addr),
-    .io_mem0_en(immio_io_mem0_en),
-    .io_mem0_data(immio_io_mem0_data),
-    .io_mem0_ok(immio_io_mem0_ok),
-    .io_mem1_addr(immio_io_mem1_addr),
-    .io_mem1_en(immio_io_mem1_en),
-    .io_mem1_data(immio_io_mem1_data),
-    .io_mem1_ok(immio_io_mem1_ok)
+  ysyx_210888_ICacheSocAxi icacheaxi ( // @[SimTop.scala 72:25]
+    .clock(icacheaxi_clock),
+    .reset(icacheaxi_reset),
+    .io_in_req(icacheaxi_io_in_req),
+    .io_in_addr(icacheaxi_io_in_addr),
+    .io_in_valid(icacheaxi_io_in_valid),
+    .io_in_data(icacheaxi_io_in_data),
+    .io_out0_req(icacheaxi_io_out0_req),
+    .io_out0_addr(icacheaxi_io_out0_addr),
+    .io_out0_valid(icacheaxi_io_out0_valid),
+    .io_out0_data(icacheaxi_io_out0_data),
+    .io_out1_req(icacheaxi_io_out1_req),
+    .io_out1_addr(icacheaxi_io_out1_addr),
+    .io_out1_valid(icacheaxi_io_out1_valid),
+    .io_out1_data(icacheaxi_io_out1_data)
   );
-  ysyx_210888_ICacheBypass icachebypass ( // @[SimTop.scala 70:28]
-    .clock(icachebypass_clock),
-    .reset(icachebypass_reset),
-    .io_imem_addr(icachebypass_io_imem_addr),
-    .io_imem_en(icachebypass_io_imem_en),
-    .io_imem_data(icachebypass_io_imem_data),
-    .io_imem_ok(icachebypass_io_imem_ok),
-    .io_axi_req(icachebypass_io_axi_req),
-    .io_axi_addr(icachebypass_io_axi_addr),
-    .io_axi_valid(icachebypass_io_axi_valid),
-    .io_axi_data(icachebypass_io_axi_data)
-  );
-  ysyx_210888_DMMIO dmmio ( // @[SimTop.scala 71:21]
+  ysyx_210888_DMMIO dmmio ( // @[SimTop.scala 73:21]
     .clock(dmmio_clock),
     .reset(dmmio_reset),
     .io_dmem_en(dmmio_io_dmem_en),
@@ -14137,7 +14218,7 @@ module ysyx_210888(
     .io_mem2_ok(dmmio_io_mem2_ok),
     .io_mem2_rdata(dmmio_io_mem2_rdata)
   );
-  ysyx_210888_ClintReg clintreg ( // @[SimTop.scala 72:24]
+  ysyx_210888_ClintReg clintreg ( // @[SimTop.scala 74:24]
     .clock(clintreg_clock),
     .reset(clintreg_reset),
     .io_mem_en(clintreg_io_mem_en),
@@ -14149,7 +14230,7 @@ module ysyx_210888(
     .io_set_mtip(clintreg_io_set_mtip),
     .io_clear_mtip(clintreg_io_clear_mtip)
   );
-  ysyx_210888_DCacheBypass dcachebypass ( // @[SimTop.scala 73:28]
+  ysyx_210888_DCacheBypass dcachebypass ( // @[SimTop.scala 75:28]
     .clock(dcachebypass_clock),
     .reset(dcachebypass_reset),
     .io_dmem_en(dcachebypass_io_dmem_en),
@@ -14171,52 +14252,52 @@ module ysyx_210888(
     .io_axi_wdone(dcachebypass_io_axi_wdone),
     .io_axi_transfer(dcachebypass_io_axi_transfer)
   );
-  assign io_master_awvalid = axi_io_out_aw_valid; // @[SimTop.scala 96:27]
-  assign io_master_awaddr = axi_io_out_aw_bits_addr[31:0]; // @[SimTop.scala 97:27]
-  assign io_master_awid = 4'h0; // @[SimTop.scala 98:27]
-  assign io_master_awlen = axi_io_out_aw_bits_len; // @[SimTop.scala 99:27]
-  assign io_master_awsize = axi_io_out_aw_bits_size; // @[SimTop.scala 100:27]
-  assign io_master_awburst = 2'h1; // @[SimTop.scala 101:27]
-  assign io_master_wvalid = axi_io_out_w_valid; // @[SimTop.scala 104:27]
-  assign io_master_wdata = axi_io_out_w_bits_data; // @[SimTop.scala 105:27]
-  assign io_master_wstrb = axi_io_out_w_bits_strb; // @[SimTop.scala 106:27]
-  assign io_master_wlast = axi_io_out_w_bits_last; // @[SimTop.scala 107:27]
-  assign io_master_bready = axi_io_out_b_ready; // @[SimTop.scala 109:27]
-  assign io_master_arvalid = axi_io_out_ar_valid; // @[SimTop.scala 115:27]
-  assign io_master_araddr = axi_io_out_ar_bits_addr[31:0]; // @[SimTop.scala 116:27]
-  assign io_master_arid = 4'h0; // @[SimTop.scala 117:27]
-  assign io_master_arlen = axi_io_out_ar_bits_len; // @[SimTop.scala 118:27]
-  assign io_master_arsize = axi_io_out_ar_bits_size; // @[SimTop.scala 119:27]
-  assign io_master_arburst = 2'h1; // @[SimTop.scala 120:27]
-  assign io_master_rready = axi_io_out_r_ready; // @[SimTop.scala 122:27]
-  assign io_slave_awready = 1'h0; // @[SimTop.scala 132:21]
-  assign io_slave_wready = 1'h0; // @[SimTop.scala 140:21]
-  assign io_slave_bvalid = 1'h0; // @[SimTop.scala 147:21]
-  assign io_slave_bresp = 2'h0; // @[SimTop.scala 148:21]
-  assign io_slave_bid = 4'h0; // @[SimTop.scala 149:21]
-  assign io_slave_arready = 1'h0; // @[SimTop.scala 151:21]
-  assign io_slave_rvalid = 1'h0; // @[SimTop.scala 160:21]
-  assign io_slave_rresp = 2'h0; // @[SimTop.scala 161:21]
-  assign io_slave_rdata = 64'h0; // @[SimTop.scala 162:21]
-  assign io_slave_rlast = 1'h0; // @[SimTop.scala 163:21]
-  assign io_slave_rid = 4'h0; // @[SimTop.scala 164:21]
+  assign io_master_awvalid = axi_io_out_aw_valid; // @[SimTop.scala 98:27]
+  assign io_master_awaddr = axi_io_out_aw_bits_addr[31:0]; // @[SimTop.scala 99:27]
+  assign io_master_awid = 4'h0; // @[SimTop.scala 100:27]
+  assign io_master_awlen = axi_io_out_aw_bits_len; // @[SimTop.scala 101:27]
+  assign io_master_awsize = axi_io_out_aw_bits_size; // @[SimTop.scala 102:27]
+  assign io_master_awburst = 2'h1; // @[SimTop.scala 103:27]
+  assign io_master_wvalid = axi_io_out_w_valid; // @[SimTop.scala 106:27]
+  assign io_master_wdata = axi_io_out_w_bits_data; // @[SimTop.scala 107:27]
+  assign io_master_wstrb = axi_io_out_w_bits_strb; // @[SimTop.scala 108:27]
+  assign io_master_wlast = axi_io_out_w_bits_last; // @[SimTop.scala 109:27]
+  assign io_master_bready = axi_io_out_b_ready; // @[SimTop.scala 111:27]
+  assign io_master_arvalid = axi_io_out_ar_valid; // @[SimTop.scala 117:27]
+  assign io_master_araddr = axi_io_out_ar_bits_addr[31:0]; // @[SimTop.scala 118:27]
+  assign io_master_arid = 4'h0; // @[SimTop.scala 119:27]
+  assign io_master_arlen = axi_io_out_ar_bits_len; // @[SimTop.scala 120:27]
+  assign io_master_arsize = axi_io_out_ar_bits_size; // @[SimTop.scala 121:27]
+  assign io_master_arburst = 2'h1; // @[SimTop.scala 122:27]
+  assign io_master_rready = axi_io_out_r_ready; // @[SimTop.scala 124:27]
+  assign io_slave_awready = 1'h0; // @[SimTop.scala 134:21]
+  assign io_slave_wready = 1'h0; // @[SimTop.scala 142:21]
+  assign io_slave_bvalid = 1'h0; // @[SimTop.scala 149:21]
+  assign io_slave_bresp = 2'h0; // @[SimTop.scala 150:21]
+  assign io_slave_bid = 4'h0; // @[SimTop.scala 151:21]
+  assign io_slave_arready = 1'h0; // @[SimTop.scala 153:21]
+  assign io_slave_rvalid = 1'h0; // @[SimTop.scala 162:21]
+  assign io_slave_rresp = 2'h0; // @[SimTop.scala 163:21]
+  assign io_slave_rdata = 64'h0; // @[SimTop.scala 164:21]
+  assign io_slave_rlast = 1'h0; // @[SimTop.scala 165:21]
+  assign io_slave_rid = 4'h0; // @[SimTop.scala 166:21]
   assign core_clock = clock;
   assign core_reset = reset;
-  assign core_io_imem_data = immio_io_imem_data; // @[SimTop.scala 78:17]
-  assign core_io_imem_ok = immio_io_imem_ok; // @[SimTop.scala 78:17]
+  assign core_io_imem_data = icache_io_imem_data; // @[SimTop.scala 80:17]
+  assign core_io_imem_ok = icache_io_imem_ok; // @[SimTop.scala 80:17]
   assign core_io_dmem_ok = dmmio_io_dmem_ok; // @[SimTop.scala 82:17]
   assign core_io_dmem_rdata = dmmio_io_dmem_rdata; // @[SimTop.scala 82:17]
   assign core_io_set_mtip = clintreg_io_set_mtip; // @[SimTop.scala 87:23]
   assign core_io_clear_mtip = clintreg_io_clear_mtip; // @[SimTop.scala 88:23]
-  assign core_io_ifence_done = icache_io_fence_done; // @[SimTop.scala 75:19]
-  assign core_io_dfence_done = dcache_io_fence_done; // @[SimTop.scala 76:19]
+  assign core_io_ifence_done = icache_io_fence_done; // @[SimTop.scala 77:19]
+  assign core_io_dfence_done = dcache_io_fence_done; // @[SimTop.scala 78:19]
   assign icache_clock = clock;
   assign icache_reset = reset;
-  assign icache_io_imem_addr = immio_io_mem0_addr; // @[SimTop.scala 79:17]
-  assign icache_io_imem_en = immio_io_mem0_en; // @[SimTop.scala 79:17]
-  assign icache_io_axi_valid = axi_io_icacheio_valid; // @[SimTop.scala 90:17]
-  assign icache_io_axi_data = axi_io_icacheio_data; // @[SimTop.scala 90:17]
-  assign icache_io_fence_req = core_io_ifence_req; // @[SimTop.scala 75:19]
+  assign icache_io_imem_addr = core_io_imem_addr; // @[SimTop.scala 80:17]
+  assign icache_io_imem_en = core_io_imem_en; // @[SimTop.scala 80:17]
+  assign icache_io_axi_valid = icacheaxi_io_in_valid; // @[SimTop.scala 90:17]
+  assign icache_io_axi_data = icacheaxi_io_in_data; // @[SimTop.scala 90:17]
+  assign icache_io_fence_req = core_io_ifence_req; // @[SimTop.scala 77:19]
   assign dcache_clock = clock;
   assign dcache_reset = reset;
   assign dcache_io_dmem_en = dmmio_io_mem0_en; // @[SimTop.scala 83:17]
@@ -14224,49 +14305,43 @@ module ysyx_210888(
   assign dcache_io_dmem_addr = dmmio_io_mem0_addr; // @[SimTop.scala 83:17]
   assign dcache_io_dmem_wdata = dmmio_io_mem0_wdata; // @[SimTop.scala 83:17]
   assign dcache_io_dmem_wmask = dmmio_io_mem0_wmask; // @[SimTop.scala 83:17]
-  assign dcache_io_axi_rvalid = axi_io_dcacheio_rvalid; // @[SimTop.scala 91:17]
-  assign dcache_io_axi_rdata = axi_io_dcacheio_rdata; // @[SimTop.scala 91:17]
-  assign dcache_io_axi_wdone = axi_io_dcacheio_wdone; // @[SimTop.scala 91:17]
-  assign dcache_io_fence_req = core_io_dfence_req; // @[SimTop.scala 76:19]
+  assign dcache_io_axi_rvalid = axi_io_dcacheio_rvalid; // @[SimTop.scala 94:17]
+  assign dcache_io_axi_rdata = axi_io_dcacheio_rdata; // @[SimTop.scala 94:17]
+  assign dcache_io_axi_wdone = axi_io_dcacheio_wdone; // @[SimTop.scala 94:17]
+  assign dcache_io_fence_req = core_io_dfence_req; // @[SimTop.scala 78:19]
   assign axi_clock = clock;
   assign axi_reset = reset;
-  assign axi_io_out_aw_ready = io_master_awready; // @[SimTop.scala 95:27]
-  assign axi_io_out_w_ready = io_master_wready; // @[SimTop.scala 103:27]
-  assign axi_io_out_b_valid = io_master_bvalid; // @[SimTop.scala 110:27]
-  assign axi_io_out_ar_ready = io_master_arready; // @[SimTop.scala 114:27]
-  assign axi_io_out_r_valid = io_master_rvalid; // @[SimTop.scala 123:27]
-  assign axi_io_out_r_bits_data = io_master_rdata; // @[SimTop.scala 125:27]
-  assign axi_io_out_r_bits_last = io_master_rlast; // @[SimTop.scala 126:27]
-  assign axi_io_icacheio_req = icache_io_axi_req; // @[SimTop.scala 90:17]
-  assign axi_io_icacheio_addr = icache_io_axi_addr; // @[SimTop.scala 90:17]
-  assign axi_io_dcacheio_req = dcache_io_axi_req; // @[SimTop.scala 91:17]
-  assign axi_io_dcacheio_raddr = dcache_io_axi_raddr; // @[SimTop.scala 91:17]
-  assign axi_io_dcacheio_weq = dcache_io_axi_weq; // @[SimTop.scala 91:17]
-  assign axi_io_dcacheio_waddr = dcache_io_axi_waddr; // @[SimTop.scala 91:17]
-  assign axi_io_dcacheio_wdata = dcache_io_axi_wdata; // @[SimTop.scala 91:17]
-  assign axi_io_icacheBypassIO_req = icachebypass_io_axi_req; // @[SimTop.scala 92:23]
-  assign axi_io_icacheBypassIO_addr = icachebypass_io_axi_addr; // @[SimTop.scala 92:23]
-  assign axi_io_dcacheBypassIO_req = dcachebypass_io_axi_req; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_raddr = dcachebypass_io_axi_raddr; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_weq = dcachebypass_io_axi_weq; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_waddr = dcachebypass_io_axi_waddr; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_wdata = dcachebypass_io_axi_wdata; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_wmask = dcachebypass_io_axi_wmask; // @[SimTop.scala 93:23]
-  assign axi_io_dcacheBypassIO_transfer = dcachebypass_io_axi_transfer; // @[SimTop.scala 93:23]
-  assign immio_clock = clock;
-  assign immio_reset = reset;
-  assign immio_io_imem_addr = core_io_imem_addr; // @[SimTop.scala 78:17]
-  assign immio_io_imem_en = core_io_imem_en; // @[SimTop.scala 78:17]
-  assign immio_io_mem0_data = icache_io_imem_data; // @[SimTop.scala 79:17]
-  assign immio_io_mem0_ok = icache_io_imem_ok; // @[SimTop.scala 79:17]
-  assign immio_io_mem1_data = icachebypass_io_imem_data; // @[SimTop.scala 80:17]
-  assign immio_io_mem1_ok = icachebypass_io_imem_ok; // @[SimTop.scala 80:17]
-  assign icachebypass_clock = clock;
-  assign icachebypass_reset = reset;
-  assign icachebypass_io_imem_addr = immio_io_mem1_addr; // @[SimTop.scala 80:17]
-  assign icachebypass_io_imem_en = immio_io_mem1_en; // @[SimTop.scala 80:17]
-  assign icachebypass_io_axi_valid = axi_io_icacheBypassIO_valid; // @[SimTop.scala 92:23]
-  assign icachebypass_io_axi_data = axi_io_icacheBypassIO_data; // @[SimTop.scala 92:23]
+  assign axi_io_out_aw_ready = io_master_awready; // @[SimTop.scala 97:27]
+  assign axi_io_out_w_ready = io_master_wready; // @[SimTop.scala 105:27]
+  assign axi_io_out_b_valid = io_master_bvalid; // @[SimTop.scala 112:27]
+  assign axi_io_out_ar_ready = io_master_arready; // @[SimTop.scala 116:27]
+  assign axi_io_out_r_valid = io_master_rvalid; // @[SimTop.scala 125:27]
+  assign axi_io_out_r_bits_data = io_master_rdata; // @[SimTop.scala 127:27]
+  assign axi_io_out_r_bits_last = io_master_rlast; // @[SimTop.scala 128:27]
+  assign axi_io_icacheio_req = icacheaxi_io_out0_req; // @[SimTop.scala 91:21]
+  assign axi_io_icacheio_addr = icacheaxi_io_out0_addr; // @[SimTop.scala 91:21]
+  assign axi_io_dcacheio_req = dcache_io_axi_req; // @[SimTop.scala 94:17]
+  assign axi_io_dcacheio_raddr = dcache_io_axi_raddr; // @[SimTop.scala 94:17]
+  assign axi_io_dcacheio_weq = dcache_io_axi_weq; // @[SimTop.scala 94:17]
+  assign axi_io_dcacheio_waddr = dcache_io_axi_waddr; // @[SimTop.scala 94:17]
+  assign axi_io_dcacheio_wdata = dcache_io_axi_wdata; // @[SimTop.scala 94:17]
+  assign axi_io_icacheBypassIO_req = icacheaxi_io_out1_req; // @[SimTop.scala 92:21]
+  assign axi_io_icacheBypassIO_addr = icacheaxi_io_out1_addr; // @[SimTop.scala 92:21]
+  assign axi_io_dcacheBypassIO_req = dcachebypass_io_axi_req; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_raddr = dcachebypass_io_axi_raddr; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_weq = dcachebypass_io_axi_weq; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_waddr = dcachebypass_io_axi_waddr; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_wdata = dcachebypass_io_axi_wdata; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_wmask = dcachebypass_io_axi_wmask; // @[SimTop.scala 95:23]
+  assign axi_io_dcacheBypassIO_transfer = dcachebypass_io_axi_transfer; // @[SimTop.scala 95:23]
+  assign icacheaxi_clock = clock;
+  assign icacheaxi_reset = reset;
+  assign icacheaxi_io_in_req = icache_io_axi_req; // @[SimTop.scala 90:17]
+  assign icacheaxi_io_in_addr = icache_io_axi_addr; // @[SimTop.scala 90:17]
+  assign icacheaxi_io_out0_valid = axi_io_icacheio_valid; // @[SimTop.scala 91:21]
+  assign icacheaxi_io_out0_data = axi_io_icacheio_data; // @[SimTop.scala 91:21]
+  assign icacheaxi_io_out1_valid = axi_io_icacheBypassIO_valid; // @[SimTop.scala 92:21]
+  assign icacheaxi_io_out1_data = axi_io_icacheBypassIO_data; // @[SimTop.scala 92:21]
   assign dmmio_clock = clock;
   assign dmmio_reset = reset;
   assign dmmio_io_dmem_en = core_io_dmem_en; // @[SimTop.scala 82:17]
@@ -14295,7 +14370,7 @@ module ysyx_210888(
   assign dcachebypass_io_dmem_wdata = dmmio_io_mem2_wdata; // @[SimTop.scala 85:17]
   assign dcachebypass_io_dmem_wmask = dmmio_io_mem2_wmask; // @[SimTop.scala 85:17]
   assign dcachebypass_io_dmem_transfer = dmmio_io_mem2_transfer; // @[SimTop.scala 85:17]
-  assign dcachebypass_io_axi_rvalid = axi_io_dcacheBypassIO_rvalid; // @[SimTop.scala 93:23]
-  assign dcachebypass_io_axi_rdata = axi_io_dcacheBypassIO_rdata; // @[SimTop.scala 93:23]
-  assign dcachebypass_io_axi_wdone = axi_io_dcacheBypassIO_wdone; // @[SimTop.scala 93:23]
+  assign dcachebypass_io_axi_rvalid = axi_io_dcacheBypassIO_rvalid; // @[SimTop.scala 95:23]
+  assign dcachebypass_io_axi_rdata = axi_io_dcacheBypassIO_rdata; // @[SimTop.scala 95:23]
+  assign dcachebypass_io_axi_wdone = axi_io_dcacheBypassIO_wdone; // @[SimTop.scala 95:23]
 endmodule

@@ -125,17 +125,19 @@ class ICacheSocAxi extends Module with CacheParameters{
     })
     //
     val times = CacheLineByte / 4
+    val cnt_width = OffsetWidth - 2
     //
     val idle :: fetch :: done :: soc_fetch :: soc_done :: soc_all_done :: Nil = Enum(6)
     val state = RegInit(idle)
     //
-    val cnt = RegInit(0.U)
+    val cnt = RegInit(0.U(cnt_width.W))
     val buffer = RegInit(VecInit(Seq.fill(times)(0.U(32.W))))
     //
     switch(state){
         is(idle){
             when(io.in.req && (io.in.addr < "h80000000".U)){state := soc_fetch}
             .elsewhen(io.in.req){state := fetch}
+            // when(io.in.req){state := soc_fetch}
         }
         is(fetch){
             when(io.out0.valid){state := done}
@@ -148,20 +150,21 @@ class ICacheSocAxi extends Module with CacheParameters{
         }
         is(soc_done){
             when(cnt === (times - 1).U){state := soc_all_done}
-            .otherwise{state === soc_fetch}
+            .otherwise{state := soc_fetch}
         }
         is(soc_all_done){
             state := idle
         }
     }
     //
-    when(state === soc_done){buffer(cnt) := io.in.data}
+    when(state === soc_done){buffer(cnt) := io.out1.data}
     var data = 0.U(1.W)
     for(i <- 0 to (times - 1)) data = Cat(buffer(i), data)
     data = data(times * 32, 1)
     //
     when(state === soc_done){cnt := cnt + 1.U}
     .elsewhen(state === soc_all_done){cnt := 0.U}
+    .otherwise{cnt := cnt}
     //
     io.out0.req  := state === fetch
     io.out0.addr := io.in.addr

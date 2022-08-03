@@ -2430,14 +2430,15 @@ module Core(
   reg [63:0] _RAND_16;
   reg [63:0] _RAND_17;
   reg [31:0] _RAND_18;
-  reg [63:0] _RAND_19;
-  reg [31:0] _RAND_20;
+  reg [31:0] _RAND_19;
+  reg [63:0] _RAND_20;
   reg [31:0] _RAND_21;
   reg [31:0] _RAND_22;
-  reg [63:0] _RAND_23;
-  reg [31:0] _RAND_24;
-  reg [63:0] _RAND_25;
+  reg [31:0] _RAND_23;
+  reg [63:0] _RAND_24;
+  reg [31:0] _RAND_25;
   reg [63:0] _RAND_26;
+  reg [63:0] _RAND_27;
 `endif // RANDOMIZE_REG_INIT
   wire  ifu_reset; // @[Core.scala 19:23]
   wire  ifu_io_jump_en; // @[Core.scala 19:23]
@@ -2761,6 +2762,7 @@ module Core(
   wire [31:0] _commit_intr_T_1 = wbreg_io_out_inst; // @[Core.scala 272:82]
   reg  commit_intr_REG; // @[Core.scala 272:76]
   wire  commit_intr = wbreg_exception_execution & wbreg_time_intr & commit_intr_REG; // @[Core.scala 272:66]
+  reg  dt_ic_io_valid_REG; // @[Core.scala 278:57]
   reg [63:0] dt_ic_io_pc_REG; // @[Core.scala 279:31]
   reg [31:0] dt_ic_io_instr_REG; // @[Core.scala 280:31]
   reg  dt_ic_io_skip_REG; // @[Core.scala 282:45]
@@ -3235,7 +3237,7 @@ module Core(
   assign dt_ic_clock = clock; // @[Core.scala 275:21]
   assign dt_ic_coreid = 8'h0; // @[Core.scala 276:21]
   assign dt_ic_index = 8'h0; // @[Core.scala 277:21]
-  assign dt_ic_valid = 1'h0; // @[Core.scala 278:21]
+  assign dt_ic_valid = commit_intr ? 1'h0 : dt_ic_io_valid_REG; // @[Core.scala 278:27]
   assign dt_ic_pc = dt_ic_io_pc_REG; // @[Core.scala 279:21]
   assign dt_ic_instr = dt_ic_io_instr_REG; // @[Core.scala 280:21]
   assign dt_ic_special = 8'h0; // @[Core.scala 281:21]
@@ -3279,6 +3281,7 @@ module Core(
     wbreg_exception_pc_REG_2 <= wbreg_exception_pc_REG_1; // @[Core.scala 271:50]
     wbreg_exception_pc <= wbreg_exception_pc_REG_2; // @[Core.scala 271:42]
     commit_intr_REG <= 32'h73 == _commit_intr_T_1; // @[Core.scala 272:82]
+    dt_ic_io_valid_REG <= wbreg_io_out_valid & ~dmem_not_ok; // @[Core.scala 237:41]
     dt_ic_io_pc_REG <= wbreg_io_out_pc; // @[Core.scala 279:31]
     dt_ic_io_instr_REG <= wbreg_io_out_inst; // @[Core.scala 280:31]
     dt_ic_io_skip_REG <= skip_putch | read_mcycle | rtthread_test_skip; // @[Core.scala 282:72]
@@ -3381,22 +3384,24 @@ initial begin
   wbreg_exception_pc = _RAND_17[63:0];
   _RAND_18 = {1{`RANDOM}};
   commit_intr_REG = _RAND_18[0:0];
-  _RAND_19 = {2{`RANDOM}};
-  dt_ic_io_pc_REG = _RAND_19[63:0];
-  _RAND_20 = {1{`RANDOM}};
-  dt_ic_io_instr_REG = _RAND_20[31:0];
+  _RAND_19 = {1{`RANDOM}};
+  dt_ic_io_valid_REG = _RAND_19[0:0];
+  _RAND_20 = {2{`RANDOM}};
+  dt_ic_io_pc_REG = _RAND_20[63:0];
   _RAND_21 = {1{`RANDOM}};
-  dt_ic_io_skip_REG = _RAND_21[0:0];
+  dt_ic_io_instr_REG = _RAND_21[31:0];
   _RAND_22 = {1{`RANDOM}};
-  dt_ic_io_wen_REG = _RAND_22[0:0];
-  _RAND_23 = {2{`RANDOM}};
-  dt_ic_io_wdata_REG = _RAND_23[63:0];
-  _RAND_24 = {1{`RANDOM}};
-  dt_ic_io_wdest_REG = _RAND_24[4:0];
-  _RAND_25 = {2{`RANDOM}};
-  cycle_cnt = _RAND_25[63:0];
+  dt_ic_io_skip_REG = _RAND_22[0:0];
+  _RAND_23 = {1{`RANDOM}};
+  dt_ic_io_wen_REG = _RAND_23[0:0];
+  _RAND_24 = {2{`RANDOM}};
+  dt_ic_io_wdata_REG = _RAND_24[63:0];
+  _RAND_25 = {1{`RANDOM}};
+  dt_ic_io_wdest_REG = _RAND_25[4:0];
   _RAND_26 = {2{`RANDOM}};
-  instr_cnt = _RAND_26[63:0];
+  cycle_cnt = _RAND_26[63:0];
+  _RAND_27 = {2{`RANDOM}};
+  instr_cnt = _RAND_27[63:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -13187,6 +13192,7 @@ module AXI(
   input          io_icacheBypassIO_req,
   input  [31:0]  io_icacheBypassIO_addr,
   output         io_icacheBypassIO_valid,
+  output [63:0]  io_icacheBypassIO_data,
   input          io_dcacheBypassIO_req,
   input  [31:0]  io_dcacheBypassIO_raddr,
   output         io_dcacheBypassIO_rvalid,
@@ -13301,6 +13307,7 @@ module AXI(
   wire [5:0] _drcnt_T_2 = drcnt + 6'h1; // @[AXI.scala 199:61]
   wire [5:0] _dwcnt_T_2 = dwcnt + 6'h1; // @[AXI.scala 200:60]
   wire [512:0] _T_20 = {ibuffer_7,ibuffer_6,ibuffer_5,ibuffer_4,ibuffer_3,ibuffer_2,ibuffer_1,ibuffer_0,1'h0}; // @[Cat.scala 30:58]
+  wire [511:0] idata = _T_20[512:1]; // @[AXI.scala 206:18]
   wire [512:0] _T_21 = {drbuffer_7,drbuffer_6,drbuffer_5,drbuffer_4,drbuffer_3,drbuffer_2,drbuffer_1,drbuffer_0,1'h0}; // @[Cat.scala 30:58]
   wire [511:0] drdata = _T_21[512:1]; // @[AXI.scala 209:20]
   wire  _io_icacheio_valid_T = rstate == 4'h4; // @[AXI.scala 214:31]
@@ -13341,6 +13348,7 @@ module AXI(
   assign io_dcacheio_rdata = _T_21[512:1]; // @[AXI.scala 209:20]
   assign io_dcacheio_wdone = wstate == 3'h4 & _T_17; // @[AXI.scala 221:42]
   assign io_icacheBypassIO_valid = _io_icacheio_valid_T & r_bypass; // @[AXI.scala 225:49]
+  assign io_icacheBypassIO_data = idata[63:0]; // @[AXI.scala 226:35]
   assign io_dcacheBypassIO_rvalid = _io_dcacheio_rvalid_T & r_bypass; // @[AXI.scala 231:49]
   assign io_dcacheBypassIO_rdata = drdata[63:0]; // @[AXI.scala 232:36]
   assign io_dcacheBypassIO_wdone = _io_dcacheio_wdone_T_2 & w_bypass; // @[AXI.scala 233:64]
@@ -13704,7 +13712,8 @@ module ICacheSocAxi(
   input  [511:0] io_out0_data,
   output         io_out1_req,
   output [31:0]  io_out1_addr,
-  input          io_out1_valid
+  input          io_out1_valid,
+  input  [63:0]  io_out1_data
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
@@ -13726,188 +13735,188 @@ module ICacheSocAxi(
   reg [31:0] _RAND_16;
   reg [31:0] _RAND_17;
 `endif // RANDOMIZE_REG_INIT
-  reg [2:0] state; // @[CacheBypass.scala 130:24]
-  reg  cnt; // @[CacheBypass.scala 132:22]
-  reg [31:0] buffer_0; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_1; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_2; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_3; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_4; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_5; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_6; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_7; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_8; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_9; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_10; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_11; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_12; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_13; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_14; // @[CacheBypass.scala 133:25]
-  reg [31:0] buffer_15; // @[CacheBypass.scala 133:25]
+  reg [2:0] state; // @[CacheBypass.scala 131:24]
+  reg [3:0] cnt; // @[CacheBypass.scala 133:22]
+  reg [31:0] buffer_0; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_1; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_2; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_3; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_4; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_5; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_6; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_7; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_8; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_9; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_10; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_11; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_12; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_13; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_14; // @[CacheBypass.scala 134:25]
+  reg [31:0] buffer_15; // @[CacheBypass.scala 134:25]
   wire  _T = 3'h0 == state; // @[Conditional.scala 37:30]
   wire  _T_3 = 3'h1 == state; // @[Conditional.scala 37:30]
   wire  _T_4 = 3'h2 == state; // @[Conditional.scala 37:30]
   wire  _T_5 = 3'h3 == state; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_3 = io_out1_valid ? 3'h4 : state; // @[CacheBypass.scala 147:32 CacheBypass.scala 147:39 CacheBypass.scala 130:24]
+  wire [2:0] _GEN_3 = io_out1_valid ? 3'h4 : state; // @[CacheBypass.scala 148:32 CacheBypass.scala 148:39 CacheBypass.scala 131:24]
   wire  _T_6 = 3'h4 == state; // @[Conditional.scala 37:30]
-  wire [3:0] _GEN_47 = {{3'd0}, cnt}; // @[CacheBypass.scala 150:22]
-  wire [2:0] _GEN_4 = _GEN_47 == 4'hf ? 3'h5 : state; // @[CacheBypass.scala 150:40 CacheBypass.scala 150:47 CacheBypass.scala 130:24]
-  wire  _T_9 = 3'h5 == state; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_5 = _T_9 ? 3'h0 : state; // @[Conditional.scala 39:67 CacheBypass.scala 154:19 CacheBypass.scala 130:24]
+  wire [2:0] _GEN_4 = cnt == 4'hf ? 3'h5 : 3'h3; // @[CacheBypass.scala 151:40 CacheBypass.scala 151:47 CacheBypass.scala 152:30]
+  wire  _T_8 = 3'h5 == state; // @[Conditional.scala 37:30]
+  wire [2:0] _GEN_5 = _T_8 ? 3'h0 : state; // @[Conditional.scala 39:67 CacheBypass.scala 155:19 CacheBypass.scala 131:24]
   wire [2:0] _GEN_6 = _T_6 ? _GEN_4 : _GEN_5; // @[Conditional.scala 39:67]
   wire [2:0] _GEN_7 = _T_5 ? _GEN_3 : _GEN_6; // @[Conditional.scala 39:67]
-  wire  _T_10 = state == 3'h4; // @[CacheBypass.scala 158:16]
+  wire  _T_9 = state == 3'h4; // @[CacheBypass.scala 159:16]
   wire [288:0] lo_8 = {buffer_8,buffer_7,buffer_6,buffer_5,buffer_4,buffer_3,buffer_2,buffer_1,buffer_0,1'h0}; // @[Cat.scala 30:58]
-  wire [512:0] _T_13 = {buffer_15,buffer_14,buffer_13,buffer_12,buffer_11,buffer_10,buffer_9,lo_8}; // @[Cat.scala 30:58]
-  wire [511:0] data = _T_13[512:1]; // @[CacheBypass.scala 161:16]
-  wire  _T_15 = state == 3'h5; // @[CacheBypass.scala 164:21]
-  wire [2:0] _GEN_48 = {cnt, 2'h0}; // @[CacheBypass.scala 169:39]
-  wire [3:0] _io_out1_addr_T = {{1'd0}, _GEN_48}; // @[CacheBypass.scala 169:39]
-  wire [63:0] _GEN_49 = {{60'd0}, _io_out1_addr_T}; // @[CacheBypass.scala 169:32]
-  wire [63:0] _io_out1_addr_T_2 = io_in_addr + _GEN_49; // @[CacheBypass.scala 169:32]
-  wire  _io_in_valid_T_1 = state == 3'h2; // @[CacheBypass.scala 171:52]
-  wire [511:0] _GEN_45 = _T_15 ? data : 512'h0; // @[CacheBypass.scala 173:38 CacheBypass.scala 173:50 CacheBypass.scala 174:27]
-  assign io_in_valid = _T_15 | state == 3'h2; // @[CacheBypass.scala 171:43]
-  assign io_in_data = _io_in_valid_T_1 ? io_out0_data : _GEN_45; // @[CacheBypass.scala 172:25 CacheBypass.scala 172:37]
-  assign io_out0_req = state == 3'h1; // @[CacheBypass.scala 166:27]
-  assign io_out0_addr = io_in_addr; // @[CacheBypass.scala 167:18]
-  assign io_out1_req = state == 3'h3; // @[CacheBypass.scala 168:27]
-  assign io_out1_addr = _io_out1_addr_T_2[31:0]; // @[CacheBypass.scala 169:18]
+  wire [512:0] _T_10 = {buffer_15,buffer_14,buffer_13,buffer_12,buffer_11,buffer_10,buffer_9,lo_8}; // @[Cat.scala 30:58]
+  wire [511:0] data = _T_10[512:1]; // @[CacheBypass.scala 162:16]
+  wire [3:0] _cnt_T_1 = cnt + 4'h1; // @[CacheBypass.scala 164:41]
+  wire  _T_12 = state == 3'h5; // @[CacheBypass.scala 165:21]
+  wire [5:0] _GEN_47 = {cnt, 2'h0}; // @[CacheBypass.scala 171:39]
+  wire [6:0] _io_out1_addr_T = {{1'd0}, _GEN_47}; // @[CacheBypass.scala 171:39]
+  wire [63:0] _GEN_48 = {{57'd0}, _io_out1_addr_T}; // @[CacheBypass.scala 171:32]
+  wire [63:0] _io_out1_addr_T_2 = io_in_addr + _GEN_48; // @[CacheBypass.scala 171:32]
+  wire  _io_in_valid_T_1 = state == 3'h2; // @[CacheBypass.scala 173:52]
+  wire [511:0] _GEN_45 = _T_12 ? data : 512'h0; // @[CacheBypass.scala 175:38 CacheBypass.scala 175:50 CacheBypass.scala 176:27]
+  assign io_in_valid = _T_12 | state == 3'h2; // @[CacheBypass.scala 173:43]
+  assign io_in_data = _io_in_valid_T_1 ? io_out0_data : _GEN_45; // @[CacheBypass.scala 174:25 CacheBypass.scala 174:37]
+  assign io_out0_req = state == 3'h1; // @[CacheBypass.scala 168:27]
+  assign io_out0_addr = io_in_addr; // @[CacheBypass.scala 169:18]
+  assign io_out1_req = state == 3'h3; // @[CacheBypass.scala 170:27]
+  assign io_out1_addr = _io_out1_addr_T_2[31:0]; // @[CacheBypass.scala 171:18]
   always @(posedge clock) begin
-    if (reset) begin // @[CacheBypass.scala 130:24]
-      state <= 3'h0; // @[CacheBypass.scala 130:24]
+    if (reset) begin // @[CacheBypass.scala 131:24]
+      state <= 3'h0; // @[CacheBypass.scala 131:24]
     end else if (_T) begin // @[Conditional.scala 40:58]
-      if (io_in_req & io_in_addr < 64'h80000000) begin // @[CacheBypass.scala 137:60]
-        state <= 3'h3; // @[CacheBypass.scala 137:67]
-      end else if (io_in_req) begin // @[CacheBypass.scala 138:33]
-        state <= 3'h1; // @[CacheBypass.scala 138:40]
+      if (io_in_req & io_in_addr >= 64'h80000000) begin // @[CacheBypass.scala 138:61]
+        state <= 3'h3; // @[CacheBypass.scala 138:68]
+      end else if (io_in_req) begin // @[CacheBypass.scala 139:33]
+        state <= 3'h1; // @[CacheBypass.scala 139:40]
       end
     end else if (_T_3) begin // @[Conditional.scala 39:67]
-      if (io_out0_valid) begin // @[CacheBypass.scala 141:32]
-        state <= 3'h2; // @[CacheBypass.scala 141:39]
+      if (io_out0_valid) begin // @[CacheBypass.scala 142:32]
+        state <= 3'h2; // @[CacheBypass.scala 142:39]
       end
     end else if (_T_4) begin // @[Conditional.scala 39:67]
-      state <= 3'h0; // @[CacheBypass.scala 144:19]
+      state <= 3'h0; // @[CacheBypass.scala 145:19]
     end else begin
       state <= _GEN_7;
     end
-    if (reset) begin // @[CacheBypass.scala 132:22]
-      cnt <= 1'h0; // @[CacheBypass.scala 132:22]
-    end else if (_T_10) begin // @[CacheBypass.scala 163:29]
-      cnt <= cnt + 1'h1; // @[CacheBypass.scala 163:34]
-    end else if (state == 3'h5) begin // @[CacheBypass.scala 164:38]
-      cnt <= 1'h0; // @[CacheBypass.scala 164:43]
+    if (reset) begin // @[CacheBypass.scala 133:22]
+      cnt <= 4'h0; // @[CacheBypass.scala 133:22]
+    end else if (_T_9) begin // @[CacheBypass.scala 164:29]
+      cnt <= _cnt_T_1; // @[CacheBypass.scala 164:34]
+    end else if (state == 3'h5) begin // @[CacheBypass.scala 165:38]
+      cnt <= 4'h0; // @[CacheBypass.scala 165:43]
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_0 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h0 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_0 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_0 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h0 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_0 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_1 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h1 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_1 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_1 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h1 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_1 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_2 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h2 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_2 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_2 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h2 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_2 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_3 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h3 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_3 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_3 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h3 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_3 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_4 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h4 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_4 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_4 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h4 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_4 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_5 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h5 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_5 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_5 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h5 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_5 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_6 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h6 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_6 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_6 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h6 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_6 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_7 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h7 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_7 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_7 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h7 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_7 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_8 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h8 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_8 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_8 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h8 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_8 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_9 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'h9 == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_9 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_9 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'h9 == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_9 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_10 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'ha == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_10 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_10 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'ha == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_10 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_11 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'hb == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_11 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_11 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'hb == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_11 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_12 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'hc == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_12 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_12 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'hc == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_12 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_13 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'hd == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_13 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_13 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'hd == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_13 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_14 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'he == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_14 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_14 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'he == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_14 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
-    if (reset) begin // @[CacheBypass.scala 133:25]
-      buffer_15 <= 32'h0; // @[CacheBypass.scala 133:25]
-    end else if (state == 3'h4) begin // @[CacheBypass.scala 158:29]
-      if (4'hf == _GEN_47) begin // @[CacheBypass.scala 158:42]
-        buffer_15 <= io_in_data[31:0]; // @[CacheBypass.scala 158:42]
+    if (reset) begin // @[CacheBypass.scala 134:25]
+      buffer_15 <= 32'h0; // @[CacheBypass.scala 134:25]
+    end else if (state == 3'h4) begin // @[CacheBypass.scala 159:29]
+      if (4'hf == cnt) begin // @[CacheBypass.scala 159:42]
+        buffer_15 <= io_out1_data[31:0]; // @[CacheBypass.scala 159:42]
       end
     end
   end
@@ -13950,7 +13959,7 @@ initial begin
   _RAND_0 = {1{`RANDOM}};
   state = _RAND_0[2:0];
   _RAND_1 = {1{`RANDOM}};
-  cnt = _RAND_1[0:0];
+  cnt = _RAND_1[3:0];
   _RAND_2 = {1{`RANDOM}};
   buffer_0 = _RAND_2[31:0];
   _RAND_3 = {1{`RANDOM}};
@@ -14567,6 +14576,7 @@ module SimTop(
   wire  axi_io_icacheBypassIO_req; // @[SimTop.scala 17:19]
   wire [31:0] axi_io_icacheBypassIO_addr; // @[SimTop.scala 17:19]
   wire  axi_io_icacheBypassIO_valid; // @[SimTop.scala 17:19]
+  wire [63:0] axi_io_icacheBypassIO_data; // @[SimTop.scala 17:19]
   wire  axi_io_dcacheBypassIO_req; // @[SimTop.scala 17:19]
   wire [31:0] axi_io_dcacheBypassIO_raddr; // @[SimTop.scala 17:19]
   wire  axi_io_dcacheBypassIO_rvalid; // @[SimTop.scala 17:19]
@@ -14590,6 +14600,7 @@ module SimTop(
   wire  icacheaxi_io_out1_req; // @[SimTop.scala 21:25]
   wire [31:0] icacheaxi_io_out1_addr; // @[SimTop.scala 21:25]
   wire  icacheaxi_io_out1_valid; // @[SimTop.scala 21:25]
+  wire [63:0] icacheaxi_io_out1_data; // @[SimTop.scala 21:25]
   wire  dmmio_clock; // @[SimTop.scala 22:21]
   wire  dmmio_reset; // @[SimTop.scala 22:21]
   wire  dmmio_io_dmem_en; // @[SimTop.scala 22:21]
@@ -14747,6 +14758,7 @@ module SimTop(
     .io_icacheBypassIO_req(axi_io_icacheBypassIO_req),
     .io_icacheBypassIO_addr(axi_io_icacheBypassIO_addr),
     .io_icacheBypassIO_valid(axi_io_icacheBypassIO_valid),
+    .io_icacheBypassIO_data(axi_io_icacheBypassIO_data),
     .io_dcacheBypassIO_req(axi_io_dcacheBypassIO_req),
     .io_dcacheBypassIO_raddr(axi_io_dcacheBypassIO_raddr),
     .io_dcacheBypassIO_rvalid(axi_io_dcacheBypassIO_rvalid),
@@ -14771,7 +14783,8 @@ module SimTop(
     .io_out0_data(icacheaxi_io_out0_data),
     .io_out1_req(icacheaxi_io_out1_req),
     .io_out1_addr(icacheaxi_io_out1_addr),
-    .io_out1_valid(icacheaxi_io_out1_valid)
+    .io_out1_valid(icacheaxi_io_out1_valid),
+    .io_out1_data(icacheaxi_io_out1_data)
   );
   DMMIO dmmio ( // @[SimTop.scala 22:21]
     .clock(dmmio_clock),
@@ -14931,6 +14944,7 @@ module SimTop(
   assign icacheaxi_io_out0_valid = axi_io_icacheio_valid; // @[SimTop.scala 40:21]
   assign icacheaxi_io_out0_data = axi_io_icacheio_data; // @[SimTop.scala 40:21]
   assign icacheaxi_io_out1_valid = axi_io_icacheBypassIO_valid; // @[SimTop.scala 41:21]
+  assign icacheaxi_io_out1_data = axi_io_icacheBypassIO_data; // @[SimTop.scala 41:21]
   assign dmmio_clock = clock;
   assign dmmio_reset = reset;
   assign dmmio_io_dmem_en = core_io_dmem_en; // @[SimTop.scala 31:17]
