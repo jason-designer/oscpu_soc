@@ -1439,12 +1439,11 @@ module MU(
   wire [64:0] mul_io_y; // @[Mul.scala 69:21]
   wire [129:0] mul_io_out; // @[Mul.scala 69:21]
   wire  mul_io_stall; // @[Mul.scala 69:21]
-  wire [129:0] _mu_out_T_1 = mul_io_out + 130'h1; // @[Mul.scala 76:36]
-  wire [31:0] mu_out_hi = _mu_out_T_1[31] ? 32'hffffffff : 32'h0; // @[Bitwise.scala 72:12]
-  wire [31:0] mu_out_lo = _mu_out_T_1[31:0]; // @[Mul.scala 67:41]
-  wire [63:0] _mu_out_T_4 = {mu_out_hi,mu_out_lo}; // @[Cat.scala 30:58]
-  wire [129:0] _mu_out_T_6 = 2'h1 == io_mu_code ? mul_io_out : 130'h0; // @[Mux.scala 80:57]
-  wire [129:0] mu_out = 2'h2 == io_mu_code ? {{66'd0}, _mu_out_T_4} : _mu_out_T_6; // @[Mux.scala 80:57]
+  wire [31:0] mu_out_hi = mul_io_out[31] ? 32'hffffffff : 32'h0; // @[Bitwise.scala 72:12]
+  wire [31:0] mu_out_lo = mul_io_out[31:0]; // @[Mul.scala 67:41]
+  wire [63:0] _mu_out_T_2 = {mu_out_hi,mu_out_lo}; // @[Cat.scala 30:58]
+  wire [129:0] _mu_out_T_4 = 2'h1 == io_mu_code ? mul_io_out : 130'h0; // @[Mux.scala 80:57]
+  wire [129:0] mu_out = 2'h2 == io_mu_code ? {{66'd0}, _mu_out_T_2} : _mu_out_T_4; // @[Mux.scala 80:57]
   Mul mul ( // @[Mul.scala 69:21]
     .clock(mul_clock),
     .reset(mul_reset),
