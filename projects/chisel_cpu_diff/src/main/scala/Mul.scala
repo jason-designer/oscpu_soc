@@ -48,14 +48,14 @@ class Mul extends Module{
     }
     //
     io.out := sum
-    io.stall := !(state === done && (state === idle && !io.en))
+    io.stall := !(state === done || (state === idle && !io.en))
 }
 
 
-class mu extends Module{
+class MU extends Module{
     val io = IO(new Bundle{
         val en   = Input(Bool())
-        val mu_code = Input(mu_code_length.W)
+        val mu_code = Input(UInt(mu_code_length.W))
         val op1     = Input(UInt(64.W))
         val op2     = Input(UInt(64.W))
         val mu_out  = Output(UInt(64.W))
@@ -71,9 +71,9 @@ class mu extends Module{
     mul.io.x    := io.op1
     mul.io.y    := io.op2
     
-    mu_out = MuxLookup(io.mu_code, 0.U, Array(
-        "b01".U -> mul.io.out,              //mul
-        "b10".U -> sext(mul.io.out, 4),    //mulw
+    val mu_out = MuxLookup(io.mu_code, 0.U, Array(
+        "b01".U -> (mul.io.out),            //mul
+        "b10".U -> sext(mul.io.out, 4),     //mulw
     ))
     
     io.mu_out   := mu_out

@@ -1,9 +1,16 @@
 import chisel3._
 import chisel3.util._
+import Decode_constant._
 
 class Execution extends Module{
     val io = IO(new Bundle{
-        val decode_info = Flipped(new DecodeInfo)
+        val fu_code     = Input(UInt(fu_code_length.W))
+        val alu_code    = Input(UInt(alu_code_length.W))
+        val bu_code     = Input(UInt(bu_code_length.W))
+        val lu_code     = Input(UInt(lu_code_length.W))
+        val su_code     = Input(UInt(su_code_length.W))
+        val du_code     = Input(UInt(du_code_length.W))
+        val csru_code   = Input(UInt(csru_code_length.W))
 
         val op1 = Input(UInt(64.W))
         val op2 = Input(UInt(64.W))
@@ -12,7 +19,6 @@ class Execution extends Module{
 
         val alu_out     = Output(UInt(64.W))
         val bu_out      = Output(UInt(64.W))
-        val mu_out      = Output(UInt(64.W))
         val du_out      = Output(UInt(64.W))
         val csru_out    = Output(UInt(64.W))
 
@@ -27,14 +33,13 @@ class Execution extends Module{
     val op2 = io.op2
     val pc  = io.pc
     val imm = io.imm
-    val fu_code     = io.decode_info.fu_code
-    val alu_code    = io.decode_info.alu_code
-    val bu_code     = io.decode_info.bu_code
-    val lu_code     = io.decode_info.lu_code
-    val su_code     = io.decode_info.su_code
-    val mu_code     = io.decode_info.mu_code
-    val du_code     = io.decode_info.du_code
-    val csru_code   = io.decode_info.csru_code
+    val fu_code     = io.fu_code
+    val alu_code    = io.alu_code
+    val bu_code     = io.bu_code
+    val lu_code     = io.lu_code
+    val su_code     = io.su_code
+    val du_code     = io.du_code
+    val csru_code   = io.csru_code
 
     //
     def sext(v:UInt, len:Int):UInt = len match{
@@ -70,12 +75,6 @@ class Execution extends Module{
 
     //bu
     val bu_out = Mux(bu_code === "b10000000".U || bu_code === "b01000000".U, pc + 4.U, 0.U)
-
-    //mu
-    val mu_out = MuxLookup(mu_code, 0.U, Array(
-        "b01".U -> (op1 * op2),             //mul
-        "b10".U -> sext((op1 * op2), 4),    //mulw
-    ))
 
     //du
     val du_out = MuxLookup(du_code, 0.U, Array(
@@ -127,7 +126,6 @@ class Execution extends Module{
     // out
     io.alu_out  := alu_out
     io.bu_out   := bu_out
-    io.mu_out   := mu_out
     io.du_out   := du_out
     io.csru_out := csru_out
 

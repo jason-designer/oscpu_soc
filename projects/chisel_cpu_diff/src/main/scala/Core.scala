@@ -25,6 +25,8 @@ class Core extends Module{
   val amu     = Module(new AccessMemory)
   val wbu     = Module(new WriteBack)
 
+  val mu      = Module(new MU)
+
   val rfconflict  = Module(new RegfileConflict)
   val fence = Module(new Fence)
 
@@ -51,38 +53,42 @@ class Core extends Module{
   idu.io.mtvec    := csru.io.mtvec
   idu.io.mepc     := csru.io.mepc
   //exereg
-  exereg.io.in.pc       := idreg.io.out.pc
-  exereg.io.in.inst     := idreg.io.inst
-  exereg.io.in.rd_en    := idu.io.rd_en
-  exereg.io.in.rd_addr  := idu.io.rd_addr
-  exereg.io.in.imm      := idu.io.imm
-  exereg.io.in.op1      := idu.io.op1
-  exereg.io.in.op2      := idu.io.op2
-  exereg.io.in.rs1_addr := idu.io.rs1_addr
-  exereg.io.in.fu_code  := idu.io.decode_info.fu_code
-  exereg.io.in.alu_code := idu.io.decode_info.alu_code
-  exereg.io.in.bu_code  := idu.io.decode_info.bu_code
-  exereg.io.in.mu_code  := idu.io.decode_info.mu_code
-  exereg.io.in.du_code  := idu.io.decode_info.du_code
-  exereg.io.in.lu_code  := idu.io.decode_info.lu_code
-  exereg.io.in.su_code  := idu.io.decode_info.su_code
-  exereg.io.in.csru_code    := idu.io.decode_info.csru_code
-  exereg.io.in.putch    := idu.io.putch
+  exereg.io.in.pc         := idreg.io.out.pc
+  exereg.io.in.inst       := idreg.io.inst
+  exereg.io.in.rd_en      := idu.io.rd_en
+  exereg.io.in.rd_addr    := idu.io.rd_addr
+  exereg.io.in.imm        := idu.io.imm
+  exereg.io.in.op1        := idu.io.op1
+  exereg.io.in.op2        := idu.io.op2
+  exereg.io.in.rs1_addr   := idu.io.rs1_addr
+  exereg.io.in.fu_code    := idu.io.decode_info.fu_code
+  exereg.io.in.alu_code   := idu.io.decode_info.alu_code
+  exereg.io.in.bu_code    := idu.io.decode_info.bu_code
+  exereg.io.in.mu_code    := idu.io.decode_info.mu_code
+  exereg.io.in.du_code    := idu.io.decode_info.du_code
+  exereg.io.in.lu_code    := idu.io.decode_info.lu_code
+  exereg.io.in.su_code    := idu.io.decode_info.su_code
+  exereg.io.in.csru_code  := idu.io.decode_info.csru_code
+  exereg.io.in.putch      := idu.io.putch
   //ieu
-  ieu.io.decode_info.fu_code  := exereg.io.out.fu_code
-  ieu.io.decode_info.alu_code := exereg.io.out.alu_code
-  ieu.io.decode_info.bu_code  := exereg.io.out.bu_code
-  ieu.io.decode_info.mu_code  := exereg.io.out.mu_code
-  ieu.io.decode_info.du_code  := exereg.io.out.du_code
-  ieu.io.decode_info.lu_code  := exereg.io.out.lu_code
-  ieu.io.decode_info.su_code  := exereg.io.out.su_code
-  ieu.io.decode_info.csru_code := exereg.io.out.csru_code
+  ieu.io.fu_code    := exereg.io.out.fu_code
+  ieu.io.alu_code   := exereg.io.out.alu_code
+  ieu.io.bu_code    := exereg.io.out.bu_code
+  ieu.io.du_code    := exereg.io.out.du_code
+  ieu.io.lu_code    := exereg.io.out.lu_code
+  ieu.io.su_code    := exereg.io.out.su_code
+  ieu.io.csru_code  := exereg.io.out.csru_code
   ieu.io.op1 := exereg.io.out.op1
   ieu.io.op2 := exereg.io.out.op2
   ieu.io.pc  := exereg.io.out.pc
   ieu.io.imm := exereg.io.out.imm
   ieu.io.rs1_addr := exereg.io.out.rs1_addr
   ieu.io.csr_rdata := csru.io.rdata
+
+  mu.io.en      := exereg.io.out.valid && (exereg.io.out.mu_code =/= 0.U)
+  mu.io.mu_code := exereg.io.out.mu_code
+  mu.io.op1     := exereg.io.out.op1
+  mu.io.op2     := exereg.io.out.op2
   //memreg
   memreg.io.in.pc       := exereg.io.out.pc
   memreg.io.in.inst     := exereg.io.out.inst
@@ -102,7 +108,7 @@ class Core extends Module{
 
   memreg.io.in.alu_out  := ieu.io.alu_out
   memreg.io.in.bu_out   := ieu.io.bu_out
-  memreg.io.in.mu_out   := ieu.io.mu_out
+  memreg.io.in.mu_out   := mu.io.mu_out
   memreg.io.in.du_out   := ieu.io.du_out
   memreg.io.in.csru_out := ieu.io.csru_out
 
@@ -198,6 +204,7 @@ class Core extends Module{
 
   //--------------------流水线控制------------------
   val stall_id = Wire(Bool())
+  val stall_ie = Wire(Bool())
   val stall_wb = Wire(Bool())
   val imem_not_ok = !io.imem.ok
   val dmem_not_ok = !io.dmem.ok
@@ -230,6 +237,9 @@ class Core extends Module{
   //    其实2和3只要实现一个就能保证功能正确，这里两个都实现了，后期看情况再修改.
   stall_id := rfconflict.io.conflict || imem_not_ok || exception_stall || fence_wait || fence_running
 
+  // mul和div需要阻塞ie级
+  stall_ie := mu.io.stall
+
   // 全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:----------------------
   //    1.全部流水线寄存器都保持原值
   //    2.wbreg的输出valid要为false.B，也就是rfu.io.rf_en要为false
@@ -237,13 +247,13 @@ class Core extends Module{
   
   
   idreg.io.in.valid  := ifu.io.valid
-  exereg.io.in.valid := idreg.io.out.valid && (!stall_id) 
-  memreg.io.in.valid := exereg.io.out.valid
+  exereg.io.in.valid := idreg.io.out.valid && !stall_id
+  memreg.io.in.valid := exereg.io.out.valid && !stall_ie
   wbreg.io.in.valid  := memreg.io.out.valid
   val commit_valid = wbreg.io.out.valid && !stall_wb
   
-  idreg.io.en  := !stall_id && !stall_wb
-  exereg.io.en := !stall_wb
+  idreg.io.en  := !stall_wb && !stall_ie && !stall_id
+  exereg.io.en := !stall_wb && !stall_ie
   memreg.io.en := !stall_wb
   wbreg.io.en  := !stall_wb
 
