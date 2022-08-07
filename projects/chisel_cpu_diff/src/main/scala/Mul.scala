@@ -1,6 +1,7 @@
 import chisel3._
 import chisel3.util._
 import chisel3.experimental._
+import Decode_constant._
 
 class Mul extends Module{
     val io = IO(new Bundle{
@@ -51,11 +52,32 @@ class Mul extends Module{
 }
 
 
-// class mu extends Module{
-//     val io = IO(new Bundle{
-
-//     })
-
-// }
+class mu extends Module{
+    val io = IO(new Bundle{
+        val en   = Input(Bool())
+        val mu_code = Input(mu_code_length.W)
+        val op1     = Input(UInt(64.W))
+        val op2     = Input(UInt(64.W))
+        val mu_out  = Output(UInt(64.W))
+        val stall   = Output(UInt(64.W))
+    })
+    def sext(v:UInt, len:Int):UInt = len match{
+        case 1 => Cat(Fill(56, v(7)), v(7, 0))
+        case 2 => Cat(Fill(48, v(15)), v(15, 0))
+        case 4 => Cat(Fill(32, v(31)), v(31, 0))
+    }
+    val mul = Module(new Mul)
+    mul.io.en   := io.en
+    mul.io.x    := io.op1
+    mul.io.y    := io.op2
+    
+    mu_out = MuxLookup(io.mu_code, 0.U, Array(
+        "b01".U -> mul.io.out,              //mul
+        "b10".U -> sext(mul.io.out, 4),    //mulw
+    ))
+    
+    io.mu_out   := mu_out
+    io.stall    := mul.io.stall
+}
 
 
