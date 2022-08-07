@@ -85,7 +85,7 @@ class DU extends Module{
         val op1     = Input(UInt(64.W))
         val op2     = Input(UInt(64.W))
         val du_out  = Output(UInt(64.W))
-        val stall   = Output(UInt(64.W))
+        val stall   = Output(Bool())
     })
     def sext(v:UInt, len:Int):UInt = len match{
         case 1 => Cat(Fill(56, v(7)), v(7, 0))

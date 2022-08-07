@@ -26,6 +26,7 @@ class Core extends Module{
   val wbu     = Module(new WriteBack)
 
   val mu      = Module(new MU)
+  val du      = Module(new DU)
 
   val rfconflict  = Module(new RegfileConflict)
   val fence = Module(new Fence)
@@ -74,7 +75,6 @@ class Core extends Module{
   ieu.io.fu_code    := exereg.io.out.fu_code
   ieu.io.alu_code   := exereg.io.out.alu_code
   ieu.io.bu_code    := exereg.io.out.bu_code
-  ieu.io.du_code    := exereg.io.out.du_code
   ieu.io.lu_code    := exereg.io.out.lu_code
   ieu.io.su_code    := exereg.io.out.su_code
   ieu.io.csru_code  := exereg.io.out.csru_code
@@ -89,6 +89,11 @@ class Core extends Module{
   mu.io.mu_code := exereg.io.out.mu_code
   mu.io.op1     := exereg.io.out.op1
   mu.io.op2     := exereg.io.out.op2
+
+  du.io.en      := exereg.io.out.valid && (exereg.io.out.du_code =/= 0.U)
+  du.io.du_code := exereg.io.out.du_code
+  du.io.op1     := exereg.io.out.op1
+  du.io.op2     := exereg.io.out.op2
   //memreg
   memreg.io.in.pc       := exereg.io.out.pc
   memreg.io.in.inst     := exereg.io.out.inst
@@ -109,7 +114,7 @@ class Core extends Module{
   memreg.io.in.alu_out  := ieu.io.alu_out
   memreg.io.in.bu_out   := ieu.io.bu_out
   memreg.io.in.mu_out   := mu.io.mu_out
-  memreg.io.in.du_out   := ieu.io.du_out
+  memreg.io.in.du_out   := du.io.du_out
   memreg.io.in.csru_out := ieu.io.csru_out
 
   memreg.io.in.putch      := exereg.io.out.putch
@@ -238,7 +243,7 @@ class Core extends Module{
   stall_id := rfconflict.io.conflict || imem_not_ok || exception_stall || fence_wait || fence_running
 
   // mul和div需要阻塞ie级
-  stall_ie := mu.io.stall
+  stall_ie := mu.io.stall || du.io.stall
 
   // 全部熄火（这时候要等待dmem加载完成,暂停整个流水线）:----------------------
   //    1.全部流水线寄存器都保持原值
