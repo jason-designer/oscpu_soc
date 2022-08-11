@@ -2,8 +2,7 @@ import chisel3._
 import chisel3.util.experimental._
 import difftest._
 
-class RegFile extends Module {
-  val io = IO(new Bundle {
+class RegFileIO extends Bundle{
     val rs1_addr = Input(UInt(5.W))
     val rs2_addr = Input(UInt(5.W))
     val rs1_data = Output(UInt(64.W))
@@ -11,7 +10,10 @@ class RegFile extends Module {
     val rd_addr = Input(UInt(5.W))
     val rd_data = Input(UInt(64.W))
     val rd_en = Input(Bool())
-  })
+}
+
+class RegFile extends Module {
+  val io = IO(new RegFileIO)
 
   val rf = RegInit(VecInit(Seq.fill(32)(0.U(64.W))))
 

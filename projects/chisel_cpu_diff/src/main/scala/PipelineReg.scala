@@ -13,9 +13,8 @@ class IDReg extends Module {
         val in      = Input(new IDReg_BUS_R)
         val out     = Output(new IDReg_BUS_R)
         // icache
-        val imem    = Flipped(new ICacheIO)
+        val imem    = new ImemIO
         val inst    = Output(UInt(32.W))
-        val imem_ok = Output(Bool())
     })
     val valid   = RegEnable(io.in.valid, false.B, io.en)
     val pc = Config.soc match{
@@ -26,7 +25,6 @@ class IDReg extends Module {
     io.imem.addr    := io.in.pc
     io.imem.en      := io.en 
     io.inst         := io.imem.data
-    io.imem_ok      := io.imem.ok
 
     io.out.valid    := valid
     io.out.pc       := pc

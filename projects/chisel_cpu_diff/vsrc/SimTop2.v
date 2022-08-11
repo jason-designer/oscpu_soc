@@ -13754,7 +13754,7 @@ module Core2(
   assign rfu_io_rs1_addr = pipeline_io_rs1_addr; // @[Core2.scala 24:29]
   assign rfu_io_rs2_addr = pipeline_io_rs2_addr; // @[Core2.scala 25:29]
   assign rfu_io_rd_addr = pipeline_io_rf_rd_addr; // @[Core2.scala 29:21]
-  assign rfu_io_rd_data = pipeline_io_rf_rd_data; // @[Core2.scala 30:21]
+  assign rfu_io_rd_data = pipeline_io_rf_rd_data + 64'h4; // @[Core2.scala 30:47]
   assign rfu_io_rd_en = pipeline_io_commit & pipeline_io_rf_rd_en; // @[Core2.scala 28:43]
   assign icache_clock = clock;
   assign icache_reset = reset;
@@ -13940,7 +13940,7 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
-module SimTop(
+module SimTop2(
   input         clock,
   input         reset,
   input  [63:0] io_logCtrl_log_begin,
