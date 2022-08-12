@@ -1,6 +1,7 @@
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental._
+import Decode_constant._
 
 class ImemIO extends Bundle{
     val en          = Output(Bool())
@@ -31,10 +32,25 @@ class Pipeline extends Module{
 
         val rfconflict  = Output(Bool())
 
+        val mu_code     = Output(UInt(mu_code_length.W))
+        val mu_op1      = Output(UInt(64.W))
+        val mu_op2      = Output(UInt(64.W))
+        val mu_out      = Input(UInt(64.W))
+
+        val du_code     = Output(UInt(du_code_length.W))
+        val du_op1      = Output(UInt(64.W))
+        val du_op2      = Output(UInt(64.W))
+        val du_out      = Input(UInt(64.W))
+
         val stall_id    = Input(Bool())
         val stall_ie    = Input(Bool())
         val stall_mem   = Input(Bool())
         val stall_wb    = Input(Bool())
+
+        val id_valid    = Output(Bool())
+        val ie_valid    = Output(Bool())
+        val mem_valid   = Output(Bool())
+        val wb_valid    = Output(Bool())
 
         val commit      = Output(Bool())
         val commit_pc   = Output(UInt(64.W))
@@ -109,14 +125,14 @@ class Pipeline extends Module{
     ieu.io.csr_rdata    := 0.U//////////////////////////////csru.io.rdata
 
     // mu.io.en      := exereg.io.out.valid && (exereg.io.out.mu_code =/= 0.U)
-    // mu.io.mu_code := exereg.io.out.mu_code
-    // mu.io.op1     := exereg.io.out.op1
-    // mu.io.op2     := exereg.io.out.op2
+    io.mu_code      := exereg.io.out.mu_code
+    io.mu_op1       := exereg.io.out.op1
+    io.mu_op2       := exereg.io.out.op2
 
     // du.io.en      := exereg.io.out.valid && (exereg.io.out.du_code =/= 0.U)
-    // du.io.du_code := exereg.io.out.du_code
-    // du.io.op1     := exereg.io.out.op1
-    // du.io.op2     := exereg.io.out.op2
+    io.du_code      := exereg.io.out.du_code
+    io.du_op1       := exereg.io.out.op1
+    io.du_op2       := exereg.io.out.op2
     //memreg
     memreg.io.in.pc       := exereg.io.out.pc
     memreg.io.in.inst     := exereg.io.out.inst
@@ -136,8 +152,8 @@ class Pipeline extends Module{
 
     memreg.io.in.alu_out  := ieu.io.alu_out
     memreg.io.in.bu_out   := ieu.io.bu_out
-    memreg.io.in.mu_out   := 0.U//////////////////////////////mu.io.mu_out
-    memreg.io.in.du_out   := 0.U//////////////////////////////du.io.du_out
+    memreg.io.in.mu_out   := io.mu_out
+    memreg.io.in.du_out   := io.du_out
     memreg.io.in.csru_out := ieu.io.csru_out
 
     memreg.io.in.putch      := exereg.io.out.putch
@@ -295,6 +311,10 @@ class Pipeline extends Module{
     // rfu.io.rd_en  := wbreg.io.out.rd_en && commit_valid  //必须是有效的流水线指令才写入
     // csru.io.wen   := wbreg.io.out.csr_wen && commit_valid
 
+    io.id_valid     := idreg.io.out.valid
+    io.ie_valid     := exereg.io.out.valid
+    io.mem_valid    := memreg.io.out.valid
+    io.wb_valid     := wbreg.io.out.valid
 
     io.rf_rd_en     := wbreg.io.out.rd_en
     io.rf_rd_addr   := wbreg.io.out.rd_addr

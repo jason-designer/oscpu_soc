@@ -54,7 +54,7 @@ class Mul extends Module{
 
 class MU extends Module{
     val io = IO(new Bundle{
-        val en   = Input(Bool())
+        val en      = Input(Bool())
         val mu_code = Input(UInt(mu_code_length.W))
         val op1     = Input(UInt(64.W))
         val op2     = Input(UInt(64.W))
