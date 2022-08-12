@@ -150,7 +150,8 @@ class Core2 extends Module{
     val pc          = pipeline.io.commit_pc
     val putch       = inst === "h0000007b".U
     val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U 
-    val skip = putch || read_mcycle || pipeline.io.commit_clint
+    val rtthread_test_skip =  pc === "h80005360".U // 读mip
+    val skip = putch || read_mcycle || pipeline.io.commit_clint || rtthread_test_skip
     
     val dt_ic = Module(new DifftestInstrCommit)
     dt_ic.io.clock    := clock

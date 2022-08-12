@@ -84,7 +84,7 @@ class Pipeline extends Module{
 
         val putch       = Output(Bool())
 
-        val commit_clint = Output(Bool())
+        val commit_clint = Output(Bool())   // 用于skip掉difftest
     })
     val ifu     = Module(new IFetch)
     val idu     = Module(new Decode)

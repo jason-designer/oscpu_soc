@@ -14914,32 +14914,32 @@ module Core2(
   wire [7:0] axi_io_dcacheBypassIO_wmask; // @[Core2.scala 25:33]
   wire  axi_io_dcacheBypassIO_wdone; // @[Core2.scala 25:33]
   wire [2:0] axi_io_dcacheBypassIO_transfer; // @[Core2.scala 25:33]
-  wire  dt_ic_clock; // @[Core2.scala 155:23]
-  wire [7:0] dt_ic_coreid; // @[Core2.scala 155:23]
-  wire [7:0] dt_ic_index; // @[Core2.scala 155:23]
-  wire  dt_ic_valid; // @[Core2.scala 155:23]
-  wire [63:0] dt_ic_pc; // @[Core2.scala 155:23]
-  wire [31:0] dt_ic_instr; // @[Core2.scala 155:23]
-  wire [7:0] dt_ic_special; // @[Core2.scala 155:23]
-  wire  dt_ic_skip; // @[Core2.scala 155:23]
-  wire  dt_ic_isRVC; // @[Core2.scala 155:23]
-  wire  dt_ic_scFailed; // @[Core2.scala 155:23]
-  wire  dt_ic_wen; // @[Core2.scala 155:23]
-  wire [63:0] dt_ic_wdata; // @[Core2.scala 155:23]
-  wire [7:0] dt_ic_wdest; // @[Core2.scala 155:23]
-  wire  dt_ae_clock; // @[Core2.scala 170:23]
-  wire [7:0] dt_ae_coreid; // @[Core2.scala 170:23]
-  wire [31:0] dt_ae_intrNO; // @[Core2.scala 170:23]
-  wire [31:0] dt_ae_cause; // @[Core2.scala 170:23]
-  wire [63:0] dt_ae_exceptionPC; // @[Core2.scala 170:23]
-  wire [31:0] dt_ae_exceptionInst; // @[Core2.scala 170:23]
-  wire  dt_te_clock; // @[Core2.scala 186:23]
-  wire [7:0] dt_te_coreid; // @[Core2.scala 186:23]
-  wire  dt_te_valid; // @[Core2.scala 186:23]
-  wire [2:0] dt_te_code; // @[Core2.scala 186:23]
-  wire [63:0] dt_te_pc; // @[Core2.scala 186:23]
-  wire [63:0] dt_te_cycleCnt; // @[Core2.scala 186:23]
-  wire [63:0] dt_te_instrCnt; // @[Core2.scala 186:23]
+  wire  dt_ic_clock; // @[Core2.scala 156:23]
+  wire [7:0] dt_ic_coreid; // @[Core2.scala 156:23]
+  wire [7:0] dt_ic_index; // @[Core2.scala 156:23]
+  wire  dt_ic_valid; // @[Core2.scala 156:23]
+  wire [63:0] dt_ic_pc; // @[Core2.scala 156:23]
+  wire [31:0] dt_ic_instr; // @[Core2.scala 156:23]
+  wire [7:0] dt_ic_special; // @[Core2.scala 156:23]
+  wire  dt_ic_skip; // @[Core2.scala 156:23]
+  wire  dt_ic_isRVC; // @[Core2.scala 156:23]
+  wire  dt_ic_scFailed; // @[Core2.scala 156:23]
+  wire  dt_ic_wen; // @[Core2.scala 156:23]
+  wire [63:0] dt_ic_wdata; // @[Core2.scala 156:23]
+  wire [7:0] dt_ic_wdest; // @[Core2.scala 156:23]
+  wire  dt_ae_clock; // @[Core2.scala 171:23]
+  wire [7:0] dt_ae_coreid; // @[Core2.scala 171:23]
+  wire [31:0] dt_ae_intrNO; // @[Core2.scala 171:23]
+  wire [31:0] dt_ae_cause; // @[Core2.scala 171:23]
+  wire [63:0] dt_ae_exceptionPC; // @[Core2.scala 171:23]
+  wire [31:0] dt_ae_exceptionInst; // @[Core2.scala 171:23]
+  wire  dt_te_clock; // @[Core2.scala 187:23]
+  wire [7:0] dt_te_coreid; // @[Core2.scala 187:23]
+  wire  dt_te_valid; // @[Core2.scala 187:23]
+  wire [2:0] dt_te_code; // @[Core2.scala 187:23]
+  wire [63:0] dt_te_pc; // @[Core2.scala 187:23]
+  wire [63:0] dt_te_cycleCnt; // @[Core2.scala 187:23]
+  wire [63:0] dt_te_instrCnt; // @[Core2.scala 187:23]
   wire  _env_wait_T_1 = pipeline_io_id_ecall | pipeline_io_id_mret | pipeline_io_id_intr; // @[Core2.scala 27:65]
   wire  env_wait = (pipeline_io_id_ecall | pipeline_io_id_mret | pipeline_io_id_intr) & (pipeline_io_ie_valid |
     pipeline_io_mem_valid | pipeline_io_wb_valid); // @[Core2.scala 27:89]
@@ -14949,20 +14949,21 @@ module Core2(
   wire  putch = pipeline_io_commit_inst == 32'h7b; // @[Core2.scala 151:28]
   wire [31:0] _read_mcycle_T = pipeline_io_commit_inst & 32'hfff0307f; // @[Core2.scala 152:29]
   wire  read_mcycle = _read_mcycle_T == 32'hb0002073; // @[Core2.scala 152:46]
-  reg  dt_ic_io_valid_REG; // @[Core2.scala 159:33]
-  reg [63:0] dt_ic_io_pc_REG; // @[Core2.scala 160:33]
-  reg [31:0] dt_ic_io_instr_REG; // @[Core2.scala 161:33]
-  reg  dt_ic_io_skip_REG; // @[Core2.scala 163:33]
-  reg  dt_ic_io_wen_REG; // @[Core2.scala 166:33]
-  reg [63:0] dt_ic_io_wdata_REG; // @[Core2.scala 167:33]
-  reg [4:0] dt_ic_io_wdest_REG; // @[Core2.scala 168:33]
-  reg [31:0] dt_ae_io_intrNO_REG; // @[Core2.scala 173:37]
-  reg [63:0] dt_ae_io_cause_REG; // @[Core2.scala 174:37]
-  reg [63:0] dt_ae_io_exceptionPC_REG; // @[Core2.scala 175:37]
-  reg [63:0] cycle_cnt; // @[Core2.scala 177:28]
-  reg [63:0] instr_cnt; // @[Core2.scala 178:28]
-  wire [63:0] _cycle_cnt_T_1 = cycle_cnt + 64'h1; // @[Core2.scala 180:28]
-  wire [63:0] _instr_cnt_T_1 = instr_cnt + 64'h1; // @[Core2.scala 181:52]
+  wire  rtthread_test_skip = pipeline_io_commit_pc == 64'h80005360; // @[Core2.scala 153:34]
+  reg  dt_ic_io_valid_REG; // @[Core2.scala 160:33]
+  reg [63:0] dt_ic_io_pc_REG; // @[Core2.scala 161:33]
+  reg [31:0] dt_ic_io_instr_REG; // @[Core2.scala 162:33]
+  reg  dt_ic_io_skip_REG; // @[Core2.scala 164:33]
+  reg  dt_ic_io_wen_REG; // @[Core2.scala 167:33]
+  reg [63:0] dt_ic_io_wdata_REG; // @[Core2.scala 168:33]
+  reg [4:0] dt_ic_io_wdest_REG; // @[Core2.scala 169:33]
+  reg [31:0] dt_ae_io_intrNO_REG; // @[Core2.scala 174:37]
+  reg [63:0] dt_ae_io_cause_REG; // @[Core2.scala 175:37]
+  reg [63:0] dt_ae_io_exceptionPC_REG; // @[Core2.scala 176:37]
+  reg [63:0] cycle_cnt; // @[Core2.scala 178:28]
+  reg [63:0] instr_cnt; // @[Core2.scala 179:28]
+  wire [63:0] _cycle_cnt_T_1 = cycle_cnt + 64'h1; // @[Core2.scala 181:28]
+  wire [63:0] _instr_cnt_T_1 = instr_cnt + 64'h1; // @[Core2.scala 182:52]
   wire [63:0] rf_a0_0 = rfu_rf_10;
   Pipeline pipeline ( // @[Core2.scala 10:33]
     .clock(pipeline_clock),
@@ -15237,7 +15238,7 @@ module Core2(
     .io_dcacheBypassIO_wdone(axi_io_dcacheBypassIO_wdone),
     .io_dcacheBypassIO_transfer(axi_io_dcacheBypassIO_transfer)
   );
-  DifftestInstrCommit dt_ic ( // @[Core2.scala 155:23]
+  DifftestInstrCommit dt_ic ( // @[Core2.scala 156:23]
     .clock(dt_ic_clock),
     .coreid(dt_ic_coreid),
     .index(dt_ic_index),
@@ -15252,7 +15253,7 @@ module Core2(
     .wdata(dt_ic_wdata),
     .wdest(dt_ic_wdest)
   );
-  DifftestArchEvent dt_ae ( // @[Core2.scala 170:23]
+  DifftestArchEvent dt_ae ( // @[Core2.scala 171:23]
     .clock(dt_ae_clock),
     .coreid(dt_ae_coreid),
     .intrNO(dt_ae_intrNO),
@@ -15260,7 +15261,7 @@ module Core2(
     .exceptionPC(dt_ae_exceptionPC),
     .exceptionInst(dt_ae_exceptionInst)
   );
-  DifftestTrapEvent dt_te ( // @[Core2.scala 186:23]
+  DifftestTrapEvent dt_te ( // @[Core2.scala 187:23]
     .clock(dt_te_clock),
     .coreid(dt_te_coreid),
     .valid(dt_te_valid),
@@ -15410,63 +15411,63 @@ module Core2(
   assign axi_io_dcacheBypassIO_wdata = dcachebypass_io_axi_wdata; // @[Core2.scala 114:25]
   assign axi_io_dcacheBypassIO_wmask = dcachebypass_io_axi_wmask; // @[Core2.scala 114:25]
   assign axi_io_dcacheBypassIO_transfer = dcachebypass_io_axi_transfer; // @[Core2.scala 114:25]
-  assign dt_ic_clock = clock; // @[Core2.scala 156:23]
-  assign dt_ic_coreid = 8'h0; // @[Core2.scala 157:23]
-  assign dt_ic_index = 8'h0; // @[Core2.scala 158:23]
-  assign dt_ic_valid = dt_ic_io_valid_REG; // @[Core2.scala 159:23]
-  assign dt_ic_pc = dt_ic_io_pc_REG; // @[Core2.scala 160:23]
-  assign dt_ic_instr = dt_ic_io_instr_REG; // @[Core2.scala 161:23]
-  assign dt_ic_special = 8'h0; // @[Core2.scala 162:23]
-  assign dt_ic_skip = dt_ic_io_skip_REG; // @[Core2.scala 163:23]
-  assign dt_ic_isRVC = 1'h0; // @[Core2.scala 164:23]
-  assign dt_ic_scFailed = 1'h0; // @[Core2.scala 165:23]
-  assign dt_ic_wen = dt_ic_io_wen_REG; // @[Core2.scala 166:23]
-  assign dt_ic_wdata = dt_ic_io_wdata_REG; // @[Core2.scala 167:23]
-  assign dt_ic_wdest = {{3'd0}, dt_ic_io_wdest_REG}; // @[Core2.scala 168:23]
-  assign dt_ae_clock = clock; // @[Core2.scala 171:27]
-  assign dt_ae_coreid = 8'h0; // @[Core2.scala 172:27]
-  assign dt_ae_intrNO = dt_ae_io_intrNO_REG; // @[Core2.scala 173:27]
-  assign dt_ae_cause = dt_ae_io_cause_REG[31:0]; // @[Core2.scala 174:27]
-  assign dt_ae_exceptionPC = dt_ae_io_exceptionPC_REG; // @[Core2.scala 175:27]
+  assign dt_ic_clock = clock; // @[Core2.scala 157:23]
+  assign dt_ic_coreid = 8'h0; // @[Core2.scala 158:23]
+  assign dt_ic_index = 8'h0; // @[Core2.scala 159:23]
+  assign dt_ic_valid = dt_ic_io_valid_REG; // @[Core2.scala 160:23]
+  assign dt_ic_pc = dt_ic_io_pc_REG; // @[Core2.scala 161:23]
+  assign dt_ic_instr = dt_ic_io_instr_REG; // @[Core2.scala 162:23]
+  assign dt_ic_special = 8'h0; // @[Core2.scala 163:23]
+  assign dt_ic_skip = dt_ic_io_skip_REG; // @[Core2.scala 164:23]
+  assign dt_ic_isRVC = 1'h0; // @[Core2.scala 165:23]
+  assign dt_ic_scFailed = 1'h0; // @[Core2.scala 166:23]
+  assign dt_ic_wen = dt_ic_io_wen_REG; // @[Core2.scala 167:23]
+  assign dt_ic_wdata = dt_ic_io_wdata_REG; // @[Core2.scala 168:23]
+  assign dt_ic_wdest = {{3'd0}, dt_ic_io_wdest_REG}; // @[Core2.scala 169:23]
+  assign dt_ae_clock = clock; // @[Core2.scala 172:27]
+  assign dt_ae_coreid = 8'h0; // @[Core2.scala 173:27]
+  assign dt_ae_intrNO = dt_ae_io_intrNO_REG; // @[Core2.scala 174:27]
+  assign dt_ae_cause = dt_ae_io_cause_REG[31:0]; // @[Core2.scala 175:27]
+  assign dt_ae_exceptionPC = dt_ae_io_exceptionPC_REG; // @[Core2.scala 176:27]
   assign dt_ae_exceptionInst = 32'h0;
-  assign dt_te_clock = clock; // @[Core2.scala 187:23]
-  assign dt_te_coreid = 8'h0; // @[Core2.scala 188:23]
-  assign dt_te_valid = (pipeline_io_commit_inst == 32'h6b | pipeline_io_commit_inst == 32'h100073) & pipeline_io_commit; // @[Core2.scala 189:115]
-  assign dt_te_code = rf_a0_0[2:0]; // @[Core2.scala 190:31]
-  assign dt_te_pc = pipeline_io_commit_pc; // @[Core2.scala 191:23]
-  assign dt_te_cycleCnt = cycle_cnt; // @[Core2.scala 192:23]
-  assign dt_te_instrCnt = instr_cnt; // @[Core2.scala 193:23]
+  assign dt_te_clock = clock; // @[Core2.scala 188:23]
+  assign dt_te_coreid = 8'h0; // @[Core2.scala 189:23]
+  assign dt_te_valid = (pipeline_io_commit_inst == 32'h6b | pipeline_io_commit_inst == 32'h100073) & pipeline_io_commit; // @[Core2.scala 190:115]
+  assign dt_te_code = rf_a0_0[2:0]; // @[Core2.scala 191:31]
+  assign dt_te_pc = pipeline_io_commit_pc; // @[Core2.scala 192:23]
+  assign dt_te_cycleCnt = cycle_cnt; // @[Core2.scala 193:23]
+  assign dt_te_instrCnt = instr_cnt; // @[Core2.scala 194:23]
   always @(posedge clock) begin
-    dt_ic_io_valid_REG <= pipeline_io_commit; // @[Core2.scala 159:33]
-    dt_ic_io_pc_REG <= pipeline_io_commit_pc; // @[Core2.scala 160:33]
-    dt_ic_io_instr_REG <= pipeline_io_commit_inst; // @[Core2.scala 161:33]
-    dt_ic_io_skip_REG <= putch | read_mcycle | pipeline_io_commit_clint; // @[Core2.scala 153:37]
-    dt_ic_io_wen_REG <= pipeline_io_rf_rd_en; // @[Core2.scala 166:33]
-    dt_ic_io_wdata_REG <= pipeline_io_rf_rd_data; // @[Core2.scala 167:33]
-    dt_ic_io_wdest_REG <= pipeline_io_rf_rd_addr; // @[Core2.scala 168:33]
-    if (pipeline_io_commit_intr) begin // @[Core2.scala 173:41]
+    dt_ic_io_valid_REG <= pipeline_io_commit; // @[Core2.scala 160:33]
+    dt_ic_io_pc_REG <= pipeline_io_commit_pc; // @[Core2.scala 161:33]
+    dt_ic_io_instr_REG <= pipeline_io_commit_inst; // @[Core2.scala 162:33]
+    dt_ic_io_skip_REG <= putch | read_mcycle | pipeline_io_commit_clint | rtthread_test_skip; // @[Core2.scala 154:65]
+    dt_ic_io_wen_REG <= pipeline_io_rf_rd_en; // @[Core2.scala 167:33]
+    dt_ic_io_wdata_REG <= pipeline_io_rf_rd_data; // @[Core2.scala 168:33]
+    dt_ic_io_wdest_REG <= pipeline_io_rf_rd_addr; // @[Core2.scala 169:33]
+    if (pipeline_io_commit_intr) begin // @[Core2.scala 174:41]
       dt_ae_io_intrNO_REG <= pipeline_io_commit_cause[31:0];
     end else begin
       dt_ae_io_intrNO_REG <= 32'h0;
     end
-    if (pipeline_io_commit_intr) begin // @[Core2.scala 174:41]
+    if (pipeline_io_commit_intr) begin // @[Core2.scala 175:41]
       dt_ae_io_cause_REG <= pipeline_io_commit_cause;
     end else begin
       dt_ae_io_cause_REG <= 64'h0;
     end
-    if (pipeline_io_commit_intr) begin // @[Core2.scala 175:41]
+    if (pipeline_io_commit_intr) begin // @[Core2.scala 176:41]
       dt_ae_io_exceptionPC_REG <= pipeline_io_commit_pc;
     end else begin
       dt_ae_io_exceptionPC_REG <= 64'h0;
     end
-    if (reset) begin // @[Core2.scala 177:28]
-      cycle_cnt <= 64'h0; // @[Core2.scala 177:28]
-    end else begin
-      cycle_cnt <= _cycle_cnt_T_1; // @[Core2.scala 180:15]
-    end
     if (reset) begin // @[Core2.scala 178:28]
-      instr_cnt <= 64'h0; // @[Core2.scala 178:28]
-    end else if (pipeline_io_commit) begin // @[Core2.scala 181:21]
+      cycle_cnt <= 64'h0; // @[Core2.scala 178:28]
+    end else begin
+      cycle_cnt <= _cycle_cnt_T_1; // @[Core2.scala 181:15]
+    end
+    if (reset) begin // @[Core2.scala 179:28]
+      instr_cnt <= 64'h0; // @[Core2.scala 179:28]
+    end else if (pipeline_io_commit) begin // @[Core2.scala 182:21]
       instr_cnt <= _instr_cnt_T_1;
     end
     `ifndef SYNTHESIS
