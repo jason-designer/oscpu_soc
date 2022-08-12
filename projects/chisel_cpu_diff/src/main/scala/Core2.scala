@@ -65,6 +65,7 @@ class Core2 extends Module{
 
     csru.io.set_mtip    := clintreg.io.set_mtip
     csru.io.clear_mtip  := clintreg.io.clear_mtip
+    
     csru.io.interrupt   := env_go && pipeline.io.id_intr
     csru.io.cause       := pipeline.io.id_cause
 

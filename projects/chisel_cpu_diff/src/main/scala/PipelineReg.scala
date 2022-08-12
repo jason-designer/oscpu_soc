@@ -57,19 +57,44 @@ class ExeReg_BUS_R extends Bundle {
     val csru_code   = UInt(csru_code_length.W)
     //
     val rs1_addr    = UInt(5.W)
-    val putch   = Bool()
+    val putch       = Bool()
     //
     val intr  = Bool()
     val cause = UInt(64.W)
+
+    // def flush() : Unit = {
+    //     valid       := false.B
+    //     pc          := 0.U
+    //     inst        := 0.U
+    //     rd_en       := false.B
+    //     rd_addr     := 0.U
+    //     imm         := 0.U
+    //     op1         := 0.U
+    //     op2         := 0.U
+    //     fu_code     := 0.U
+    //     alu_code    := 0.U
+    //     bu_code     := 0.U
+    //     lu_code     := 0.U
+    //     su_code     := 0.U
+    //     mu_code     := 0.U
+    //     du_code     := 0.U
+    //     csru_code   := 0.U
+    //     rs1_addr    := 0.U
+    //     putch       := false.B
+    //     intr        := false.B
+    //     cause       := 0.U
+    // }
 }
 
 class ExeReg extends Module {
     val io = IO(new Bundle {
         val en  = Input(Bool())
+        // val flush = Input(Bool())
         val in  = Input(new ExeReg_BUS_R)
         val out = Output(new ExeReg_BUS_R)
     })
   val reg = RegEnable(io.in, 0.U.asTypeOf(new ExeReg_BUS_R), io.en)
+//   when(io.flush){reg.flush()}
   io.out := reg
 }
 
@@ -108,15 +133,47 @@ class MemReg_BUS_R extends Bundle {
     //
     val intr  = Bool()
     val cause = UInt(64.W)
+
+    // def flush() : Unit = {
+    //     valid       := false.B
+    //     pc          := 0.U
+    //     inst        := 0.U
+    //     rd_en       := false.B
+    //     rd_addr     := 0.U
+    //     imm         := 0.U
+    //     op1         := 0.U
+    //     op2         := 0.U
+    //     alu_out     := 0.U
+    //     bu_out      := 0.U
+    //     mu_out      := 0.U
+    //     du_out      := 0.U
+    //     csru_out    := 0.U
+    //     fu_code     := 0.U
+    //     alu_code    := 0.U
+    //     bu_code     := 0.U
+    //     lu_code     := 0.U
+    //     su_code     := 0.U
+    //     mu_code     := 0.U
+    //     du_code     := 0.U
+    //     csru_code   := 0.U
+    //     putch       := false.B
+    //     csr_wen     := false.B
+    //     csr_waddr   := 0.U
+    //     csr_wdata   := 0.U
+    //     intr        := false.B
+    //     cause       := 0.U
+    // }
 }
 
 class MemReg extends Module {
     val io = IO(new Bundle {
         val en  = Input(Bool())
+        // val flush = Input(Bool())
         val in  = Input(new MemReg_BUS_R)
         val out = Output(new MemReg_BUS_R)
     })
   val reg = RegEnable(io.in, 0.U.asTypeOf(new MemReg_BUS_R), io.en)
+//   when(io.flush){reg.flush()}
   io.out := reg
 }
 
@@ -148,15 +205,40 @@ class WBReg_BUS_R extends Bundle {
     //
     val intr  = Bool()
     val cause = UInt(64.W)
+
+    // def flush() : Unit = {
+    //     valid       := false.B
+    //     pc          := 0.U
+    //     inst        := 0.U
+    //     rd_en       := false.B
+    //     rd_addr     := 0.U
+    //     alu_out     := 0.U
+    //     bu_out      := 0.U
+    //     mu_out      := 0.U
+    //     du_out      := 0.U
+    //     csru_out    := 0.U
+    //     fu_code     := 0.U
+    //     lu_code     := 0.U
+    //     csru_code   := 0.U
+    //     lu_shift    := 0.U
+    //     putch       := false.B
+    //     csr_wen     := false.B
+    //     csr_waddr   := 0.U
+    //     csr_wdata   := 0.U
+    //     intr        := false.B
+    //     cause       := 0.U
+    // }
 }
 
 class WBReg extends Module {
     val io = IO(new Bundle {
         val en  = Input(Bool())
+        // val flush = Input(Bool())
         val in  = Input(new WBReg_BUS_R)
         val out = Output(new WBReg_BUS_R)
     })
   val reg = RegEnable(io.in, 0.U.asTypeOf(new WBReg_BUS_R), io.en)
+//   when(io.flush){reg.flush()}
   io.out := reg
 }
 

@@ -55,8 +55,8 @@ class Pipeline extends Module{
         val id_mret     = Output(Bool())
         val id_pc       = Output(UInt(64.W))
 
-        val intr        = Input(Bool())
-        val cause       = Input(UInt(64.W))
+        val intr        = Input(Bool())         // 中断请求
+        val cause       = Input(UInt(64.W))     // 异常号
         val id_intr     = Output(Bool())
         val id_cause    = Output(UInt(64.W))
         
@@ -340,8 +340,8 @@ class Pipeline extends Module{
     // stall_wb := dmem_not_ok
     
     
-    idreg.io.in.valid   := ifu.io.valid
-    exereg.io.in.valid  := idreg.io.out.valid && !io.stall_id && !idreg.io.out.intr
+    idreg.io.in.valid   := ifu.io.valid && !io.intr     // difftest不把intr当作commit
+    exereg.io.in.valid  := idreg.io.out.valid && !io.stall_id
     memreg.io.in.valid  := exereg.io.out.valid && !io.stall_ie
     wbreg.io.in.valid   := memreg.io.out.valid && !io.stall_mem
     val commit_valid    = wbreg.io.out.valid && !io.stall_wb
