@@ -48,6 +48,8 @@ class Decode extends Module{
 
         val mtvec = Input(UInt(64.W))
         val mepc  = Input(UInt(64.W))
+
+        val intr = Input(Bool())
     })
     val inst = io.inst
 
@@ -264,8 +266,24 @@ class Decode extends Module{
         "b0010".U -> true.B,   //mret
     ))
 
-    io.jump_en := bu_jump_en || csru_jump_en                // 按理说不会两个都enable
-    io.jump_pc := Mux(bu_jump_en, bu_jump_pc, csru_jump_pc) // 按理说不会两个都enable
+    // io.jump_en := bu_jump_en || csru_jump_en                // 按理说不会两个都enable
+    // io.jump_pc := Mux(bu_jump_en, bu_jump_pc, csru_jump_pc) // 按理说不会两个都enable
+    when(io.intr){                  // intr有可能和bu或csru同时enable，所以intr要优先
+        io.jump_en := true.B
+        io.jump_pc := io.mtvec
+    }
+    .elsewhen(bu_jump_en){          // 按理bu和csru不会两个都enable,所以顺序无关
+        io.jump_en := true.B
+        io.jump_pc := bu_jump_pc
+    }
+    .elsewhen(csru_jump_en){
+        io.jump_en := true.B
+        io.jump_pc := csru_jump_pc
+    }
+    .otherwise{
+        io.jump_en := false.B
+        io.jump_pc := 0.U
+    }
 }
 
 

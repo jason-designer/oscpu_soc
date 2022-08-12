@@ -9,6 +9,7 @@ class Core2 extends Module{
     })
     val pipeline        = Module(new Pipeline)
     val rfu             = Module(new RegFile)
+    val csru            = Module(new Csr)
     // mul/div
     val mu              = Module(new MU)
     val du              = Module(new DU)
@@ -23,8 +24,12 @@ class Core2 extends Module{
     //
     val axi             = Module(new AXI)
 
+    val env_wait = (pipeline.io.id_ecall || pipeline.io.id_mret || pipeline.io.id_intr) && (pipeline.io.ie_valid || pipeline.io.mem_valid || pipeline.io.wb_valid)
+    val env_go = !pipeline.io.stall_id && (pipeline.io.id_ecall || pipeline.io.id_mret || pipeline.io.id_intr) && (!pipeline.io.ie_valid && !pipeline.io.mem_valid && !pipeline.io.wb_valid)
+
+
     // pipeline control
-    pipeline.io.stall_id    := pipeline.io.rfconflict || !icache.io.imem.ok
+    pipeline.io.stall_id    := pipeline.io.rfconflict || !icache.io.imem.ok || env_wait
     pipeline.io.stall_ie    := mu.io.stall || du.io.stall
     pipeline.io.stall_mem   := false.B
     pipeline.io.stall_wb    := !dmmio.io.dmem.ok
@@ -50,6 +55,27 @@ class Core2 extends Module{
     du.io.op1           := pipeline.io.du_op1
     du.io.op2           := pipeline.io.du_op2
     pipeline.io.du_out  := du.io.du_out
+
+    // pipeline <--> csr
+    csru.io.raddr           := pipeline.io.csr_raddr
+    pipeline.io.csr_rdata   := csru.io.rdata
+    csru.io.wen             := pipeline.io.commit && pipeline.io.csr_wen
+    csru.io.waddr           := pipeline.io.csr_waddr
+    csru.io.wdata           := pipeline.io.csr_wdata
+
+    csru.io.set_mtip    := clintreg.io.set_mtip
+    csru.io.clear_mtip  := clintreg.io.clear_mtip
+    csru.io.interrupt   := env_go && pipeline.io.id_intr
+    csru.io.cause       := pipeline.io.id_cause
+
+    pipeline.io.intr    := csru.io.time_intr && !env_go     // 防止连续给出两个intr
+    pipeline.io.cause   := "h8000000000000007".U
+
+    pipeline.io.csr_mtvec   := csru.io.mtvec
+    pipeline.io.csr_mepc    := csru.io.mepc
+    csru.io.ecall   := env_go && pipeline.io.id_ecall
+    csru.io.mret    := env_go && pipeline.io.id_mret
+    csru.io.pc      := pipeline.io.id_pc
 
     // pipeline <--> memory <--> axi
     /******************* access memory *****************
@@ -97,6 +123,11 @@ class Core2 extends Module{
     icache.io.fence.req := false.B
     dcache.io.fence.req := false.B
 
+    /* ------------------------------------ putch --------------------------------- */
+    val regfile_a0 = WireInit(0.U(64.W))
+    BoringUtils.addSink(regfile_a0, "rf_a0")
+    when(pipeline.io.putch && pipeline.io.commit) {printf("%c",regfile_a0)}
+
     /* ------------------------------------ debug ---------------------------------------- */
     when(clock.asBool()){
         val commit = pipeline.io.commit
@@ -114,8 +145,13 @@ class Core2 extends Module{
         // printf("valid=%d pc=%x inst=%x %d %d %x %x %x %d %x \n", commit, pc, inst, en, op, addr, wdata, wmask, transfer, rdata)
     }
         
-    
     /* ------------------------------------ use difftest ---------------------------------------- */
+    val inst        = pipeline.io.commit_inst
+    val pc          = pipeline.io.commit_pc
+    val putch       = inst === "h0000007b".U
+    val read_mcycle = (inst & "hfff0307f".U) === "hb0002073".U 
+    val skip = putch || read_mcycle || pipeline.io.commit_clint
+    
     val dt_ic = Module(new DifftestInstrCommit)
     dt_ic.io.clock    := clock
     dt_ic.io.coreid   := 0.U
@@ -124,7 +160,7 @@ class Core2 extends Module{
     dt_ic.io.pc       := RegNext(pipeline.io.commit_pc)
     dt_ic.io.instr    := RegNext(pipeline.io.commit_inst)
     dt_ic.io.special  := 0.U
-    dt_ic.io.skip     := false.B
+    dt_ic.io.skip     := RegNext(skip)
     dt_ic.io.isRVC    := false.B
     dt_ic.io.scFailed := false.B
     dt_ic.io.wen      := RegNext(pipeline.io.rf_rd_en)
@@ -134,9 +170,9 @@ class Core2 extends Module{
     val dt_ae = Module(new DifftestArchEvent)
     dt_ae.io.clock        := clock
     dt_ae.io.coreid       := 0.U
-    dt_ae.io.intrNO       := 0.U
-    dt_ae.io.cause        := 0.U
-    dt_ae.io.exceptionPC  := 0.U
+    dt_ae.io.intrNO       := RegNext(Mux(pipeline.io.commit_intr, pipeline.io.commit_cause(31, 0), 0.U))
+    dt_ae.io.cause        := RegNext(Mux(pipeline.io.commit_intr, pipeline.io.commit_cause, 0.U))
+    dt_ae.io.exceptionPC  := RegNext(Mux(pipeline.io.commit_intr, pipeline.io.commit_pc, 0.U))
 
     val cycle_cnt = RegInit(0.U(64.W))
     val instr_cnt = RegInit(0.U(64.W))
@@ -156,27 +192,29 @@ class Core2 extends Module{
     dt_te.io.cycleCnt := cycle_cnt
     dt_te.io.instrCnt := instr_cnt
 
-    val dt_cs = Module(new DifftestCSRState)
-    dt_cs.io.clock          := clock
-    dt_cs.io.coreid         := 0.U
-    dt_cs.io.priviledgeMode := 3.U  // Machine mode
-    dt_cs.io.mstatus        := 0.U
-    dt_cs.io.sstatus        := 0.U
-    dt_cs.io.mepc           := 0.U
-    dt_cs.io.sepc           := 0.U
-    dt_cs.io.mtval          := 0.U
-    dt_cs.io.stval          := 0.U
-    dt_cs.io.mtvec          := 0.U
-    dt_cs.io.stvec          := 0.U
-    dt_cs.io.mcause         := 0.U
-    dt_cs.io.scause         := 0.U
-    dt_cs.io.satp           := 0.U
-    dt_cs.io.mip            := 0.U
-    dt_cs.io.mie            := 0.U
-    dt_cs.io.mscratch       := 0.U
-    dt_cs.io.sscratch       := 0.U
-    dt_cs.io.mideleg        := 0.U
-    dt_cs.io.medeleg        := 0.U
+
+
+    // val dt_cs = Module(new DifftestCSRState)
+    // dt_cs.io.clock          := clock
+    // dt_cs.io.coreid         := 0.U
+    // dt_cs.io.priviledgeMode := 3.U  // Machine mode
+    // dt_cs.io.mstatus        := 0.U
+    // dt_cs.io.sstatus        := 0.U
+    // dt_cs.io.mepc           := 0.U
+    // dt_cs.io.sepc           := 0.U
+    // dt_cs.io.mtval          := 0.U
+    // dt_cs.io.stval          := 0.U
+    // dt_cs.io.mtvec          := 0.U
+    // dt_cs.io.stvec          := 0.U
+    // dt_cs.io.mcause         := 0.U
+    // dt_cs.io.scause         := 0.U
+    // dt_cs.io.satp           := 0.U
+    // dt_cs.io.mip            := 0.U
+    // dt_cs.io.mie            := 0.U
+    // dt_cs.io.mscratch       := 0.U
+    // dt_cs.io.sscratch       := 0.U
+    // dt_cs.io.mideleg        := 0.U
+    // dt_cs.io.medeleg        := 0.U
 }
 
 

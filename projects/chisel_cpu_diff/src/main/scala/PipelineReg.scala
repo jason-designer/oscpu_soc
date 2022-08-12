@@ -5,6 +5,8 @@ import Decode_constant._
 class IDReg_BUS_R extends Bundle {
   val valid = Bool()
   val pc    = UInt(64.W)
+  val intr  = Bool()
+  val cause = UInt(64.W)
 }
 
 class IDReg extends Module {
@@ -21,6 +23,8 @@ class IDReg extends Module {
         case true   => RegEnable(io.in.pc, "h2ffffffc".U(64.W), io.en)
         case false  => RegEnable(io.in.pc, "h7ffffffc".U(64.W), io.en)
     }  
+    val intr    = RegEnable(io.in.intr, false.B, io.en)
+    val cause   = RegEnable(io.in.cause, 0.U(64.W), io.en)
 
     io.imem.addr    := io.in.pc
     io.imem.en      := io.en 
@@ -28,6 +32,8 @@ class IDReg extends Module {
 
     io.out.valid    := valid
     io.out.pc       := pc
+    io.out.intr     := intr
+    io.out.cause    := cause
 }
 
 class ExeReg_BUS_R extends Bundle {
@@ -52,6 +58,9 @@ class ExeReg_BUS_R extends Bundle {
     //
     val rs1_addr    = UInt(5.W)
     val putch   = Bool()
+    //
+    val intr  = Bool()
+    val cause = UInt(64.W)
 }
 
 class ExeReg extends Module {
@@ -96,6 +105,9 @@ class MemReg_BUS_R extends Bundle {
     val csr_wen = Bool()
     val csr_waddr = UInt(12.W)
     val csr_wdata = UInt(64.W)
+    //
+    val intr  = Bool()
+    val cause = UInt(64.W)
 }
 
 class MemReg extends Module {
@@ -134,8 +146,8 @@ class WBReg_BUS_R extends Bundle {
     val csr_waddr = UInt(12.W)
     val csr_wdata = UInt(64.W)
     //
-    val csr_set_mtip = Bool()
-    val csr_clear_mtip = Bool()
+    val intr  = Bool()
+    val cause = UInt(64.W)
 }
 
 class WBReg extends Module {
